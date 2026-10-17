@@ -133,7 +133,9 @@
    "tasks": true,
    "team": true,
    "funds": true,
-   "deadlines": true
+   "deadlines": true,
+   "meeting": true,
+   "projects": true
   },
   "tagline": "Partenaire de votre développement",
   "weekStart": 1,
@@ -267,7 +269,8 @@
     "workflows": true,
     "funds": true,
     "externals": true,
-    "deadlines": true
+    "deadlines": true,
+    "projects": true
    }
   },
   {
@@ -293,7 +296,8 @@
     "workflows": true,
     "funds": true,
     "externals": true,
-    "deadlines": true
+    "deadlines": true,
+    "projects": true
    }
   },
   {
@@ -319,7 +323,8 @@
     "workflows": true,
     "funds": true,
     "externals": true,
-    "deadlines": true
+    "deadlines": true,
+    "projects": true
    }
   },
   {
@@ -345,7 +350,8 @@
     "workflows": false,
     "funds": false,
     "externals": false,
-    "deadlines": true
+    "deadlines": true,
+    "projects": true
    }
   },
   {
@@ -371,7 +377,8 @@
     "workflows": false,
     "funds": false,
     "externals": false,
-    "deadlines": false
+    "deadlines": false,
+    "projects": false
    }
   },
   {
@@ -397,7 +404,8 @@
     "workflows": false,
     "funds": false,
     "externals": false,
-    "deadlines": true
+    "deadlines": true,
+    "projects": true
    }
   },
   {
@@ -423,7 +431,8 @@
     "workflows": false,
     "funds": false,
     "externals": false,
-    "deadlines": false
+    "deadlines": false,
+    "projects": false
    }
   }
  ],
@@ -1221,6 +1230,116 @@
      "auto": "",
      "children": []
     }
+   ],
+   "positions": [
+    {
+     "id": "pos_h0",
+     "name": "Groupe Institution Laghmani",
+     "kind": "equity",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    },
+    {
+     "id": "pos_h1",
+     "name": "Gourmandise",
+     "kind": "equity",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    },
+    {
+     "id": "pos_h2",
+     "name": "Les Écoles Idéales",
+     "kind": "equity",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    },
+    {
+     "id": "pos_h3",
+     "name": "ABK Groupe",
+     "kind": "equity",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    },
+    {
+     "id": "pos_h4",
+     "name": "Sindbad Group",
+     "kind": "equity",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    },
+    {
+     "id": "pos_h5",
+     "name": "Polypharma",
+     "kind": "equity",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    }
    ]
   },
   {
@@ -1413,6 +1532,62 @@
      "note": "",
      "auto": "",
      "children": []
+    }
+   ],
+   "positions": [
+    {
+     "id": "pos_f0",
+     "name": "Biosphere",
+     "kind": "debt",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    },
+    {
+     "id": "pos_f1",
+     "name": "DAAM",
+     "kind": "debt",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
+    },
+    {
+     "id": "pos_f2",
+     "name": "Enda Tamweel",
+     "kind": "debt",
+     "sector": "",
+     "instrument": "",
+     "amount": "",
+     "outstanding": "",
+     "stake": "",
+     "date": "",
+     "status": "active",
+     "health": "green",
+     "boardSeat": false,
+     "lastReport": "",
+     "dossierId": "",
+     "url": "",
+     "note": ""
     }
    ]
   },
@@ -1613,7 +1788,8 @@
      "auto": "dossiers",
      "children": []
     }
-   ]
+   ],
+   "positions": []
   }
  ],
  "fundRoot": {
@@ -1730,5 +1906,15 @@
    "label": "Fiscal et réglementaire",
    "color": "#2F8A5B"
   }
+ ],
+ "projectCategories": [
+  "ESG",
+  "Organisation & outils",
+  "Levée de fonds",
+  "Gouvernance",
+  "Reporting investisseurs",
+  "Conformité",
+  "Communication",
+  "Ressources humaines"
  ]
 }

@@ -1,6 +1,6 @@
 // Access control: what each signed-in person may read and write. Pure functions (no I/O).
 export const ALL_PERMS = ["settings", "roles", "members", "workflows", "automations", "view_all", "view_amounts", "dossier_create", "dossier_edit_all",
-  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines"];
+  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects"];
 const CONFIG_PERMS = ["settings", "roles", "members", "workflows", "automations", "onedrive", "funds", "externals", "export"];
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -67,7 +67,9 @@ function sanitizeConfig(c) {
     cfg.automations = [];
     if (cfg.fundRoot) cfg.fundRoot = { ...cfg.fundRoot, url: "" };
     if (cfg.onedrive) cfg.onedrive = { ...cfg.onedrive, rootUrl: "", perWorkflowRoot: {} };
-  } else if (!seesCodes) {
+    cfg.funds = cfg.funds.map(f => ({ ...f, positions: [] }));
+  }
+  if (!c.can("view_amounts")) cfg.funds = (cfg.funds || []).map(f => ({ ...f, positions: (f.positions || []).map(({ amount, outstanding, ...rest }) => rest) })); else if (!seesCodes) {
     cfg.members = (cfg.members || []).map(m => { const x = { ...m }; delete x.code; if (m.external) delete x.grants; return x; });
   }
   return cfg;
@@ -85,6 +87,7 @@ export function snapshot(c, all, version) {
     version,
     config: sanitizeConfig(c),
     dossiers, tasks, activity,
+    projects: c.isExt ? [] : (all.projects || []),
     deadlines: c.isExt ? [] : (all.deadlines || []).map(o => c.can("view_amounts") ? o : (({ amount, ...rest }) => rest)(o)),
     claims: c.member ? [{ id: c.user.id, memberId: c.member.id, code: seesCodes ? (c.member.code || "") : "" }] : [],
     me: { userId: c.user.id, email: c.user.email, name: c.user.name, isAdmin: c.isAdmin, memberId: c.member?.id || null, external: c.isExt },
@@ -115,6 +118,10 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     }
     inc.members = result;
     if (!c.isAdmin && !c.can("funds")) { inc.funds = stored.funds; inc.fundRoot = stored.fundRoot; }
+    else if (!c.can("view_amounts") && Array.isArray(inc.funds)) {
+      const old = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).map(p => [f.id + "|" + p.id, p])));
+      inc.funds = inc.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => { const o = old[f.id + "|" + p.id]; return { ...p, amount: o?.amount ?? "", outstanding: o?.outstanding ?? "" }; }) }));
+    }
     if (!c.isAdmin && !c.can("workflows")) { inc.workflows = stored.workflows; inc.customFields = stored.customFields; }
     if (!c.isAdmin && !c.can("automations")) inc.automations = stored.automations;
     return inc;
@@ -159,6 +166,15 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     if ((existing.owners || []).includes(c.member?.id)) return { ...existing, done: data.done || existing.done };
     throw new Denied("Seuls les responsables de cette échéance peuvent la mettre à jour.");
   }
+  if (coll === "projects") {
+    if (c.isExt) throw new Denied();
+    if (c.isAdmin || c.can("projects")) return data;
+    if (!existing) throw new Denied("Votre rôle ne permet pas de créer des projets.");
+    const mid = c.member?.id;
+    if (mid && (existing.ownerId === mid || (existing.members || []).includes(mid)))
+      return { ...existing, status: data.status, health: data.health, progress: data.progress, nextStep: data.nextStep, description: data.description, url: data.url, milestones: data.milestones, updatedAt: data.updatedAt };
+    throw new Denied("Seuls le responsable et l'équipe du projet peuvent le mettre à jour.");
+  }
   if (coll === "activity") {
     if (existing) throw new Denied();
     return { ...data, by: c.member?.id || null };
@@ -168,6 +184,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
 
 export function checkDelete(c, coll, existing, dossierOf) {
   if (coll === "deadlines") { if (c.isExt || !(c.isAdmin || c.can("deadlines"))) throw new Denied("Votre rôle ne permet pas de supprimer des échéances."); return; }
+  if (coll === "projects") { if (c.isExt || !(c.isAdmin || c.can("projects"))) throw new Denied("Votre rôle ne permet pas de supprimer des projets."); return; }
   if (coll === "dossiers") { if (c.isExt || !c.can("dossier_delete")) throw new Denied("Votre rôle ne permet pas de supprimer des dossiers."); return; }
   if (coll === "tasks") {
     if (!existing) return;
