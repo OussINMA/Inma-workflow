@@ -300,6 +300,30 @@ pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:
   .cal .d{min-height:64px}
   .cal .ev{font-size:10px}
 }
+/* meeting & projects */
+.hdot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.prj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.prj{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;min-width:0}
+.prj:hover,.prj:focus-visible{border-color:var(--accent);outline:none}
+.prj-t{font-size:14px;line-height:1.3;min-width:0;flex:1;overflow-wrap:anywhere}.prj .chip{flex:none}
+.mstep{display:flex;gap:3px}.mstep i{flex:1;height:6px;border-radius:2px;background:var(--surface-2);min-width:8px}
+.mstep i.done{background:var(--ok)}.mstep i.cur{background:var(--accent)}
+.mt-slide{display:flex;flex-direction:column;gap:14px;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.mt-head{display:flex;gap:14px;align-items:center}
+.mt-head h2{margin:0;display:flex;align-items:center}
+.mt-num{font-family:var(--f-mono);font-size:13px;font-weight:600;color:#fff;background:var(--accent);border-radius:6px;padding:6px 8px;flex:none}
+.mt-chip{font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.mt-table td{vertical-align:top}
+#present{position:fixed;inset:0;z-index:35;background:var(--bg);display:flex;flex-direction:column}
+#present .pbar{display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--rail);color:#fff}
+#present .pbar .muted{color:var(--rail-muted)}
+#present .pbar .btn{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}#present .pbar .btn:disabled{opacity:.35}#present .pbar .btn:hover:not(:disabled){background:rgba(255,255,255,.12)}
+#present .pbody{flex:1;overflow:auto;padding:24px clamp(16px,4vw,56px);display:flex;flex-direction:column;gap:16px;font-size:15px}
+#present .pbody .kpi .v{font-size:30px!important}
+#present .pdots{display:flex;justify-content:center;gap:6px;padding:10px}
+#present .pdots button{width:9px;height:9px;border-radius:50%;border:0;background:var(--line);cursor:pointer;padding:0}
+#present .pdots button.on{background:var(--accent);width:22px;border-radius:5px}
+@media print{.rail,.mobilenav,.topbar,.toolbar,#present,.btn{display:none!important}.app{display:block}.content{padding:0}.mt-slide{break-after:page;border:0}.dash{grid-template-columns:1fr 1fr}body{background:#fff}}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
 </style>
 
@@ -354,6 +378,8 @@ const ICON = {
   indent:'<path d="M3 5h18M11 10h10M11 14h10M3 19h18M3 9l4 3-4 3"/>',
   outdent:'<path d="M3 5h18M11 10h10M11 14h10M3 19h18M7 9l-4 3 4 3"/>',
   link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  present:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/>',
+  flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
   userplus:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5M19 8v6M16 11h6"/>'
 };
 const ic = (n, cls = "") => `<svg class="${cls}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n] || ""}</svg>`;
@@ -364,22 +390,24 @@ const PERMS = [
   ["workflows","Workflows, champs & statuts"],["automations","Automatisations"],["view_all","Voir tous les dossiers"],
   ["view_amounts","Voir les montants"],["dossier_create","Créer des dossiers"],["dossier_edit_all","Modifier tous les dossiers"],
   ["dossier_delete","Supprimer / archiver"],["stage_advance","Faire avancer les étapes"],["stage_approve","Valider les étapes soumises à approbation"],
-  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"]
+  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"]
 ];
 const ALL = Object.fromEntries(PERMS.map(p => [p[0], true]));
 const pset = keys => Object.fromEntries(PERMS.map(p => [p[0], keys.includes(p[0])]));
 const st = (name, roleId, sla, approval = false, checklist = []) => ({ id: uid("s"), name, roleId, sla, approval, checklist });
 
+const DEF_POS = fid => ({ f_holding: [["Groupe Institution Laghmani", ""], ["Gourmandise", ""], ["Les Écoles Idéales", ""], ["ABK Groupe", ""], ["Sindbad Group", ""], ["Polypharma", ""]].map(([n, sec], i) => ({ id: "pos_h" + i, name: n, kind: "equity", sector: sec, instrument: "", amount: "", outstanding: "", stake: "", date: "", status: "active", health: "green", boardSeat: false, lastReport: "", dossierId: "", url: "", note: "" })),
+  f_finance: [["Biosphere", ""], ["DAAM", ""], ["Enda Tamweel", ""]].map(([n, sec], i) => ({ id: "pos_f" + i, name: n, kind: "debt", sector: sec, instrument: "", amount: "", outstanding: "", stake: "", date: "", status: "active", health: "green", boardSeat: false, lastReport: "", dossierId: "", url: "", note: "" })) }[fid] || []);
 const DEFAULT_CFG = () => fixIds({
   version: 1,
   general: { appName: "INMA Workflow", tagline: "Partenaire de votre développement", brand: "#212121", accent: "#E22529", font: "Montserrat", density: "1", currency: "TND", dateFormat: "fr", weekStart: 1, home: "dashboard", logo: "", defaultRoleId: "r_guest", fiscalYearStart: "01", appUrl: "https://claude.ai/artifact/MesFgynywcYAoxqDWS6ksV",
-    modules: { dashboard: true, funds: true, deadlines: true, dossiers: true, tasks: true, calendar: true, team: true, onedrive: true } },
+    modules: { dashboard: true, meeting: true, funds: true, projects: true, deadlines: true, dossiers: true, tasks: true, calendar: true, team: true, onedrive: true } },
   roles: [
     { id: "r_partner", name: "Associé", color: "#E22529", perms: { ...ALL } },
-    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","onedrive","export","workflows","automations","funds","externals","deadlines"]) },
-    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","onedrive","export","deadlines"]) },
+    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","onedrive","export","workflows","automations","funds","externals","deadlines","projects"]) },
+    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","onedrive","export","deadlines","projects"]) },
     { id: "r_junior", name: "Analyste junior", color: "#7A5BB0", perms: pset(["view_all","task_create","onedrive"]) },
-    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","onedrive","export","members","deadlines"]) },
+    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","onedrive","export","members","deadlines","projects"]) },
     { id: "r_guest", name: "Invité externe", color: "#7B8794", perms: pset([]) }
   ],
   teams: ["Direction Générale","Investissement","Financement (dette privée)","Finance & Comptabilité","Juridique","Ressources Humaines","Informatique","Support"],
@@ -457,15 +485,16 @@ const DEFAULT_CFG = () => fixIds({
   fundTypes: ["Fonds propres & quasi-fonds propres", "Dette privée", "Multi-instruments", "SICAR", "FCPR"],
   fundFields: [ { id: "ff_ticket", label: "Ticket", type: "text", options: [] }, { id: "ff_dur", label: "Durée d'investissement", type: "text", options: [] }, { id: "ff_size", label: "Taille cible", type: "currency", options: [] }, { id: "ff_backers", label: "Bailleurs de fonds", type: "text", options: [] } ],
   fundTemplate: ["Gouvernance/Statuts & pacte", "Gouvernance/Conseils d'administration", "Gouvernance/Assemblées générales", "Investisseurs & bailleurs/Engagements & souscriptions", "Investisseurs & bailleurs/Reporting investisseurs", "Comité d'investissement/Notes", "Comité d'investissement/PV", "Pipeline [dossiers]", "Portefeuille", "Finance & comptabilité/États financiers", "Finance & comptabilité/Valorisation", "Juridique & conformité"],
+  projectCategories: ["ESG", "Organisation & outils", "Levée de fonds", "Gouvernance", "Reporting investisseurs", "Conformité", "Communication", "Ressources humaines"],
   funds: [
     { id: "f_holding", name: "INMA Holding", status: "fs_active", type: "Fonds propres & quasi-fonds propres", year: "2018", color: "#E22529", url: "",
       description: "Véhicule d'investissement en fonds propres et quasi-fonds propres dans des PME tunisiennes en croissance ou en consolidation, tous secteurs. Accompagnement opérationnel, financier et réseau.",
       fields: { ff_ticket: "5 à 8 MTND (co-investissement au-delà)", ff_dur: "3 à 7 ans", ff_size: "", ff_backers: "BIAT, TAEF, CDC" }, milestones: [],
-      tree: tplTree("f_holding", ["Gouvernance/Statuts & pacte d'actionnaires", "Gouvernance/Conseils d'administration", "Gouvernance/Assemblées générales", "Investisseurs & bailleurs/Engagements & appels de fonds", "Investisseurs & bailleurs/Reporting investisseurs", "Comité d'investissement/Notes d'investissement", "Comité d'investissement/PV des comités", "Pipeline [dossiers]", "Portefeuille/Groupe Institution Laghmani", "Portefeuille/Gourmandise", "Portefeuille/Les Écoles Idéales", "Portefeuille/ABK Groupe", "Portefeuille/Sindbad Group", "Portefeuille/Polypharma", "Sorties", "Finance & comptabilité/États financiers", "Finance & comptabilité/Valorisation du portefeuille", "Finance & comptabilité/Frais de gestion", "Juridique & conformité"]) },
+      positions: DEF_POS("f_holding"), tree: tplTree("f_holding", ["Gouvernance/Statuts & pacte d'actionnaires", "Gouvernance/Conseils d'administration", "Gouvernance/Assemblées générales", "Investisseurs & bailleurs/Engagements & appels de fonds", "Investisseurs & bailleurs/Reporting investisseurs", "Comité d'investissement/Notes d'investissement", "Comité d'investissement/PV des comités", "Pipeline [dossiers]", "Portefeuille/Groupe Institution Laghmani", "Portefeuille/Gourmandise", "Portefeuille/Les Écoles Idéales", "Portefeuille/ABK Groupe", "Portefeuille/Sindbad Group", "Portefeuille/Polypharma", "Sorties", "Finance & comptabilité/États financiers", "Finance & comptabilité/Valorisation du portefeuille", "Finance & comptabilité/Frais de gestion", "Juridique & conformité"]) },
     { id: "f_finance", name: "INMA Finance", status: "fs_active", type: "Dette privée", year: "2021", color: "#2A3139", url: "",
       description: "Véhicule de dette privée : financements senior, junior ou mezzanine, directs ou indirects, de sociétés tunisiennes et d'institutions financières, avec un objectif d'impact sur l'emploi et l'inclusion.",
       fields: { ff_ticket: "Jusqu'à 5 MTND (cofinancement possible)", ff_dur: "1 à 7 ans", ff_size: "", ff_backers: "TAEF, CDC" }, milestones: [],
-      tree: tplTree("f_finance", ["Gouvernance/Statuts", "Gouvernance/Conseils d'administration", "Investisseurs & bailleurs/Conventions de financement", "Investisseurs & bailleurs/Reporting bailleurs", "Comité de crédit/Notes de financement", "Comité de crédit/PV des comités", "Dossiers en instruction [dossiers]", "Portefeuille de financements/Biosphere", "Portefeuille de financements/DAAM", "Portefeuille de financements/Enda Tamweel", "Suivi des remboursements/Échéanciers", "Suivi des remboursements/Impayés & relances", "Risques & conformité/Covenants", "Risques & conformité/Reporting d'impact (emploi & inclusion)", "Finance & comptabilité"]) },
+      positions: DEF_POS("f_finance"), tree: tplTree("f_finance", ["Gouvernance/Statuts", "Gouvernance/Conseils d'administration", "Investisseurs & bailleurs/Conventions de financement", "Investisseurs & bailleurs/Reporting bailleurs", "Comité de crédit/Notes de financement", "Comité de crédit/PV des comités", "Dossiers en instruction [dossiers]", "Portefeuille de financements/Biosphere", "Portefeuille de financements/DAAM", "Portefeuille de financements/Enda Tamweel", "Suivi des remboursements/Échéanciers", "Suivi des remboursements/Impayés & relances", "Risques & conformité/Covenants", "Risques & conformité/Reporting d'impact (emploi & inclusion)", "Finance & comptabilité"]) },
     { id: "f_entreprises", name: "INMA Entreprises", status: "fs_build", type: "", year: "", color: "#8A6D3B", url: "",
       description: "Nouveau véhicule en cours de constitution.",
       fields: { ff_ticket: "À définir", ff_dur: "", ff_size: "", ff_backers: "" },
@@ -479,7 +508,7 @@ const DEFAULT_CFG = () => fixIds({
 function fixIds(c) { c.workflows.forEach(w => w.stages.forEach((s, i) => s.id = w.id + "_s" + (i + 1))); c.automations.forEach((a, i) => a.id = "a_def_" + (i + 1)); return c; }
 /* ---------- state ---------- */
 const S = {
-  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [],
+  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [], projects: [],
   mode: "loading", db: null, user: null, uid: null, isOwner: false, canEditArtifact: false, downloads: null,
   view: "dashboard", sim: null, ui: store.get("inma-wf-ui", { dView: "kanban", tView: "list", wf: "all", calMonth: null, filters: {}, cols: ["code","name","stage","owner","amount","due","prio"], stab: "general" }),
   openDossier: null, inboxOpen: false
@@ -488,7 +517,7 @@ const saveUI = () => store.set("inma-wf-ui", S.ui);
 
 /* ---------- persistence ---------- */
 const LOCAL_KEY = "inma-wf-local-v1";
-function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, activity: S.activity.slice(0, 300) }); }
+function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, activity: S.activity.slice(0, 300) }); }
 let cfgTimer;
 function saveCfg(msg) {
   applyBranding();
@@ -598,8 +627,9 @@ function applyPrefs() {
   if (p.density) r.style.setProperty("--density", p.density);
 }
 function migrateCfg(raw) {
-  if (S._migrated || !raw) return; S._migrated = true; let ch = !raw.funds; const D = DEFAULT_CFG();
-  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : !!(r.perms.settings && r.perms.roles); ch = true; } }
+  if (S._migrated || !raw) return; S._migrated = true; let ch = !raw.funds || !raw.projectCategories; const D = DEFAULT_CFG();
+  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : !!(r.perms.settings && r.perms.roles); ch = true; } }
+  for (const f of S.cfg.funds || []) if (!Array.isArray(f.positions)) { f.positions = DEF_POS(f.id); ch = true; }
   if (!window.INMA) for (const m of S.cfg.members) if (!m.code) { m.code = genCode(); ch = true; }
   if (ch && (S.isOwner || can("settings") || can("members"))) saveCfg("Espace mis à jour : fonds, accès externes et codes d'accès");
 }
@@ -708,7 +738,7 @@ function applyBranding() {
 }
 
 /* ---------- shell ---------- */
-const NAV = [["dashboard","Tableau de bord","dash"],["funds","Fonds","fund"],["dossiers","Dossiers","folder"],["tasks","Tâches","task"],["calendar","Calendrier","cal"],["deadlines","Échéances","deadline"],["team","Équipe","team"],["onedrive","OneDrive","cloud"]];
+const NAV = [["dashboard","Tableau de bord","dash"],["meeting","Réunion d'équipe","present"],["funds","Fonds","fund"],["projects","Projets","flag"],["dossiers","Dossiers","folder"],["tasks","Tâches","task"],["calendar","Calendrier","cal"],["deadlines","Échéances","deadline"],["team","Équipe","team"],["onedrive","OneDrive","cloud"]];
 function renderRail() {
   const g = S.cfg.general, mods = g.modules || {}, m = me(), r = myRole();
   const myOpen = m ? S.tasks.filter(t => (t.assignees || []).includes(m.id) && !isDone(t)).length : 0;
@@ -726,7 +756,7 @@ function renderRail() {
     </div>`;
   $("#mobilenav").innerHTML = NAV.filter(n => mods[n[0]] !== false && navAllowed(n[0])).map(n => `<button class="nav ${S.view === n[0] ? "on" : ""}" data-nav="${n[0]}">${n[1]}</button>`).join("") + (settingsBtn ? `<button class="nav ${S.view === "settings" ? "on" : ""}" data-nav="settings">Paramètres</button>` : "");
 }
-const TITLES = { deadlines: ["Calendrier réglementaire", "Échéances et reportings"], dashboard: ["Pilotage", "Tableau de bord"], funds: ["Architecture", "Fonds"], dossiers: ["Portefeuille de travail", "Dossiers"], tasks: ["Exécution", "Tâches"], calendar: ["Planning", "Calendrier"], team: ["Organisation", "Équipe"], onedrive: ["Documents", "OneDrive"], settings: ["Administration", "Paramètres"] };
+const TITLES = { meeting: ["Réunion d'équipe", "Point d'avancement"], projects: ["Corporate & transverse", "Projets"], deadlines: ["Calendrier réglementaire", "Échéances et reportings"], dashboard: ["Pilotage", "Tableau de bord"], funds: ["Architecture", "Fonds"], dossiers: ["Portefeuille de travail", "Dossiers"], tasks: ["Exécution", "Tâches"], calendar: ["Planning", "Calendrier"], team: ["Organisation", "Équipe"], onedrive: ["Documents", "OneDrive"], settings: ["Administration", "Paramètres"] };
 function renderTop() {
   const [c, t] = TITLES[S.view] || ["", ""]; const n = unreadCount();
   $("#topbar").innerHTML = `<div><div class="crumb">${h(c)}</div><h1>${h(t)}</h1></div><div class="spacer"></div>
@@ -1245,7 +1275,7 @@ function vFunds() {
         <span class="row" style="gap:6px">${chip(s.label, s.color)}<span class="muted" style="font-size:12px">${h(f.type || "Type à définir")}${f.year ? " · " + h(f.year) : ""}</span></span>
         ${ffs.map(x => `<span class="kv"><span>${h(x.label)}</span><span>${fieldVal(f, x, true)}</span></span>`).join("")}
         <span class="kv"><span>Dossiers de travail</span><span class="num">${st.ds.length}</span></span>
-        <span class="kv"><span>Montants</span><span>${money(st.amount)}</span></span>
+        <span class="kv"><span>Montants</span><span>${money(st.amount)}</span></span><span class="kv"><span>En portefeuille</span><span>${livePositions(f).length}</span></span>
         <span class="kv"><span>Dossiers liés à OneDrive / SharePoint</span><span class="num">${st.linked}/${st.nodes}</span></span>
         ${msBar(f)}</button>`; }).join("")}</div>
     </div></div></div></div>`;
@@ -1293,7 +1323,7 @@ function fundDetail(f, fv) {
       <div class="panel"><header><h2>Fiche du fonds</h2>${chip(s.label, s.color)}</header><div class="body">${info}</div></div>
       ${msPanel}
     </div>
-  </div>${dsPanel}`;
+  </div>${positionsPanel(f)}${fundProjectsPanel(f)}${dsPanel}`;
 }
 
 function vFundsExternal(m) {
@@ -1843,6 +1873,262 @@ document.addEventListener("change", e => {
   S.ui.dl = { ...(S.ui.dl || {}), [t.id.slice(5)]: t.value }; saveUI(); render();
 });
 
+/* ---------- participations & financements (positions des fonds) ---------- */
+const POS_STATUS = [["active", "En portefeuille", "var(--ok)"], ["watch", "Sous surveillance", "var(--warn)"], ["exited", "Sortie", "#7B8794"], ["repaid", "Remboursé", "#7B8794"]];
+const posStatus = id => POS_STATUS.find(s => s[0] === id) || POS_STATUS[0];
+const HEALTH = { green: ["Bonne santé", "var(--ok)"], amber: ["À surveiller", "var(--warn)"], red: ["En difficulté", "var(--bad)"] };
+const hdot = (hv, title) => `<span class="hdot" style="background:${(HEALTH[hv] || HEALTH.green)[1]}" title="${h(title || (HEALTH[hv] || HEALTH.green)[0])}"></span>`;
+const livePositions = f => (f.positions || []).filter(p => p.status !== "exited" && p.status !== "repaid");
+function positionsPanel(f) {
+  const ef = can("funds"), list = f.positions || [];
+  const act = livePositions(f); const eq = act.filter(p => p.kind !== "debt"), debt = act.filter(p => p.kind === "debt");
+  const totEq = eq.reduce((s, p) => s + (+p.amount || 0), 0), totDebt = debt.reduce((s, p) => s + (+(p.outstanding || p.amount) || 0), 0);
+  return `<div class="panel"><header><h2>Participations et financements actuels · ${h(f.name)}</h2><span class="muted" style="font-size:12px">${act.length} en portefeuille${eq.length ? ` · investi ${money(totEq)}` : ""}${debt.length ? ` · encours ${money(totDebt)}` : ""}</span><span class="spacer"></span>${ef ? `<button class="btn sm pri" data-pos-new="${f.id}">${ic("plus")}Ajouter</button>` : ""}</header>
+  <div class="body tablewrap">${list.length ? `<table class="t"><thead><tr><th></th><th>Société</th><th>Nature</th><th>Secteur</th><th>Instrument</th><th class="r">Investi / financé</th><th class="r">Encours</th><th>Entrée</th><th>Dernier reporting</th><th>Statut</th></tr></thead><tbody>
+    ${list.map(p => `<tr class="click" data-pos="${f.id}|${p.id}" style="${p.status === "exited" || p.status === "repaid" ? "opacity:.55" : ""}"><td>${hdot(p.health)}</td><td><b>${h(p.name)}</b>${p.boardSeat ? ' <span class="tag">Siège CA</span>' : ""}</td><td>${p.kind === "debt" ? "Financement" : "Participation"}</td><td>${h(p.sector || "—")}</td><td>${h(p.instrument || "—")}</td><td class="r">${p.amount ? money(p.amount) : '<span class="muted">—</span>'}</td><td class="r">${p.kind === "debt" && p.outstanding ? money(p.outstanding) : '<span class="muted">—</span>'}</td><td>${p.date ? h(fdate(p.date)) : "—"}</td><td>${p.lastReport ? due(p.lastReport, true) : '<span class="muted">—</span>'}</td><td>${chip(posStatus(p.status)[1], posStatus(p.status)[2])}</td></tr>`).join("")}
+  </tbody></table>` : `<p class="muted" style="margin:0">Aucune participation ni aucun financement enregistré.${ef ? " Cliquez « Ajouter »." : ""}</p>`}</div></div>`;
+}
+function posModal(fid, pid) {
+  const f = fundById(fid); if (!f) return; const ef = can("funds"), dis = ef ? "" : "disabled";
+  const isNew = !pid; const p = isNew ? { id: uid("pos"), name: "", kind: /finance/i.test(f.name) || f.type === "Dette privée" ? "debt" : "equity", sector: "", instrument: "", amount: "", outstanding: "", stake: "", date: "", status: "active", health: "green", boardSeat: false, lastReport: "", dossierId: "", url: "", note: "" } : clone((f.positions || []).find(x => x.id === pid) || {});
+  const inner = `<div class="grid2"><label class="f"><span>Société</span><input type="text" id="ps-name" value="${h(p.name)}" ${dis}></label>
+      <label class="f"><span>Nature</span><select id="ps-kind" ${dis}><option value="equity" ${p.kind !== "debt" ? "selected" : ""}>Participation (fonds propres / quasi-fonds propres)</option><option value="debt" ${p.kind === "debt" ? "selected" : ""}>Financement (dette)</option></select></label></div>
+    <div class="grid3"><label class="f"><span>Secteur</span><select id="ps-sector" ${dis}><option value="">—</option>${S.cfg.sectors.map(x => `<option ${p.sector === x ? "selected" : ""}>${h(x)}</option>`).join("")}</select></label>
+      <label class="f"><span>Instrument</span><input type="text" id="ps-instr" value="${h(p.instrument || "")}" placeholder="Actions, OC, prêt participatif…" ${dis}></label>
+      <label class="f"><span>Date d'entrée / de décaissement</span><input type="date" id="ps-date" value="${h(p.date || "")}" ${dis}></label>
+      ${can("view_amounts") ? `<label class="f"><span>Montant investi / financé (${h(S.cfg.general.currency)})</span><input type="number" id="ps-amount" value="${h(p.amount || "")}" ${dis}></label>
+      <label class="f"><span>Encours restant (financements)</span><input type="number" id="ps-out" value="${h(p.outstanding || "")}" ${dis}></label>` : ""}
+      <label class="f"><span>Participation détenue (%)</span><input type="number" id="ps-stake" value="${h(p.stake || "")}" ${dis}></label>
+      <label class="f"><span>Statut</span><select id="ps-status" ${dis}>${POS_STATUS.map(s => `<option value="${s[0]}" ${p.status === s[0] ? "selected" : ""}>${s[1]}</option>`).join("")}</select></label>
+      <label class="f"><span>Santé</span><select id="ps-health" ${dis}>${Object.entries(HEALTH).map(([k, v]) => `<option value="${k}" ${p.health === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select></label>
+      <label class="f"><span>Dernier reporting reçu</span><input type="date" id="ps-rep" value="${h(p.lastReport || "")}" ${dis}></label></div>
+    <div class="grid2"><label class="f"><span>Dossier de travail lié</span><select id="ps-dossier" ${dis}><option value="">—</option>${visDossiers().map(d => `<option value="${d.id}" ${p.dossierId === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
+      <label class="f"><span>Dossier OneDrive / SharePoint</span><input type="url" id="ps-url" value="${h(p.url || "")}" ${dis}></label></div>
+    <label class="chk"><input type="checkbox" id="ps-board" ${p.boardSeat ? "checked" : ""} ${dis}>INMA siège au conseil d'administration</label>
+    <label class="f"><span>Commentaire (faits marquants, points d'attention)</span><textarea id="ps-note" rows="3" ${dis}>${h(p.note || "")}</textarea></label>
+    ${isURL(p.url) ? `<div>${linkBtn(p.url, "Ouvrir le dossier")}</div>` : ""}`;
+  modal(isNew ? "Nouvelle participation / nouveau financement" : p.name, inner, `${!isNew && ef ? `<button class="btn danger" id="ps-del">Retirer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ef ? `<button class="btn pri" id="ps-save">Enregistrer</button>` : ""}`, L => {
+    const sb = $("#ps-save", L); sb && (sb.onclick = () => {
+      const name = $("#ps-name", L).value.trim(); if (!name) { toast("Indiquez le nom de la société."); return; }
+      const u = $("#ps-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
+      const live = fundById(fid); if (!live) { L.remove(); return; }
+      const cur = (live.positions || []).find(x => x.id === p.id) || {};
+      const data = { ...cur, id: p.id, name, kind: $("#ps-kind", L).value, sector: $("#ps-sector", L).value, instrument: $("#ps-instr", L).value.trim(), date: $("#ps-date", L).value, stake: $("#ps-stake", L).value, status: $("#ps-status", L).value, health: $("#ps-health", L).value, lastReport: $("#ps-rep", L).value, dossierId: $("#ps-dossier", L).value || "", url: u, boardSeat: $("#ps-board", L).checked, note: $("#ps-note", L).value };
+      if ($("#ps-amount", L)) { data.amount = $("#ps-amount", L).value; data.outstanding = $("#ps-out", L).value; }
+      live.positions = (live.positions || []).some(x => x.id === p.id) ? live.positions.map(x => x.id === p.id ? data : x) : [...(live.positions || []), data];
+      L.remove(); saveCfg("Portefeuille mis à jour"); render();
+    });
+    const db = $("#ps-del", L); db && (db.onclick = () => { L.remove(); confirmBox(`Retirer « ${p.name} » du portefeuille de ${f.name} ? Pour garder l'historique, choisissez plutôt le statut « Sortie » ou « Remboursé ».`, "Retirer", async () => { const live = fundById(fid); live.positions = (live.positions || []).filter(x => x.id !== p.id); saveCfg("Ligne retirée"); render(); }); });
+  }, true);
+}
+
+/* ---------- projets corporate & transverses ---------- */
+const PRJ_STATUS = [["todo", "Pas démarré", "#7B8794"], ["doing", "En cours", "#2F6FB0"], ["paused", "En pause", "#B7791F"], ["done", "Terminé", "#2F8A5B"]];
+const prjStatus = id => PRJ_STATUS.find(s => s[0] === id) || PRJ_STATUS[0];
+const visProjects = () => isExt(me()) ? [] : (S.projects || []);
+const scopeName = s => s === "inma" ? (S.cfg.fundRoot?.name || "INMA Capital") : (fundById(s)?.name || "—");
+function prjProgress(p) { const ms = p.milestones || []; return ms.length ? Math.round(ms.filter(m => m.done).length / ms.length * 100) : (+p.progress || 0); }
+const canEditProject = p => can("projects") || (!!me() && (p.ownerId === me().id || (p.members || []).includes(me().id)));
+function prjCard(p) {
+  const pr = prjProgress(p), st = prjStatus(p.status); const nx = (p.milestones || []).find(m => !m.done);
+  const late = p.due && p.due < todayISO() && p.status !== "done";
+  return `<div class="prj" data-prj="${p.id}" tabindex="0" role="button" aria-label="${h(p.title)}">
+    <div class="row" style="gap:8px;flex-wrap:nowrap">${hdot(p.health)}<b class="prj-t">${h(p.title)}</b><span class="spacer"></span>${chip(st[1], st[2])}</div>
+    <div class="row" style="gap:6px"><span class="tag">${h(p.category || "Projet")}</span><span class="muted" style="font-size:12px">${h(scopeName(p.scope))}</span></div>
+    <div class="row" style="gap:8px;flex-wrap:nowrap"><span class="msbar"><span style="width:${pr}%;background:${p.health === "red" ? "var(--bad)" : p.health === "amber" ? "var(--warn)" : "var(--ok)"}"></span></span><span class="num" style="font-size:12px">${pr} %</span></div>
+    <div class="t2" style="font-size:12.5px;line-height:1.4"><span class="muted">Prochaine étape :</span> ${h(p.nextStep || nx?.text || "—")}</div>
+    <div class="row" style="gap:8px">${av(p.ownerId)}${avs((p.members || []).filter(x => x !== p.ownerId).slice(0, 3))}<span class="spacer"></span>${p.due ? `<span class="due ${late ? "late" : dueCls(p.due, p.status === "done")}">${late ? "En retard · " : "Échéance "}${fdate(p.due)}</span>` : ""}</div></div>`;
+}
+function vProjects() {
+  const f = S.ui.pj = { scope: "", status: "", ...(S.ui.pj || {}) };
+  const scopes = ["inma", ...(S.cfg.funds || []).map(x => x.id)];
+  const list = visProjects().filter(p => (!f.scope || p.scope === f.scope) && (!f.status || (f.status === "open" ? p.status !== "done" : p.status === f.status)));
+  const tb = `<div class="toolbar"><select id="pj-f-scope" aria-label="Périmètre"><option value="">Tous les périmètres</option>${scopes.map(s => `<option value="${s}" ${f.scope === s ? "selected" : ""}>${h(scopeName(s))}</option>`).join("")}</select>
+    <select id="pj-f-status" aria-label="Statut"><option value="">Tous statuts</option><option value="open" ${f.status === "open" ? "selected" : ""}>Non terminés</option>${PRJ_STATUS.map(s => `<option value="${s[0]}" ${f.status === s[0] ? "selected" : ""}>${s[1]}</option>`).join("")}</select>
+    <span class="spacer"></span>${can("projects") ? `<button class="btn" data-act4="prj-templates">Projets types INMA</button><button class="btn pri" data-act4="prj-new">${ic("plus")}Nouveau projet</button>` : ""}</div>`;
+  if (!visProjects().length) return tb + `<div class="empty"><b>Aucun projet pour l'instant</b><span>Suivez ici les chantiers corporate de chaque fonds (levée, gouvernance, reporting) et les projets transverses d'INMA Capital (ESG, outil de workflow management…).</span>${can("projects") ? `<div class="row"><button class="btn pri" data-act4="prj-templates">Créer les projets types INMA</button><button class="btn" data-act4="prj-new">${ic("plus")}Nouveau projet</button></div>` : ""}</div>`;
+  return tb + scopes.filter(s => list.some(p => p.scope === s)).map(s => { const l = list.filter(p => p.scope === s);
+    return `<div class="panel"><header><h2>${h(scopeName(s))}</h2><span class="muted" style="font-size:12px">${s === "inma" ? "Projets transverses" : "Projets corporate du fonds"} · ${l.length}</span></header><div class="body prj-grid">${l.sort((a, b) => (a.status === "done") - (b.status === "done") || (a.due || "9") .localeCompare(b.due || "9")).map(prjCard).join("")}</div></div>`; }).join("") || `<div class="empty"><b>Aucun projet ne correspond aux filtres</b></div>`;
+}
+function prjModal(p0, scope0) {
+  const isNew = !p0; const p = isNew ? { id: uid("prj"), title: "", scope: scope0 || S.ui.pj?.scope || "inma", category: (S.cfg.projectCategories || [])[0] || "", ownerId: me()?.id || "", members: [], status: "todo", health: "green", progress: 0, start: todayISO(), due: "", nextStep: "", description: "", url: "", milestones: [], createdAt: new Date().toISOString() } : clone(p0);
+  const ed = isNew ? can("projects") : canEditProject(p), full = can("projects"), dis = ed ? "" : "disabled", dfull = full ? "" : "disabled";
+  const msHtml = () => (p.milestones || []).map((m, i) => `<div class="li"><input type="checkbox" class="cb" data-pm-done="${i}" ${m.done ? "checked" : ""} ${dis} aria-label="Fait"><div class="grow"><div class="t1" style="white-space:normal;${m.done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(m.text)}</div></div>${m.due ? due(m.due, m.done) : ""}${ed ? `<button class="btn sm ghost danger" data-pm-del="${i}" aria-label="Supprimer">${ic("trash")}</button>` : ""}</div>`).join("") || '<p class="muted" style="margin:0">Aucun jalon : l\'avancement se saisit à la main.</p>';
+  const inner = `<label class="f"><span>Intitulé</span><input type="text" id="pj-title" value="${h(p.title)}" ${dfull} placeholder="Ex. Démarche ESG"></label>
+    <div class="grid3"><label class="f"><span>Périmètre</span><select id="pj-scope" ${dfull}><option value="inma" ${p.scope === "inma" ? "selected" : ""}>${h(scopeName("inma"))} (transverse)</option>${(S.cfg.funds || []).map(x => `<option value="${x.id}" ${p.scope === x.id ? "selected" : ""}>${h(x.name)} (corporate)</option>`).join("")}</select></label>
+      <label class="f"><span>Catégorie</span><select id="pj-cat" ${dfull}>${(S.cfg.projectCategories || []).map(c => `<option ${p.category === c ? "selected" : ""}>${h(c)}</option>`).join("")}</select></label>
+      <label class="f"><span>Responsable</span><select id="pj-owner" ${dfull}>${S.cfg.members.filter(m => !m.external).map(m => `<option value="${m.id}" ${p.ownerId === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select></label>
+      <label class="f"><span>Statut</span><select id="pj-status" ${dis}>${PRJ_STATUS.map(s => `<option value="${s[0]}" ${p.status === s[0] ? "selected" : ""}>${s[1]}</option>`).join("")}</select></label>
+      <label class="f"><span>Santé</span><select id="pj-health" ${dis}>${Object.entries(HEALTH).map(([k, v]) => `<option value="${k}" ${p.health === k ? "selected" : ""}>${k === "green" ? "Dans les temps" : k === "amber" ? "Vigilance" : "En difficulté"}</option>`).join("")}</select></label>
+      <label class="f"><span>Avancement (%)</span><input type="number" id="pj-progress" min="0" max="100" value="${h(prjProgress(p))}" ${dis} ${(p.milestones || []).length ? 'disabled title="Calculé à partir des jalons"' : ""}></label>
+      <label class="f"><span>Début</span><input type="date" id="pj-start" value="${h(p.start || "")}" ${dfull}></label>
+      <label class="f"><span>Échéance</span><input type="date" id="pj-due" value="${h(p.due || "")}" ${dfull}></label></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Équipe projet</div><div class="row">${S.cfg.members.filter(m => !m.external).map(m => `<label class="chk"><input type="checkbox" data-pj-member="${m.id}" ${(p.members || []).includes(m.id) ? "checked" : ""} ${dfull}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
+    <label class="f"><span>Prochaine étape</span><input type="text" id="pj-next" value="${h(p.nextStep || "")}" ${dis} placeholder="Ce qui doit être fait d'ici la prochaine réunion"></label>
+    <label class="f"><span>Description / objectifs</span><textarea id="pj-desc" rows="3" ${dis}>${h(p.description || "")}</textarea></label>
+    <label class="f"><span>Dossier OneDrive / SharePoint</span><input type="url" id="pj-url" value="${h(p.url || "")}" ${dis}></label>
+    <div><div class="eyebrow" style="margin-bottom:4px">Jalons</div><div class="list" id="pj-ms">${msHtml()}</div>
+    ${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="pj-newms" placeholder="Nouveau jalon" style="max-width:300px"><input type="date" id="pj-newms-due" style="width:auto" aria-label="Échéance du jalon"><button class="btn sm" id="pj-addms">Ajouter</button></div>` : ""}</div>`;
+  modal(isNew ? "Nouveau projet" : p.title, inner, `${!isNew && full ? `<button class="btn danger" id="pj-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="pj-save">${isNew ? "Créer le projet" : "Enregistrer"}</button>` : ""}`, L => {
+    const sync = () => { p.milestones = (p.milestones || []).map((m, i) => ({ ...m, done: L.querySelector(`[data-pm-done="${i}"]`)?.checked ?? m.done })); };
+    L.addEventListener("click", e => { const d = e.target.closest("[data-pm-del]"); if (!d) return; sync(); p.milestones.splice(+d.dataset.pmDel, 1); $("#pj-ms", L).innerHTML = msHtml(); });
+    const add = $("#pj-addms", L); add && (add.onclick = () => { const t = $("#pj-newms", L).value.trim(); if (!t) return; sync(); p.milestones = [...(p.milestones || []), { text: t, done: false, due: $("#pj-newms-due", L).value }]; $("#pj-ms", L).innerHTML = msHtml(); $("#pj-newms", L).value = ""; });
+    const sb = $("#pj-save", L); sb && (sb.onclick = async () => {
+      sync(); const title = $("#pj-title", L).value.trim(); if (!title) { toast("Indiquez l'intitulé du projet."); return; }
+      const u = $("#pj-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
+      const live = isNew ? p : { ...((S.projects || []).find(x => x.id === p.id) || p), milestones: p.milestones };
+      const prevStatus = live.status;
+      Object.assign(live, { title, scope: $("#pj-scope", L).value, category: $("#pj-cat", L).value, ownerId: $("#pj-owner", L).value, members: $$("[data-pj-member]", L).filter(x => x.checked).map(x => x.dataset.pjMember), status: $("#pj-status", L).value, health: $("#pj-health", L).value, progress: +$("#pj-progress", L).value || 0, start: $("#pj-start", L).value, due: $("#pj-due", L).value, nextStep: $("#pj-next", L).value.trim(), description: $("#pj-desc", L).value, url: u, milestones: p.milestones, updatedAt: new Date().toISOString() });
+      await putDoc("projects", live);
+      await log(isNew ? `Projet créé : « ${title} »` : prevStatus !== live.status ? `Projet « ${title} » : ${prjStatus(live.status)[1].toLowerCase()}` : `Projet mis à jour : « ${title} »`, { notify: isNew ? [live.ownerId].filter(id => id && id !== me()?.id) : [] });
+      L.remove(); toast(isNew ? "Projet créé" : "Projet enregistré"); render();
+    });
+    const db = $("#pj-del", L); db && (db.onclick = () => { L.remove(); confirmBox(`Supprimer le projet « ${p.title} » ?`, "Supprimer", async () => { await delDoc("projects", p.id); toast("Projet supprimé"); render(); }); });
+  }, true);
+}
+function prjTemplates() {
+  const ok = id => S.cfg.members.some(m => m.id === id) ? id : (me()?.id || "");
+  const F = re => (S.cfg.funds || []).find(f => re.test(f.name))?.id || "inma";
+  const ms = (arr, doneN = 0) => arr.map((t, i) => ({ text: t, done: i < doneN, due: "" }));
+  return [
+    { id: "prj_workflow", title: "Outil de workflow management", scope: "inma", category: "Organisation & outils", ownerId: ok("m_oussema"), members: [ok("m_hamdi"), ok("m_nour"), ok("m_eya")].filter(Boolean), status: "doing", health: "green", nextStep: "Paramétrer les rôles et inviter l'équipe", description: "Choix et déploiement de l'outil de suivi des dossiers, tâches, échéances et documents (processus d'évaluation en 8 phases).", milestones: ms(["Étude documentaire des solutions", "Prise en main", "Création d'un environnement de test", "Tests fonctionnels", "Cas d'usage métier", "Évaluation multicritère", "Décision", "Déploiement et formation de l'équipe"], 2) },
+    { id: "prj_esg", title: "Démarche ESG et RSE", scope: "inma", category: "ESG", ownerId: ok("m_fatma"), members: [ok("m_oussema")].filter(Boolean), status: "todo", health: "green", nextStep: "Valider le périmètre et le calendrier avec les associés", description: "Politique ESG d'INMA Capital, intégration dans le processus d'investissement et reporting ESG du portefeuille.", milestones: ms(["Politique ESG validée par les associés", "Grille d'évaluation ESG des cibles", "Intégration dans la note d'investissement", "Plan d'action ESG par participation", "Premier reporting ESG annuel"]) },
+    { id: "prj_holding_investors", title: "Rapport annuel aux investisseurs", scope: F(/holding/i), category: "Reporting investisseurs", ownerId: ok("m_kais"), members: [ok("m_oussema")].filter(Boolean), status: "todo", health: "green", nextStep: "", description: "", milestones: ms(["Collecte des données du portefeuille", "Rédaction", "Validation des associés", "Envoi aux investisseurs"]) },
+    { id: "prj_finance_impact", title: "Cadre de mesure d'impact (emploi et inclusion)", scope: F(/finance/i), category: "ESG", ownerId: ok("m_hamdi"), members: [], status: "todo", health: "green", nextStep: "", description: "Indicateurs d'impact suivis pour les bailleurs.", milestones: ms(["Choix des indicateurs", "Collecte auprès des emprunteurs", "Premier rapport"]) },
+    { id: "prj_entreprises_launch", title: "Constitution d'INMA Entreprises", scope: F(/entreprises/i), category: "Levée de fonds", ownerId: ok("m_kais"), members: [ok("m_fatma"), ok("m_hamdi")].filter(Boolean), status: "doing", health: "amber", nextStep: "Finaliser la note de structuration", description: "Structuration, agrément et levée du nouveau véhicule.", milestones: ms(["Note de structuration", "Documentation juridique", "Dépôt du dossier d'agrément", "Obtention de l'agrément", "Lettres d'engagement des investisseurs", "Premier closing"]) },
+  ].map(p => ({ ...p, progress: 0, start: todayISO(), due: "", url: "", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), template: true }));
+}
+
+/* ---------- réunion d'équipe ---------- */
+function mtDossierRow(d) {
+  const w = wfById(d.workflowId), s = stageOf(d), idx = w ? w.stages.indexOf(s) : -1;
+  const tks = S.tasks.filter(t => t.dossierId === d.id), open = tks.filter(t => !isDone(t)), late = open.filter(t => t.due && t.due < todayISO());
+  const next = open.filter(t => t.due).sort((a, b) => a.due < b.due ? -1 : 1)[0] || open[0];
+  const inStage = d.stageSince ? daysBetween(d.stageSince, todayISO()) : null, over = s?.sla && inStage > s.sla;
+  return `<tr class="click" data-open="${d.id}"><td class="mono" style="font-size:12px">${h(d.code)}</td><td><b>${h(d.name)}</b>${d.pendingApproval ? ' <span class="lock">À VALIDER</span>' : ""}<div class="muted" style="font-size:11.5px">${h(d.vehicle || "")}${d.sector ? " · " + h(d.sector) : ""}</div></td>
+    <td><span class="row" style="flex-wrap:nowrap;gap:6px">${av(d.ownerId)}${h(mname(d.ownerId).split(" ")[0])}</span></td>
+    <td><div class="mstep" title="${h((w?.stages || []).map(x => x.name).join(" › "))}">${(w?.stages || []).map((x, i) => `<i class="${i < idx ? "done" : i === idx ? "cur" : ""}"></i>`).join("")}</div><div style="font-size:12px;margin-top:3px"><b>${h(s?.name || "—")}</b> <span class="muted">· étape ${idx + 1}/${w?.stages.length || "?"}</span></div></td>
+    <td class="num ${over ? "" : ""}" style="${over ? "color:var(--bad);font-weight:600" : ""}">${inStage != null ? inStage + " j" : "—"}${s?.sla ? `<span class="muted" style="font-weight:400"> / ${s.sla}</span>` : ""}</td>
+    <td class="num">${tks.length - open.length}/${tks.length}${late.length ? ` <span class="chip" style="background:var(--bad-bg);color:var(--bad)">${late.length} en retard</span>` : ""}</td>
+    <td style="font-size:12.5px">${next ? `${h(next.title)}${next.due ? ` <span class="due ${dueCls(next.due)}">${fdate(next.due)}</span>` : ""}` : '<span class="muted">—</span>'}</td>
+    <td class="r">${money(d.amount)}</td></tr>`;
+}
+function meetingSlides(mt) {
+  const slides = [], t = todayISO(), since = mt.since || addDays(t, -7);
+  const dsAll = visDossiers().filter(d => !d.archived && (!mt.fund || d.vehicle === fundById(mt.fund)?.name));
+  const funds = (S.cfg.funds || []).filter(f => !mt.fund || f.id === mt.fund);
+  const sec = mt.sections || {};
+  if (sec.summary !== 0) {
+    const open = visTasks().filter(x => !isDone(x)), lateT = open.filter(x => x.due && x.due < t);
+    const occ = dlOccAll(addDays(t, -120), addDays(t, 31)).filter(x => x.status !== "sent" && (x.late || x.due <= addDays(t, 30)));
+    const prj = visProjects().filter(p => p.status !== "done");
+    const ev = S.activity.filter(e => e.at >= since && (e.dossierId ? canSeeDossier(dossierById(e.dossierId) || {}) : true));
+    const moves = ev.filter(e => /passe à l'étape|validée|Dossier créé|remis|Projet .* : terminé/i.test(e.text)).slice(0, 8);
+    const doneT = visTasks().filter(x => isDone(x) && (x.completedAt || "") >= since).length;
+    slides.push({ id: "summary", title: `${S.cfg.fundRoot?.name || "INMA Capital"} · synthèse`, sub: `Réunion du ${fdate(t)} · évolutions depuis le ${fdate(since)}`, html: `
+      <div class="kpis">${[["Dossiers actifs", dsAll.length, `${funds.length} fonds`], ["Montants en cours", can("view_amounts") ? `${dsAll.reduce((s, d) => s + (+d.amount || 0), 0).toLocaleString("fr-FR")} <small>${h(S.cfg.general.currency)}</small>` : "Masqué", "pipeline et portefeuille"], ["Validations en attente", dsAll.filter(d => d.pendingApproval).length, "étapes à valider"], ["Tâches en retard", lateT.length, `sur ${open.length} ouvertes`, lateT.length], ["Échéances ≤ 30 j", occ.length, `${occ.filter(x => x.late).length} en retard`, occ.filter(x => x.late).length], ["Projets en cours", prj.length, `${prj.filter(p => p.health === "red").length} en difficulté`, prj.filter(p => p.health === "red").length]].map(([l, v, s, a]) => `<div class="kpi ${a ? "alert" : ""}"><span class="l">${l}</span><span class="v" style="font-size:24px">${v}</span><span class="l">${s}</span></div>`).join("")}</div>
+      <div class="dash"><div class="panel"><header><h2>Depuis la dernière réunion</h2></header><div class="body"><div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div class="kpi"><span class="l">Étapes franchies</span><span class="v">${ev.filter(e => /passe à l'étape/.test(e.text)).length}</span></div><div class="kpi"><span class="l">Tâches terminées</span><span class="v">${doneT}</span></div><div class="kpi"><span class="l">Reportings remis</span><span class="v">${ev.filter(e => /: remis/.test(e.text)).length}</span></div></div></div></div>
+      <div class="panel"><header><h2>Faits marquants</h2></header><div class="body list">${moves.map(e => `<div class="li">${av(e.by)}<div class="grow"><div class="t1" style="white-space:normal;font-weight:500">${h(e.text)}</div><div class="t2">${new Date(e.at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun fait marquant sur la période.</p>'}</div></div></div>` });
+  }
+  if (sec.dossiers !== 0) for (const w of S.cfg.workflows) {
+    const ds = dsAll.filter(d => d.workflowId === w.id); if (!ds.length) continue;
+    ds.sort((a, b) => w.stages.findIndex(s => s.id === b.stageId) - w.stages.findIndex(s => s.id === a.stageId));
+    slides.push({ id: "wf-" + w.id, title: `Avancement · ${w.name}`, sub: `${ds.length} dossier(s) · du plus avancé au plus récent`, html: `<div class="panel tablewrap"><table class="t mt-table"><thead><tr><th>Réf.</th><th>Dossier</th><th>Responsable</th><th style="min-width:180px">Avancement</th><th>Dans l'étape</th><th>Tâches</th><th>Prochaine action</th><th class="r">Montant</th></tr></thead><tbody>${ds.map(mtDossierRow).join("")}</tbody></table></div>` });
+  }
+  if (sec.funds !== 0) for (const f of funds) {
+    const ds = visDossiers().filter(d => !d.archived && d.vehicle === f.name);
+    const act = livePositions(f); const eqT = act.filter(p => p.kind !== "debt").reduce((s, p) => s + (+p.amount || 0), 0), dbT = act.filter(p => p.kind === "debt").reduce((s, p) => s + (+(p.outstanding || p.amount) || 0), 0);
+    const prj = visProjects().filter(p => p.scope === f.id && p.status !== "done");
+    const occ = dlOccAll(addDays(t, -120), addDays(t, 31)).filter(x => x.o.fund === f.name && x.status !== "sent" && (x.late || x.due <= addDays(t, 30)));
+    const stageCounts = {}; for (const d of ds) { const s = stageOf(d)?.name || "—"; stageCounts[s] = (stageCounts[s] || 0) + 1; }
+    const maxC = Math.max(1, ...Object.values(stageCounts));
+    const order = [...new Set(S.cfg.workflows.flatMap(w => w.stages.map(s => s.name)))].filter(n => stageCounts[n]);
+    slides.push({ id: "fund-" + f.id, title: f.name, sub: `${fstatus(f.status).label}${f.type ? " · " + f.type : ""}${f.year ? " · depuis " + f.year : ""}`, color: f.color, html: `
+      <div class="kpis">${[["Dossiers en cours", ds.length, can("view_amounts") ? money(ds.reduce((s, d) => s + (+d.amount || 0), 0)) : ""], ["Participations / financements", act.length, [eqT ? "investi " + money(eqT) : "", dbT ? "encours " + money(dbT) : ""].filter(Boolean).join(" · ") || "montants à renseigner"], ["Projets corporate", prj.length, `${prj.filter(p => p.health !== "green").length} sous vigilance`], ["Échéances ≤ 30 j", occ.length, `${occ.filter(x => x.late).length} en retard`, occ.filter(x => x.late).length]].map(([l, v, s, a]) => `<div class="kpi ${a ? "alert" : ""}"><span class="l">${l}</span><span class="v" style="font-size:24px">${v}</span><span class="l">${s}</span></div>`).join("")}</div>
+      <div class="dash"><div class="panel"><header><h2>Pipeline par étape</h2></header><div class="body bars">${order.map(n => `<div class="bar"><span class="lbl">${h(n)}</span><span class="track"><span class="fill" style="width:${stageCounts[n] / maxC * 100}%;background:${h(f.color)}"></span></span><span class="num r">${stageCounts[n]}</span></div>`).join("") || '<p class="muted" style="margin:0">Aucun dossier en cours.</p>'}</div></div>
+      <div class="panel"><header><h2>Projets corporate</h2></header><div class="body list">${prj.map(p => `<div class="li" data-prj="${p.id}" style="cursor:pointer">${hdot(p.health)}<div class="grow"><div class="t1">${h(p.title)}</div><div class="t2">${h(p.nextStep || (p.milestones || []).find(m => !m.done)?.text || "")}</div></div><span class="msbar" style="max-width:90px"><span style="width:${prjProgress(p)}%"></span></span><span class="num" style="font-size:12px">${prjProgress(p)} %</span></div>`).join("") || '<p class="muted" style="margin:0">Aucun projet corporate en cours.</p>'}</div></div></div>
+      ${positionsPanel(f)}` });
+  }
+  if (sec.projects !== 0) {
+    const prj = visProjects().filter(p => p.scope === "inma" && p.status !== "done");
+    if (prj.length || !mt.fund) slides.push({ id: "projects", title: `Projets transverses · ${S.cfg.fundRoot?.name || "INMA Capital"}`, sub: "ESG, organisation, outils et autres chantiers communs", html: prj.length ? `<div class="prj-grid">${prj.map(prjCard).join("")}</div>` : `<div class="empty"><b>Aucun projet transverse en cours</b>${can("projects") ? `<button class="btn" data-nav="projects">Ouvrir les projets</button>` : ""}</div>` });
+  }
+  if (sec.deadlines !== 0) {
+    const l = dlOccAll(addDays(t, -120), addDays(t, 31)).filter(x => x.status !== "sent" && (x.late || x.due <= addDays(t, 30)) && (!mt.fund || x.o.fund === fundById(mt.fund)?.name));
+    slides.push({ id: "deadlines", title: "Échéances et reportings", sub: "En retard et dans les 30 prochains jours", html: `<div class="panel"><div class="body list">${l.map(occRow).join("") || '<p class="muted" style="margin:0">Rien à remettre dans les 30 prochains jours.</p>'}</div></div>` });
+  }
+  if (sec.decisions !== 0) {
+    const pend = dsAll.filter(d => d.pendingApproval); const blocked = visTasks().filter(x => x.status === "t_blocked" || (x.status && statusById(x.status)?.label === "Bloqué"));
+    const red = [...visProjects().filter(p => p.health === "red" && p.status !== "done").map(p => ({ k: "prj", p })), ...(S.cfg.funds || []).flatMap(f => livePositions(f).filter(p => p.health === "red").map(p => ({ k: "pos", f, p })))];
+    slides.push({ id: "decisions", title: "Points de décision et d'attention", sub: "À traiter en réunion", html: `<div class="dash"><div class="panel"><header><h2>Validations d'étape en attente</h2><span class="chip">${pend.length}</span></header><div class="body list">${pend.map(d => { const w = wfById(d.workflowId); return `<div class="li" data-open="${d.id}" style="cursor:pointer"><div class="grow"><div class="t1">${h(d.code)} · ${h(d.name)}</div><div class="t2">« ${h(stageOf(d)?.name)} » → « ${h(w?.stages.find(s => s.id === d.pendingApproval.to)?.name)} » · demandé par ${h(mname(d.pendingApproval.by))}</div></div>${can("stage_approve") ? `<button class="btn sm pri" data-approve="${d.id}">Valider</button>` : ""}</div>`; }).join("") || '<p class="muted" style="margin:0">Aucune validation en attente.</p>'}</div></div>
+      <div class="panel"><header><h2>Tâches bloquées</h2><span class="chip">${blocked.length}</span></header><div class="body list">${blocked.map(taskLine).join("") || '<p class="muted" style="margin:0">Aucune tâche bloquée.</p>'}</div></div></div>
+      ${red.length ? `<div class="panel"><header><h2>En difficulté</h2></header><div class="body list">${red.map(x => x.k === "prj" ? `<div class="li" data-prj="${x.p.id}" style="cursor:pointer">${hdot("red")}<div class="grow"><div class="t1">${h(x.p.title)}</div><div class="t2">Projet · ${h(scopeName(x.p.scope))}</div></div></div>` : `<div class="li" data-pos="${x.f.id}|${x.p.id}" style="cursor:pointer">${hdot("red")}<div class="grow"><div class="t1">${h(x.p.name)}</div><div class="t2">${x.p.kind === "debt" ? "Financement" : "Participation"} · ${h(x.f.name)}${x.p.note ? " · " + h(x.p.note.slice(0, 120)) : ""}</div></div></div>`).join("")}</div></div>` : ""}` });
+  }
+  return slides;
+}
+const MT_SECTIONS = [["summary", "Synthèse"], ["dossiers", "Avancement des dossiers"], ["funds", "Vue par fonds"], ["projects", "Projets transverses"], ["deadlines", "Échéances"], ["decisions", "Décisions"]];
+function vMeeting() {
+  const mt = S.ui.mt = { since: addDays(todayISO(), -7), fund: "", sections: {}, ...(S.ui.mt || {}) };
+  const slides = meetingSlides(mt);
+  const tb = `<div class="toolbar"><label class="row" style="gap:6px;flex-wrap:nowrap"><span class="muted" style="font-size:12.5px">Depuis le</span><input type="date" id="mt-since" value="${h(mt.since)}" style="width:auto"></label>
+    <select id="mt-fund" aria-label="Fonds"><option value="">Tous les fonds</option>${(S.cfg.funds || []).map(f => `<option value="${f.id}" ${mt.fund === f.id ? "selected" : ""}>${h(f.name)}</option>`).join("")}</select>
+    <span class="row" style="gap:4px">${MT_SECTIONS.map(([k, l]) => `<label class="chk mt-chip"><input type="checkbox" data-mt-sec="${k}" ${mt.sections[k] === 0 ? "" : "checked"}>${l}</label>`).join("")}</span>
+    <span class="spacer"></span>${window.INMA ? `<button class="btn" data-act4="mt-print" title="Imprimer ou enregistrer en PDF">Imprimer / PDF</button>` : ""}<button class="btn pri" data-act4="mt-present">${ic("present")}Présenter</button></div>`;
+  return tb + slides.map((s, i) => `<section class="mt-slide" id="slide-${s.id}"><div class="mt-head"><span class="mt-num">${String(i + 1).padStart(2, "0")}</span><div><h2 style="font-size:18px">${s.color ? `<span class="fdot" style="--fc:${h(s.color)};margin-right:8px;width:12px;height:12px"></span>` : ""}${h(s.title)}</h2><div class="muted" style="font-size:12.5px">${h(s.sub || "")}</div></div></div>${s.html}</section>`).join("");
+}
+function presentMode(start) {
+  S.present = { i: start || 0 }; drawPresent();
+  try { document.documentElement.requestFullscreen?.().catch(() => {}); } catch {}
+}
+function drawPresent() {
+  if (!S.present) { $("#present")?.remove(); return; }
+  const slides = meetingSlides(S.ui.mt || {}); if (!slides.length) { S.present = null; return; }
+  S.present.i = Math.max(0, Math.min(slides.length - 1, S.present.i)); const s = slides[S.present.i];
+  let el = $("#present"); if (!el) { el = document.createElement("div"); el.id = "present"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Présentation"); document.body.appendChild(el); }
+  el.innerHTML = `<div class="pbar"><div class="wordmark" style="font-size:16px">INMA<small>RÉUNION D'ÉQUIPE</small></div><span class="spacer"></span><span class="muted num">${S.present.i + 1} / ${slides.length}</span><button class="btn sm" data-pv="-1" ${S.present.i === 0 ? "disabled" : ""} aria-label="Diapositive précédente">‹ Précédent</button><button class="btn sm" data-pv="1" ${S.present.i === slides.length - 1 ? "disabled" : ""} aria-label="Diapositive suivante">Suivant ›</button><button class="btn sm" data-pv="x">Quitter</button></div>
+    <div class="pbody"><div class="mt-head"><span class="mt-num">${String(S.present.i + 1).padStart(2, "0")}</span><div><h2 style="font-size:26px">${s.color ? `<span class="fdot" style="--fc:${h(s.color)};margin-right:10px;width:14px;height:14px"></span>` : ""}${h(s.title)}</h2><div class="muted">${h(s.sub || "")}</div></div></div>${s.html}</div>
+    <div class="pdots">${slides.map((x, i) => `<button class="${i === S.present.i ? "on" : ""}" data-pv-go="${i}" aria-label="${h(x.title)}" title="${h(x.title)}"></button>`).join("")}</div>`;
+}
+function exitPresent() { S.present = null; $("#present")?.remove(); try { if (document.fullscreenElement) document.exitFullscreen(); } catch {} }
+
+/* ---------- meeting events ---------- */
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-pos],[data-pos-new],[data-prj],[data-act4],[data-pv],[data-pv-go]"); if (!el) return; const ds = el.dataset;
+  if (ds.posNew) { posModal(ds.posNew); return; }
+  if (ds.pos) { const [fid, pid] = ds.pos.split("|"); posModal(fid, pid); return; }
+  if (ds.prj) { const p = (S.projects || []).find(x => x.id === ds.prj); if (p) prjModal(p); return; }
+  if (ds.pv) { if (ds.pv === "x") exitPresent(); else { S.present.i += +ds.pv; drawPresent(); } return; }
+  if (ds.pvGo) { S.present.i = +ds.pvGo; drawPresent(); return; }
+  const A = ds.act4;
+  if (A === "prj-new") prjModal(null);
+  if (A === "prj-new-fund") prjModal(null, el.dataset.fid);
+  if (A === "mt-present") presentMode(0);
+  if (A === "mt-print") { try { window.print(); } catch { toast("Impression indisponible dans ce navigateur."); } }
+  if (A === "prj-templates") {
+    const have = new Set((S.projects || []).map(p => p.id)); const add = prjTemplates().filter(p => !have.has(p.id));
+    if (!add.length) { toast("Les projets types sont déjà en place."); return; }
+    confirmBox(`Créer ${add.length} projets types (outil de workflow management, démarche ESG, projets corporate des fonds) ? Vous pourrez les ajuster.`, "Créer", async () => { for (const p of add) await putDoc("projects", p); await log(`${add.length} projets types créés`); toast(`${add.length} projets créés`); render(); });
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "pj-f-scope" || t.id === "pj-f-status") { S.ui.pj = { ...(S.ui.pj || {}), [t.id === "pj-f-scope" ? "scope" : "status"]: t.value }; saveUI(); render(); return; }
+  if (t.id === "mt-since") { S.ui.mt = { ...(S.ui.mt || {}), since: t.value || addDays(todayISO(), -7) }; saveUI(); render(); return; }
+  if (t.id === "mt-fund") { S.ui.mt = { ...(S.ui.mt || {}), fund: t.value }; saveUI(); render(); return; }
+  if (t.dataset.mtSec) { const mt = S.ui.mt || {}; mt.sections = { ...(mt.sections || {}), [t.dataset.mtSec]: t.checked ? 1 : 0 }; S.ui.mt = mt; saveUI(); render(); }
+});
+document.addEventListener("keydown", e => {
+  if (S.present && !$("#modal") && !(S.openDossier)) {
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); S.present.i++; drawPresent(); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); S.present.i--; drawPresent(); }
+    else if (e.key === "Escape") exitPresent();
+  } else if (e.key === "Enter" && e.target.matches?.(".prj[data-prj]")) e.target.click();
+});
+function fundProjectsPanel(f) {
+  const l = visProjects().filter(p => p.scope === f.id);
+  return `<div class="panel"><header><h2>Projets corporate · ${h(f.name)}</h2><span class="muted" style="font-size:12px">${l.filter(p => p.status !== "done").length} en cours</span><span class="spacer"></span>${can("projects") ? `<button class="btn sm" data-act4="prj-new-fund" data-fid="${f.id}">${ic("plus")}Nouveau projet</button>` : ""}</header><div class="body ${l.length ? "prj-grid" : ""}">${l.map(prjCard).join("") || '<p class="muted" style="margin:0">Aucun projet corporate pour ce fonds (levée, gouvernance, reporting, agrément…).</p>'}</div></div>`;
+}
+
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
 document.addEventListener("click", async e => {
@@ -1935,7 +2221,7 @@ document.addEventListener("change", async e => {
   if (ds.fwf) { const [i, wid] = ds.fwf.split("|"); const f = S.cfg.customFields[+i]; f.workflows = t.checked ? [...new Set([...(f.workflows || []), wid])] : (f.workflows || []).filter(x => x !== wid); saveCfg(); return; }
   if (ds.odwf) { S.cfg.onedrive.perWorkflowRoot = S.cfg.onedrive.perWorkflowRoot || {}; S.cfg.onedrive.perWorkflowRoot[ds.odwf] = t.value.trim(); saveCfg(); return; }
   if (t.id === "logo-file" && t.files[0]) { const f = t.files[0]; const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const sc = Math.min(1, 320 / img.width, 90 / img.height); const c = document.createElement("canvas"); c.width = Math.round(img.width * sc) || 160; c.height = Math.round(img.height * sc) || 40; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); S.cfg.general.logo = c.toDataURL("image/png"); saveCfg("Logo mis à jour"); render(); }; img.onerror = () => toast("Image illisible. Essayez un PNG."); img.src = r.result; }; r.readAsDataURL(f); return; }
-  if (t.id === "import-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j.cfg || !Array.isArray(j.dossiers)) throw 0; confirmBox(`Importer ${j.dossiers.length} dossiers et ${(j.tasks || []).length} tâches ? Les paramètres seront remplacés ; les éléments existants de même identifiant aussi.`, "Importer", async () => { S.cfg = { ...DEFAULT_CFG(), ...j.cfg }; saveCfg("Paramètres importés"); for (const d of j.dossiers) await putDoc("dossiers", d); for (const x of j.tasks || []) await putDoc("tasks", x); for (const x of j.deadlines || []) await putDoc("deadlines", x); toast("Import terminé"); render(); }); } catch { toast("Fichier invalide : utilisez une sauvegarde exportée depuis l'outil."); } }; r.readAsText(t.files[0]); }
+  if (t.id === "import-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j.cfg || !Array.isArray(j.dossiers)) throw 0; confirmBox(`Importer ${j.dossiers.length} dossiers et ${(j.tasks || []).length} tâches ? Les paramètres seront remplacés ; les éléments existants de même identifiant aussi.`, "Importer", async () => { S.cfg = { ...DEFAULT_CFG(), ...j.cfg }; saveCfg("Paramètres importés"); for (const d of j.dossiers) await putDoc("dossiers", d); for (const x of j.tasks || []) await putDoc("tasks", x); for (const x of j.deadlines || []) await putDoc("deadlines", x); for (const x of j.projects || []) await putDoc("projects", x); toast("Import terminé"); render(); }); } catch { toast("Fichier invalide : utilisez une sauvegarde exportée depuis l'outil."); } }; r.readAsText(t.files[0]); }
 });
 document.addEventListener("input", e => { if (e.target.id === "f-q" || e.target.id === "tf-q") { clearTimeout(S.qT); const id = e.target.id; S.qT = setTimeout(() => { if (id === "f-q") S.ui.filters.q = e.target.value; else { S.ui.tf = S.ui.tf || {}; S.ui.tf.q = e.target.value; } saveUI(); render(); const el = $("#" + id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 250); } });
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if ($("#modal")) $("#modal").remove(); else if (S.openDossier) { S.openDossier = null; renderDrawer(); } } });
@@ -1954,7 +2240,7 @@ async function saveFile(filename, data) {
   if (!S.downloads) { toast("Téléchargement indisponible dans cette vue."); return; }
   try { await S.downloads.save({ filename, data }); } catch (e) { if (e?.code !== "declined") toast("Téléchargement impossible : " + (e?.message || "erreur")); }
 }
-function exportJSON() { saveFile(`inma-workflow-${todayISO()}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, activity: S.activity }, null, 2)); }
+function exportJSON() { saveFile(`inma-workflow-${todayISO()}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, activity: S.activity }, null, 2)); }
 function exportCSV() {
   const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const rows = [["Référence","Dossier","Workflow","Étape","Véhicule","Secteur","Responsable","Montant","Priorité","Début","Échéance","Lien OneDrive","Archivé"]].concat(visDossiers().map(d => [d.code, d.name, wfById(d.workflowId)?.name, stageOf(d)?.name, d.vehicle, d.sector, mname(d.ownerId), can("view_amounts") ? d.amount : "", prioById(d.priority)?.label, d.startDate, d.dueDate, d.oneDriveUrl, d.archived ? "oui" : "non"]));
@@ -1988,12 +2274,12 @@ async function loadSamples() {
 function render() {
   if (S.view !== "settings" && !navAllowed(S.view)) S.view = NAV.find(n => navAllowed(n[0]))?.[0] || "dossiers";
   applyBranding(); renderRail(); renderTop();
-  const v = { deadlines: vDeadlines, funds: vFunds, dashboard: vDashboard, dossiers: vDossiers, tasks: vTasks, calendar: vCalendar, team: vTeam, onedrive: vOneDrive, settings: vSettings }[S.view] || vDashboard;
+  const v = { meeting: vMeeting, projects: vProjects, deadlines: vDeadlines, funds: vFunds, dashboard: vDashboard, dossiers: vDossiers, tasks: vTasks, calendar: vCalendar, team: vTeam, onedrive: vOneDrive, settings: vSettings }[S.view] || vDashboard;
   $("#content").innerHTML = banners() + v();
 }
 
 /* ---------- boot ---------- */
-function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.activity = d.activity || []; } }
+function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.projects = d.projects || []; S.activity = d.activity || []; } }
 async function boot() {
   S.view = homeView(); render();
   const use = (window.INMA && window.INMA.use) || (window.claude && window.claude.use);
@@ -2011,7 +2297,7 @@ async function boot() {
     S.cfgLoaded = true; if (snap.exists) migrateCfg(snap.data()); if (!document.querySelector("#content :focus")) render(); renderDrawer();
   }, () => {});
   const sub = (coll, sortKey) => db.collection(coll).onSnapshot(q => { S[coll] = q.docs.map(d => ({ ...d.data(), id: d.id })); if (sortKey) S[coll].sort((a, b) => String(b[sortKey]).localeCompare(String(a[sortKey]))); if (!document.querySelector("#content :focus") && !$("#modal")) render(); if (S.openDossier && !document.querySelector("#layer :focus")) renderDrawer(); }, () => {});
-  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null);
+  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null); sub("projects", null);
   db.collection("activity").orderBy("at", "desc").limit(300).onSnapshot(q => { S.activity = q.docs.map(d => ({ ...d.data(), id: d.id })); if (!document.querySelector("#content :focus") && !$("#modal")) { renderTop(); if (S.view === "dashboard") render(); } }, () => {});
 }
 boot();
