@@ -1,0 +1,24 @@
+# INMA Workflow — configuration Cloudflare (offre gratuite).
+name = "inma-workflow"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+# Conserver les variables saisies dans le tableau de bord Cloudflare à chaque nouveau déploiement
+keep_vars = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+# La base est créée automatiquement au premier déploiement (aucun identifiant à saisir).
+binding = "DB"
+database_name = "inma-workflow"
+
+[vars]
+APP_NAME = "INMA Workflow"
+MAIL_MODE = "graph"
+SEED_DEMO = "true"
+# Les autres réglages se saisissent dans Cloudflare › inma-workflow › Paramètres › Variables et secrets :
+#   ADMIN_EMAILS, AZURE_TENANT_ID, AZURE_CLIENT_ID, MAIL_FROM (type Texte)
+#   ADMIN_PASSWORD, AZURE_CLIENT_SECRET (type Secret)
