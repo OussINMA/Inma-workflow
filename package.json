@@ -1,0 +1,56 @@
+{
+  "name": "inma-workflow",
+  "version": "1.0.0",
+  "description": "INMA Workflow — dossiers, fonds et accès, connexion Microsoft 365 et OneDrive / SharePoint. Hébergement gratuit Cloudflare.",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8787",
+    "deploy": "wrangler deploy"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "jose": "^5.9.6"
+  },
+  "private": true,
+  "devDependencies": {
+    "wrangler": "^4.151.1",
+    "@azure/msal-browser": "^3.28.1"
+  },
+  "type": "module",
+  "cloudflare": {
+    "label": "INMA Workflow",
+    "products": [
+      "Workers",
+      "D1"
+    ],
+    "categories": [
+      "productivity"
+    ],
+    "bindings": {
+      "ADMIN_EMAILS": {
+        "description": "Votre adresse e-mail INMA : elle aura l'accès administrateur complet."
+      },
+      "ADMIN_PASSWORD": {
+        "description": "Choisissez un mot de passe solide (12 caractères minimum). Il permet à l'administrateur de se connecter avant la configuration Microsoft, puis sert de secours."
+      },
+      "AZURE_CLIENT_SECRET": {
+        "description": "Secret client de l'application Microsoft Entra, pour envoyer les invitations par e-mail. Si vous ne l'avez pas encore, saisissez `aucun` et ajoutez-le plus tard."
+      },
+      "AZURE_TENANT_ID": {
+        "description": "ID de l'annuaire (locataire) Microsoft Entra. Peut rester vide pour l'instant."
+      },
+      "AZURE_CLIENT_ID": {
+        "description": "ID d'application (client) Microsoft Entra. Peut rester vide pour l'instant."
+      },
+      "MAIL_FROM": {
+        "description": "Boîte qui envoie les invitations (ex. workflow@votre-domaine). Peut rester vide pour l'instant."
+      },
+      "SEED_DEMO": {
+        "description": "`true` pour charger les 10 dossiers de démonstration au premier démarrage, `false` sinon."
+      },
+      "DB": {
+        "description": "Base de données de l'outil, créée automatiquement."
+      }
+    }
+  }
+}

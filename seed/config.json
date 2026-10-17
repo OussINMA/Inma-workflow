@@ -1,0 +1,1689 @@
+{
+ "automations": [
+  {
+   "action": {
+    "type": "notify_role",
+    "value": "r_partner"
+   },
+   "enabled": true,
+   "id": "a_def_1",
+   "name": "Comité : prévenir les associés",
+   "trigger": {
+    "type": "stage_enter",
+    "value": "*:Comité"
+   }
+  },
+  {
+   "action": {
+    "type": "notify_role",
+    "value": "r_associate"
+   },
+   "enabled": true,
+   "id": "a_def_2",
+   "name": "Tâche critique : notifier l'Associate",
+   "trigger": {
+    "type": "task_created",
+    "value": "p1"
+   }
+  },
+  {
+   "action": {
+    "type": "set_priority",
+    "value": "p2"
+   },
+   "enabled": true,
+   "id": "a_def_3",
+   "name": "Tâche bloquée : passer en priorité haute",
+   "trigger": {
+    "type": "task_status",
+    "value": "t_blocked"
+   }
+  },
+  {
+   "action": {
+    "type": "create_task",
+    "value": "Créer l'arborescence OneDrive du dossier"
+   },
+   "enabled": true,
+   "id": "a_def_4",
+   "name": "Nouveau dossier : créer la tâche d'arborescence OneDrive",
+   "trigger": {
+    "type": "dossier_created",
+    "value": ""
+   }
+  }
+ ],
+ "customFields": [
+  {
+   "id": "cf_val",
+   "label": "Valorisation pré-money (TND)",
+   "options": [],
+   "scope": "dossier",
+   "type": "currency",
+   "workflows": [
+    "w_inv"
+   ]
+  },
+  {
+   "id": "cf_stake",
+   "label": "Participation visée (%)",
+   "options": [],
+   "scope": "dossier",
+   "type": "number",
+   "workflows": [
+    "w_inv"
+   ]
+  },
+  {
+   "id": "cf_inst",
+   "label": "Instrument",
+   "options": [
+    "Actions ordinaires",
+    "Actions de préférence",
+    "Obligations convertibles",
+    "Comptes courants associés",
+    "Prêt participatif",
+    "Dette senior"
+   ],
+   "scope": "dossier",
+   "type": "select",
+   "workflows": [
+    "w_inv",
+    "w_fin"
+   ]
+  },
+  {
+   "id": "cf_rate",
+   "label": "Taux (%)",
+   "options": [],
+   "scope": "dossier",
+   "type": "number",
+   "workflows": [
+    "w_fin"
+   ]
+  },
+  {
+   "id": "cf_dur",
+   "label": "Durée (mois)",
+   "options": [],
+   "scope": "dossier",
+   "type": "number",
+   "workflows": [
+    "w_fin"
+   ]
+  }
+ ],
+ "general": {
+  "accent": "#E22529",
+  "appName": "INMA Workflow",
+  "brand": "#212121",
+  "currency": "TND",
+  "dateFormat": "fr",
+  "defaultRoleId": "r_guest",
+  "density": "1",
+  "fiscalYearStart": "01",
+  "font": "Montserrat",
+  "home": "dashboard",
+  "logo": "",
+  "modules": {
+   "calendar": true,
+   "dashboard": true,
+   "dossiers": true,
+   "onedrive": true,
+   "tasks": true,
+   "team": true,
+   "funds": true
+  },
+  "tagline": "Partenaire de votre développement",
+  "weekStart": 1,
+  "appUrl": ""
+ },
+ "members": [
+  {
+   "color": "#212121",
+   "email": "",
+   "id": "m_fatma",
+   "name": "Fatma Malouche Merai",
+   "roleId": "r_partner",
+   "team": "Direction Générale",
+   "title": "Associée",
+   "userId": null,
+   "code": null
+  },
+  {
+   "color": "#1F4E79",
+   "email": "",
+   "id": "m_kais",
+   "name": "Kaïs Affes",
+   "roleId": "r_partner",
+   "team": "Investissement",
+   "title": "Associé",
+   "userId": null,
+   "code": null
+  },
+  {
+   "color": "#2F6FB0",
+   "email": "",
+   "id": "m_hamdi",
+   "name": "Hamdi Belgaied Hassine",
+   "roleId": "r_associate",
+   "team": "Investissement",
+   "title": "Associate",
+   "userId": null,
+   "code": null
+  },
+  {
+   "color": "#2F8A5B",
+   "email": "",
+   "id": "m_oussema",
+   "name": "Oussema Hentati",
+   "roleId": "r_sysadmin",
+   "team": "Investissement",
+   "title": "Analyste",
+   "userId": null,
+   "code": null
+  },
+  {
+   "color": "#7A5BB0",
+   "email": "",
+   "id": "m_nour",
+   "name": "Nour Lefi",
+   "roleId": "r_junior",
+   "team": "Investissement",
+   "title": "Analyste junior",
+   "userId": null,
+   "code": null
+  },
+  {
+   "color": "#B5597A",
+   "email": "",
+   "id": "m_eya",
+   "name": "Eya Boubakri",
+   "roleId": "r_junior",
+   "team": "Investissement",
+   "title": "Analyste junior",
+   "userId": null,
+   "code": null
+  }
+ ],
+ "notify": {
+  "dueSoonDays": 3,
+  "onAssign": true,
+  "onMention": true,
+  "onStage": true,
+  "overdue": true
+ },
+ "onedrive": {
+  "naming": "{annee}_{code}_{nom}",
+  "perWorkflowRoot": {},
+  "rootName": "INMA – Dossiers",
+  "rootUrl": "https://medcf.sharepoint.com/sites/INMA2/Documents%20partages/Forms/AllItems.aspx",
+  "syncPath": "C:\\Users\\<utilisateur>\\OneDrive - INMA\\INMA – Dossiers"
+ },
+ "priorities": [
+  {
+   "color": "#C2413A",
+   "id": "p1",
+   "label": "Critique"
+  },
+  {
+   "color": "#D9822B",
+   "id": "p2",
+   "label": "Haute"
+  },
+  {
+   "color": "#2F6FB0",
+   "id": "p3",
+   "label": "Normale"
+  },
+  {
+   "color": "#7B8794",
+   "id": "p4",
+   "label": "Basse"
+  }
+ ],
+ "roles": [
+  {
+   "id": "r_sysadmin",
+   "name": "Administrateur",
+   "color": "#212121",
+   "perms": {
+    "automations": true,
+    "dossier_create": true,
+    "dossier_delete": true,
+    "dossier_edit_all": true,
+    "export": true,
+    "members": true,
+    "onedrive": true,
+    "roles": true,
+    "settings": true,
+    "stage_advance": true,
+    "stage_approve": true,
+    "task_create": true,
+    "task_edit_all": true,
+    "view_all": true,
+    "view_amounts": true,
+    "workflows": true,
+    "funds": true,
+    "externals": true
+   }
+  },
+  {
+   "color": "#E22529",
+   "id": "r_partner",
+   "name": "Associé",
+   "perms": {
+    "automations": true,
+    "dossier_create": true,
+    "dossier_delete": true,
+    "dossier_edit_all": true,
+    "export": true,
+    "members": true,
+    "onedrive": true,
+    "roles": true,
+    "settings": true,
+    "stage_advance": true,
+    "stage_approve": true,
+    "task_create": true,
+    "task_edit_all": true,
+    "view_all": true,
+    "view_amounts": true,
+    "workflows": true,
+    "funds": true,
+    "externals": true
+   }
+  },
+  {
+   "color": "#2F6FB0",
+   "id": "r_associate",
+   "name": "Associate",
+   "perms": {
+    "automations": true,
+    "dossier_create": true,
+    "dossier_delete": true,
+    "dossier_edit_all": true,
+    "export": true,
+    "members": false,
+    "onedrive": true,
+    "roles": false,
+    "settings": false,
+    "stage_advance": true,
+    "stage_approve": false,
+    "task_create": true,
+    "task_edit_all": true,
+    "view_all": true,
+    "view_amounts": true,
+    "workflows": true,
+    "funds": true,
+    "externals": true
+   }
+  },
+  {
+   "color": "#2F8A5B",
+   "id": "r_analyst",
+   "name": "Analyste",
+   "perms": {
+    "automations": false,
+    "dossier_create": true,
+    "dossier_delete": false,
+    "dossier_edit_all": false,
+    "export": true,
+    "members": false,
+    "onedrive": true,
+    "roles": false,
+    "settings": false,
+    "stage_advance": true,
+    "stage_approve": false,
+    "task_create": true,
+    "task_edit_all": false,
+    "view_all": true,
+    "view_amounts": true,
+    "workflows": false,
+    "funds": false,
+    "externals": false
+   }
+  },
+  {
+   "color": "#7A5BB0",
+   "id": "r_junior",
+   "name": "Analyste junior",
+   "perms": {
+    "automations": false,
+    "dossier_create": false,
+    "dossier_delete": false,
+    "dossier_edit_all": false,
+    "export": false,
+    "members": false,
+    "onedrive": true,
+    "roles": false,
+    "settings": false,
+    "stage_advance": false,
+    "stage_approve": false,
+    "task_create": true,
+    "task_edit_all": false,
+    "view_all": true,
+    "view_amounts": false,
+    "workflows": false,
+    "funds": false,
+    "externals": false
+   }
+  },
+  {
+   "color": "#8A6D3B",
+   "id": "r_admin",
+   "name": "Administration & Finance",
+   "perms": {
+    "automations": false,
+    "dossier_create": false,
+    "dossier_delete": false,
+    "dossier_edit_all": false,
+    "export": true,
+    "members": true,
+    "onedrive": true,
+    "roles": false,
+    "settings": false,
+    "stage_advance": false,
+    "stage_approve": false,
+    "task_create": true,
+    "task_edit_all": false,
+    "view_all": true,
+    "view_amounts": true,
+    "workflows": false,
+    "funds": false,
+    "externals": false
+   }
+  },
+  {
+   "color": "#7B8794",
+   "id": "r_guest",
+   "name": "Invité externe",
+   "perms": {
+    "automations": false,
+    "dossier_create": false,
+    "dossier_delete": false,
+    "dossier_edit_all": false,
+    "export": false,
+    "members": false,
+    "onedrive": false,
+    "roles": false,
+    "settings": false,
+    "stage_advance": false,
+    "stage_approve": false,
+    "task_create": false,
+    "task_edit_all": false,
+    "view_all": false,
+    "view_amounts": false,
+    "workflows": false,
+    "funds": false,
+    "externals": false
+   }
+  }
+ ],
+ "sectors": [
+  "Industrie",
+  "Services",
+  "Santé",
+  "Éducation",
+  "Agroalimentaire",
+  "Distribution",
+  "Technologie",
+  "Finance",
+  "Énergie",
+  "Autre"
+ ],
+ "statuses": [
+  {
+   "color": "#7B8794",
+   "done": false,
+   "id": "t_todo",
+   "label": "À faire"
+  },
+  {
+   "color": "#2F6FB0",
+   "done": false,
+   "id": "t_doing",
+   "label": "En cours"
+  },
+  {
+   "color": "#B7791F",
+   "done": false,
+   "id": "t_review",
+   "label": "En revue"
+  },
+  {
+   "color": "#C2413A",
+   "done": false,
+   "id": "t_blocked",
+   "label": "Bloqué"
+  },
+  {
+   "color": "#2F8A5B",
+   "done": true,
+   "id": "t_done",
+   "label": "Terminé"
+  }
+ ],
+ "tags": [
+  "Prioritaire",
+  "Co-investissement",
+  "Sortie",
+  "Refinancement",
+  "Réglementaire"
+ ],
+ "teams": [
+  "Direction Générale",
+  "Investissement",
+  "Financement (dette privée)",
+  "Finance & Comptabilité",
+  "Juridique",
+  "Ressources Humaines",
+  "Informatique",
+  "Support"
+ ],
+ "vehicles": [
+  "INMA Holding",
+  "INMA Finance",
+  "Transverse"
+ ],
+ "workflows": [
+  {
+   "autoTasks": true,
+   "color": "#E22529",
+   "folders": [
+    "01_Sourcing",
+    "02_Analyse financière",
+    "02_Analyse financière/Business plan",
+    "02_Analyse financière/Valorisation",
+    "03_LOI",
+    "04_Due diligence",
+    "04_Due diligence/Financière",
+    "04_Due diligence/Juridique",
+    "05_Comité d'investissement",
+    "06_Juridique",
+    "07_Closing",
+    "08_Suivi & reporting"
+   ],
+   "id": "w_inv",
+   "name": "Investissement (Private Equity)",
+   "prefix": "INV",
+   "stages": [
+    {
+     "approval": false,
+     "checklist": [
+      "Fiche d'opportunité",
+      "Premier contact dirigeant"
+     ],
+     "id": "w_inv_s1",
+     "name": "Sourcing",
+     "roleId": "r_analyst",
+     "sla": 14
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Analyse des états financiers",
+      "Benchmark sectoriel"
+     ],
+     "id": "w_inv_s2",
+     "name": "Analyse préliminaire",
+     "roleId": "r_analyst",
+     "sla": 21
+    },
+    {
+     "approval": true,
+     "checklist": [
+      "Rédaction de la LOI",
+      "Validation LOI par les associés"
+     ],
+     "id": "w_inv_s3",
+     "name": "Lettre d'intention",
+     "roleId": "r_associate",
+     "sla": 10
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "DD financière",
+      "DD juridique",
+      "DD fiscale"
+     ],
+     "id": "w_inv_s4",
+     "name": "Due diligence",
+     "roleId": "r_associate",
+     "sla": 45
+    },
+    {
+     "approval": true,
+     "checklist": [
+      "Note d'investissement",
+      "Présentation comité"
+     ],
+     "id": "w_inv_s5",
+     "name": "Comité d'investissement",
+     "roleId": "r_partner",
+     "sla": 7
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Pacte d'associés",
+      "Documentation juridique"
+     ],
+     "id": "w_inv_s6",
+     "name": "Structuration & juridique",
+     "roleId": "r_associate",
+     "sla": 30
+    },
+    {
+     "approval": true,
+     "checklist": [
+      "Signature",
+      "Décaissement des fonds"
+     ],
+     "id": "w_inv_s7",
+     "name": "Closing",
+     "roleId": "r_partner",
+     "sla": 10
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Reporting trimestriel",
+      "Participation au conseil"
+     ],
+     "id": "w_inv_s8",
+     "name": "Suivi de participation",
+     "roleId": "r_analyst",
+     "sla": 0
+    }
+   ],
+   "vehicle": "INMA Holding"
+  },
+  {
+   "autoTasks": true,
+   "color": "#2A3139",
+   "folders": [
+    "01_Demande",
+    "02_Analyse crédit",
+    "03_Comité de crédit",
+    "04_Contrats & garanties",
+    "05_Décaissement",
+    "06_Suivi remboursements"
+   ],
+   "id": "w_fin",
+   "name": "Financement (INMA Finance)",
+   "prefix": "FIN",
+   "stages": [
+    {
+     "approval": false,
+     "checklist": [
+      "Collecte des pièces"
+     ],
+     "id": "w_fin_s1",
+     "name": "Demande de financement",
+     "roleId": "r_analyst",
+     "sla": 7
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Analyse de solvabilité",
+      "Note de financement"
+     ],
+     "id": "w_fin_s2",
+     "name": "Analyse crédit",
+     "roleId": "r_analyst",
+     "sla": 15
+    },
+    {
+     "approval": true,
+     "checklist": [
+      "Présentation au comité"
+     ],
+     "id": "w_fin_s3",
+     "name": "Comité de crédit",
+     "roleId": "r_partner",
+     "sla": 5
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Contrat de prêt",
+      "Prise de garanties"
+     ],
+     "id": "w_fin_s4",
+     "name": "Documentation & garanties",
+     "roleId": "r_associate",
+     "sla": 15
+    },
+    {
+     "approval": true,
+     "checklist": [
+      "Ordre de décaissement"
+     ],
+     "id": "w_fin_s5",
+     "name": "Décaissement",
+     "roleId": "r_admin",
+     "sla": 5
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Échéancier",
+      "Relances"
+     ],
+     "id": "w_fin_s6",
+     "name": "Suivi des remboursements",
+     "roleId": "r_admin",
+     "sla": 0
+    }
+   ],
+   "vehicle": "INMA Finance"
+  },
+  {
+   "autoTasks": true,
+   "color": "#7A5BB0",
+   "folders": [
+    "01_Convocation & ODJ",
+    "02_Documents du conseil",
+    "03_PV signés",
+    "04_Suivi des résolutions"
+   ],
+   "id": "w_ca",
+   "name": "Conseil d'administration",
+   "prefix": "CA",
+   "stages": [
+    {
+     "approval": false,
+     "checklist": [
+      "Projet d'ordre du jour"
+     ],
+     "id": "w_ca_s1",
+     "name": "Préparation de l'ordre du jour",
+     "roleId": "r_associate",
+     "sla": 10
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "États financiers",
+      "Rapport d'activité"
+     ],
+     "id": "w_ca_s2",
+     "name": "Collecte des documents",
+     "roleId": "r_analyst",
+     "sla": 7
+    },
+    {
+     "approval": true,
+     "checklist": [],
+     "id": "w_ca_s3",
+     "name": "Validation du dossier",
+     "roleId": "r_partner",
+     "sla": 3
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Convocations envoyées"
+     ],
+     "id": "w_ca_s4",
+     "name": "Tenue du conseil",
+     "roleId": "r_partner",
+     "sla": 1
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Rédaction du PV",
+      "Suivi des résolutions"
+     ],
+     "id": "w_ca_s5",
+     "name": "PV & suivi des décisions",
+     "roleId": "r_analyst",
+     "sla": 10
+    }
+   ],
+   "vehicle": "Transverse"
+  },
+  {
+   "autoTasks": false,
+   "color": "#2F8A5B",
+   "folders": [
+    "01_Données reçues",
+    "02_Tableaux de bord",
+    "03_Rapports diffusés"
+   ],
+   "id": "w_rep",
+   "name": "Reporting participations",
+   "prefix": "REP",
+   "stages": [
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_rep_s1",
+     "name": "Collecte des données",
+     "roleId": "r_junior",
+     "sla": 5
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_rep_s2",
+     "name": "Analyse & KPI",
+     "roleId": "r_analyst",
+     "sla": 5
+    },
+    {
+     "approval": true,
+     "checklist": [],
+     "id": "w_rep_s3",
+     "name": "Revue",
+     "roleId": "r_associate",
+     "sla": 3
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_rep_s4",
+     "name": "Diffusion",
+     "roleId": "r_analyst",
+     "sla": 2
+    }
+   ],
+   "vehicle": "INMA Holding"
+  },
+  {
+   "autoTasks": true,
+   "color": "#B5597A",
+   "folders": [
+    "01_Fiche de poste",
+    "02_Candidatures",
+    "03_Entretiens",
+    "04_Contrat"
+   ],
+   "id": "w_rh",
+   "name": "Recrutement",
+   "prefix": "RH",
+   "stages": [
+    {
+     "approval": true,
+     "checklist": [],
+     "id": "w_rh_s1",
+     "name": "Besoin validé",
+     "roleId": "r_partner",
+     "sla": 5
+    },
+    {
+     "approval": false,
+     "checklist": [
+      "Publication de l'offre"
+     ],
+     "id": "w_rh_s2",
+     "name": "Sourcing candidats",
+     "roleId": "r_admin",
+     "sla": 21
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_rh_s3",
+     "name": "Entretiens",
+     "roleId": "r_associate",
+     "sla": 15
+    },
+    {
+     "approval": true,
+     "checklist": [
+      "Lettre d'offre",
+      "Contrat"
+     ],
+     "id": "w_rh_s4",
+     "name": "Offre & embauche",
+     "roleId": "r_partner",
+     "sla": 7
+    }
+   ],
+   "vehicle": "Transverse"
+  },
+  {
+   "autoTasks": false,
+   "color": "#C2413A",
+   "folders": [
+    "01_Réclamation",
+    "02_Échanges",
+    "03_Clôture"
+   ],
+   "id": "w_rec",
+   "name": "Gestion des réclamations",
+   "prefix": "REC",
+   "stages": [
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_rec_s1",
+     "name": "Réception",
+     "roleId": "r_admin",
+     "sla": 1
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_rec_s2",
+     "name": "Affectation",
+     "roleId": "r_associate",
+     "sla": 2
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_rec_s3",
+     "name": "Traitement",
+     "roleId": "r_analyst",
+     "sla": 7
+    },
+    {
+     "approval": true,
+     "checklist": [],
+     "id": "w_rec_s4",
+     "name": "Clôture",
+     "roleId": "r_associate",
+     "sla": 2
+    }
+   ],
+   "vehicle": "Transverse"
+  },
+  {
+   "autoTasks": false,
+   "color": "#4C6A88",
+   "folders": [
+    "01_Cadrage",
+    "02_Benchmark",
+    "03_Déploiement",
+    "04_Recette",
+    "05_Documentation"
+   ],
+   "id": "w_it",
+   "name": "Projet informatique",
+   "prefix": "IT",
+   "stages": [
+    {
+     "approval": true,
+     "checklist": [],
+     "id": "w_it_s1",
+     "name": "Cadrage",
+     "roleId": "r_associate",
+     "sla": 14
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_it_s2",
+     "name": "Sélection de la solution",
+     "roleId": "r_analyst",
+     "sla": 30
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_it_s3",
+     "name": "Déploiement",
+     "roleId": "r_analyst",
+     "sla": 30
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_it_s4",
+     "name": "Recette & formation",
+     "roleId": "r_junior",
+     "sla": 14
+    },
+    {
+     "approval": true,
+     "checklist": [],
+     "id": "w_it_s5",
+     "name": "Clôture",
+     "roleId": "r_partner",
+     "sla": 5
+    }
+   ],
+   "vehicle": "Transverse"
+  },
+  {
+   "autoTasks": false,
+   "color": "#8A6D3B",
+   "folders": [
+    "01_Brouillons",
+    "02_Validés",
+    "03_Archives"
+   ],
+   "id": "w_doc",
+   "name": "Gestion documentaire",
+   "prefix": "DOC",
+   "stages": [
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_doc_s1",
+     "name": "Rédaction",
+     "roleId": "r_analyst",
+     "sla": 7
+    },
+    {
+     "approval": true,
+     "checklist": [],
+     "id": "w_doc_s2",
+     "name": "Validation",
+     "roleId": "r_associate",
+     "sla": 3
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_doc_s3",
+     "name": "Classement OneDrive",
+     "roleId": "r_junior",
+     "sla": 2
+    },
+    {
+     "approval": false,
+     "checklist": [],
+     "id": "w_doc_s4",
+     "name": "Archivage",
+     "roleId": "r_admin",
+     "sla": 0
+    }
+   ],
+   "vehicle": "Transverse"
+  }
+ ],
+ "funds": [
+  {
+   "id": "f_holding",
+   "name": "INMA Holding",
+   "status": "fs_active",
+   "type": "Fonds propres & quasi-fonds propres",
+   "year": "2018",
+   "color": "#E22529",
+   "url": "",
+   "description": "Véhicule d'investissement en fonds propres et quasi-fonds propres dans des PME tunisiennes en croissance ou en consolidation, tous secteurs. Accompagnement opérationnel, financier et réseau.",
+   "fields": {
+    "ff_ticket": "5 à 8 MTND (co-investissement au-delà)",
+    "ff_dur": "3 à 7 ans",
+    "ff_size": "",
+    "ff_backers": "BIAT, TAEF, CDC"
+   },
+   "milestones": [],
+   "tree": [
+    {
+     "id": "f_holding_n1",
+     "name": "Gouvernance",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_holding_n2",
+       "name": "Statuts & pacte d'actionnaires",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n3",
+       "name": "Conseils d'administration",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n4",
+       "name": "Assemblées générales",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_holding_n5",
+     "name": "Investisseurs & bailleurs",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_holding_n6",
+       "name": "Engagements & appels de fonds",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n7",
+       "name": "Reporting investisseurs",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_holding_n8",
+     "name": "Comité d'investissement",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_holding_n9",
+       "name": "Notes d'investissement",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n10",
+       "name": "PV des comités",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_holding_n11",
+     "name": "Pipeline",
+     "url": "",
+     "note": "",
+     "auto": "dossiers",
+     "children": []
+    },
+    {
+     "id": "f_holding_n12",
+     "name": "Portefeuille",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_holding_n13",
+       "name": "Groupe Institution Laghmani",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n14",
+       "name": "Gourmandise",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n15",
+       "name": "Les Écoles Idéales",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n16",
+       "name": "ABK Groupe",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n17",
+       "name": "Sindbad Group",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n18",
+       "name": "Polypharma",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_holding_n19",
+     "name": "Sorties",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": []
+    },
+    {
+     "id": "f_holding_n20",
+     "name": "Finance & comptabilité",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_holding_n21",
+       "name": "États financiers",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n22",
+       "name": "Valorisation du portefeuille",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_holding_n23",
+       "name": "Frais de gestion",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_holding_n24",
+     "name": "Juridique & conformité",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": []
+    }
+   ]
+  },
+  {
+   "id": "f_finance",
+   "name": "INMA Finance",
+   "status": "fs_active",
+   "type": "Dette privée",
+   "year": "2021",
+   "color": "#2A3139",
+   "url": "",
+   "description": "Véhicule de dette privée : financements senior, junior ou mezzanine, directs ou indirects, de sociétés tunisiennes et d'institutions financières, avec un objectif d'impact sur l'emploi et l'inclusion.",
+   "fields": {
+    "ff_ticket": "Jusqu'à 5 MTND (cofinancement possible)",
+    "ff_dur": "1 à 7 ans",
+    "ff_size": "",
+    "ff_backers": "TAEF, CDC"
+   },
+   "milestones": [],
+   "tree": [
+    {
+     "id": "f_finance_n1",
+     "name": "Gouvernance",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_finance_n2",
+       "name": "Statuts",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_finance_n3",
+       "name": "Conseils d'administration",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_finance_n4",
+     "name": "Investisseurs & bailleurs",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_finance_n5",
+       "name": "Conventions de financement",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_finance_n6",
+       "name": "Reporting bailleurs",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_finance_n7",
+     "name": "Comité de crédit",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_finance_n8",
+       "name": "Notes de financement",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_finance_n9",
+       "name": "PV des comités",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_finance_n10",
+     "name": "Dossiers en instruction",
+     "url": "",
+     "note": "",
+     "auto": "dossiers",
+     "children": []
+    },
+    {
+     "id": "f_finance_n11",
+     "name": "Portefeuille de financements",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_finance_n12",
+       "name": "Biosphere",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_finance_n13",
+       "name": "DAAM",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_finance_n14",
+       "name": "Enda Tamweel",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_finance_n15",
+     "name": "Suivi des remboursements",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_finance_n16",
+       "name": "Échéanciers",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_finance_n17",
+       "name": "Impayés & relances",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_finance_n18",
+     "name": "Risques & conformité",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_finance_n19",
+       "name": "Covenants",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_finance_n20",
+       "name": "Reporting d'impact (emploi & inclusion)",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_finance_n21",
+     "name": "Finance & comptabilité",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": []
+    }
+   ]
+  },
+  {
+   "id": "f_entreprises",
+   "name": "INMA Entreprises",
+   "status": "fs_build",
+   "type": "",
+   "year": "",
+   "color": "#8A6D3B",
+   "url": "",
+   "description": "Nouveau véhicule en cours de constitution.",
+   "fields": {
+    "ff_ticket": "À définir",
+    "ff_dur": "",
+    "ff_size": "",
+    "ff_backers": ""
+   },
+   "milestones": [
+    {
+     "text": "Note de structuration validée par les associés",
+     "done": false,
+     "due": ""
+    },
+    {
+     "text": "Documentation juridique finalisée",
+     "done": false,
+     "due": ""
+    },
+    {
+     "text": "Dépôt du dossier d'agrément",
+     "done": false,
+     "due": ""
+    },
+    {
+     "text": "Obtention de l'agrément",
+     "done": false,
+     "due": ""
+    },
+    {
+     "text": "Lettres d'engagement des investisseurs",
+     "done": false,
+     "due": ""
+    },
+    {
+     "text": "Premier closing",
+     "done": false,
+     "due": ""
+    }
+   ],
+   "tree": [
+    {
+     "id": "f_entreprises_n1",
+     "name": "Structuration",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_entreprises_n2",
+       "name": "Note de structuration",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_entreprises_n3",
+       "name": "Business plan du véhicule",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_entreprises_n4",
+       "name": "Benchmark des véhicules comparables",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_entreprises_n5",
+     "name": "Agrément & réglementaire",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_entreprises_n6",
+       "name": "Dossier d'agrément",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_entreprises_n7",
+       "name": "Échanges avec le régulateur",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_entreprises_n8",
+     "name": "Levée de fonds",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_entreprises_n9",
+       "name": "Investisseurs cibles",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_entreprises_n10",
+       "name": "Teaser & présentation",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_entreprises_n11",
+       "name": "Lettres d'engagement",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_entreprises_n12",
+     "name": "Juridique",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_entreprises_n13",
+       "name": "Projets de statuts & règlement",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_entreprises_n14",
+       "name": "Avis juridiques",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_entreprises_n15",
+     "name": "Gouvernance cible",
+     "url": "",
+     "note": "",
+     "auto": "",
+     "children": [
+      {
+       "id": "f_entreprises_n16",
+       "name": "Comité d'investissement",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      },
+      {
+       "id": "f_entreprises_n17",
+       "name": "Politique d'investissement",
+       "url": "",
+       "note": "",
+       "auto": "",
+       "children": []
+      }
+     ]
+    },
+    {
+     "id": "f_entreprises_n18",
+     "name": "Pipeline de lancement",
+     "url": "",
+     "note": "",
+     "auto": "dossiers",
+     "children": []
+    }
+   ]
+  }
+ ],
+ "fundRoot": {
+  "name": "INMA Capital",
+  "subtitle": "Société de gestion",
+  "url": ""
+ },
+ "fundView": {
+  "mode": "org",
+  "showDossiers": true
+ },
+ "fundStatuses": [
+  {
+   "id": "fs_active",
+   "label": "Actif",
+   "color": "#2F8A5B"
+  },
+  {
+   "id": "fs_build",
+   "label": "En constitution",
+   "color": "#B7791F"
+  },
+  {
+   "id": "fs_raise",
+   "label": "En levée",
+   "color": "#2F6FB0"
+  },
+  {
+   "id": "fs_closed",
+   "label": "Liquidé",
+   "color": "#7B8794"
+  }
+ ],
+ "fundTypes": [
+  "Fonds propres & quasi-fonds propres",
+  "Dette privée",
+  "Multi-instruments",
+  "SICAR",
+  "FCPR"
+ ],
+ "fundFields": [
+  {
+   "id": "ff_ticket",
+   "label": "Ticket",
+   "type": "text",
+   "options": []
+  },
+  {
+   "id": "ff_dur",
+   "label": "Durée d'investissement",
+   "type": "text",
+   "options": []
+  },
+  {
+   "id": "ff_size",
+   "label": "Taille cible",
+   "type": "currency",
+   "options": []
+  },
+  {
+   "id": "ff_backers",
+   "label": "Bailleurs de fonds",
+   "type": "text",
+   "options": []
+  }
+ ],
+ "fundTemplate": [
+  "Gouvernance/Statuts & pacte",
+  "Gouvernance/Conseils d'administration",
+  "Gouvernance/Assemblées générales",
+  "Investisseurs & bailleurs/Engagements & souscriptions",
+  "Investisseurs & bailleurs/Reporting investisseurs",
+  "Comité d'investissement/Notes",
+  "Comité d'investissement/PV",
+  "Pipeline [dossiers]",
+  "Portefeuille",
+  "Finance & comptabilité/États financiers",
+  "Finance & comptabilité/Valorisation",
+  "Juridique & conformité"
+ ]
+}

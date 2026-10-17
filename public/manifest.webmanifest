@@ -1,0 +1,10 @@
+{
+  "name": "INMA Workflow",
+  "short_name": "INMA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F1F1F1",
+  "theme_color": "#212121",
+  "lang": "fr",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
