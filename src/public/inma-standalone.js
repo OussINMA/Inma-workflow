@@ -304,5 +304,6 @@
     invite: memberId => api(`/api/invite/${encodeURIComponent(memberId)}`, { method: "POST", body: {} }),
     logout: async () => { await api("/api/auth/logout", { method: "POST", body: {} }).catch(() => {}); try { if (st.msal?.getActiveAccount()) sessionStorage.clear(); } catch {} location.href = "/"; },
     msLogin: () => st.msal ? msLogin() : null,
+    ai: { status: () => api("/api/ai/status"), chat: body => api("/api/ai/chat", { method: "POST", body }) },
   };
 })();
