@@ -364,6 +364,10 @@ a.btn{text-decoration:none}
 .ai-mic.on{background:var(--accent);color:#fff;border-color:var(--accent);animation:aipulse 1.2s infinite}
 @keyframes aipulse{50%{box-shadow:0 0 0 6px color-mix(in oklab,var(--accent) 25%,transparent)}}
 .ai-ctx{flex-wrap:wrap}
+.sch-card>summary{list-style:none;cursor:pointer}.sch-card>summary::-webkit-details-marker{display:none}
+.sch-kpi{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:120px;font-size:12px}.sch-kpi>span:first-child{color:var(--muted)}.sch-kpi b{font-family:var(--f-mono);font-size:14px}
+.sch-t td,.sch-t th{white-space:nowrap}.sch-t tr.sch-paid td{color:var(--muted)}.sch-t tr.sch-late td{background:var(--bad-bg)}.sch-t tfoot th{border-top:2px solid var(--line)}
+@media (max-width:760px){.sch-kpi{display:none}}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
 </style>
 
@@ -1668,13 +1672,15 @@ function periodLabel(key) {
 }
 function ruleText(r) {
   r = r || {};
+  if (r.type === "schedule") { const it = (r.items || []).map(x => x.d).sort(); return `Échéancier · ${it.length} échéances${it.length ? ` (${fdate(it[0])} → ${fdate(it[it.length - 1])})` : ""}`; }
   if (r.type === "once") return `Unique · ${fdate(r.date)}`;
   if (r.type === "fixed") return `Chaque année · ${(r.dates || []).map(d => d.split("-").reverse().join("/")).join(", ")}`;
   return `${(DL_FREQ[r.freq] || DL_FREQ.quarterly)[0]} · ${+r.offset || 0} j après la fin de période`;
 }
 function occurrences(o, from, to) {
   const r = o.rule || {}, out = [];
-  if (r.type === "once") { if (r.date && r.date >= from && r.date <= to) out.push({ key: "once", due: r.date }); }
+  if (r.type === "schedule") { const items = schItems(o); items.forEach((it, k) => { if (it.d >= from && it.d <= to) out.push({ key: schKey(o, it), due: it.d, amt: num(it.p) + num(it.i), p: num(it.p), i: num(it.i), idx: k + 1, n: items.length }); }); }
+  else if (r.type === "once") { if (r.date && r.date >= from && r.date <= to) out.push({ key: "once", due: r.date }); }
   else if (r.type === "fixed") {
     for (let y = +from.slice(0, 4); y <= +to.slice(0, 4); y++) for (const md of r.dates || []) {
       if (!/^\d{2}-\d{2}$/.test(md)) continue; const d = `${y}-${md}`; if (d >= from && d <= to) out.push({ key: d, due: d });
@@ -1697,15 +1703,15 @@ function dlOccAll(from, to) {
     if (o.active === false) continue;
     for (const x of occurrences(o, from, to)) {
       const st = o.done?.[x.key] || {}; const status = st.status || "todo";
-      if (o.createdAt && x.due < o.createdAt && !o.done?.[x.key]) continue; // periods before the obligation was created are not tracked
-      out.push({ o, key: x.key, due: x.due, status, st, late: status !== "sent" && x.due < todayISO(), label: periodLabel(x.key) });
+      if (!isSched(o) && o.createdAt && x.due < o.createdAt && !o.done?.[x.key]) continue; // periods before the obligation was created are not tracked
+      out.push({ o, key: x.key, due: x.due, status, st, late: status !== "sent" && x.due < todayISO(), label: isSched(o) ? `Échéance ${x.idx}/${x.n}` : periodLabel(x.key), amt: x.amt, p: x.p, i: x.i });
     }
   }
   return out.sort((a, b) => a.due < b.due ? -1 : a.due > b.due ? 1 : a.o.title.localeCompare(b.o.title));
 }
 function dlFiltered(list, ignoreStatus) {
   const f = S.ui.dl || {}; const m = me();
-  return list.filter(x => (!f.fund || x.o.fund === f.fund) && (!f.type || x.o.type === f.type)
+  return list.filter(x => (!f.fund || x.o.fund === f.fund) && (!f.type || x.o.type === f.type) && schRefMatch(x.o, f.ref)
     && (!f.owner || (f.owner === "_me" ? (m && (x.o.owners || []).includes(m.id)) : (x.o.owners || []).includes(f.owner)))
     && (ignoreStatus || !f.status || (f.status === "open" ? x.status !== "sent" : f.status === "late" ? x.late : x.status === f.status)));
 }
@@ -1715,10 +1721,10 @@ function occRow(x) {
   const t = dlType(x.o.type), s = dlStatus(x.status); const d = new Date(x.due + "T12:00:00");
   return `<div class="li dl-row" data-occ="${x.o.id}|${x.key}" style="cursor:pointer">
     <div class="dl-date ${x.late ? "late" : ""}"><b>${d.getDate()}</b><span>${MONTHS_FR[d.getMonth()]}</span></div>
-    <div class="grow"><div class="t1">${h(x.o.title)} <span class="muted" style="font-weight:500">· ${h(x.label)}</span></div>
-      <div class="t2">${chip(t.label, t.color)} ${h(x.o.fund || "")}${x.o.recipient ? " · pour " + h(x.o.recipient) : ""}${x.o.amount && can("view_amounts") ? " · " + money(x.o.amount) : ""}</div></div>
-    ${avs(x.o.owners)}${x.late ? '<span class="chip" style="background:var(--bad-bg);color:var(--bad)">En retard</span>' : chip(s[1], s[2])}
-    ${x.status !== "sent" && canUpdateOcc(x.o) ? `<button class="btn sm" data-dl-sent="${x.o.id}|${x.key}" title="Marquer comme remis">Remis</button>` : ""}</div>`;
+    <div class="grow"><div class="t1">${h(isSched(x.o) ? schOwnerName(x.o) : x.o.title)} <span class="muted" style="font-weight:500">· ${h(x.label)}</span></div>
+      <div class="t2">${chip(t.label, t.color)} ${h(x.o.fund || "")}${x.o.recipient ? " · pour " + h(x.o.recipient) : ""}${x.amt != null && can("view_amounts") ? " · " + money(x.amt) : x.o.amount && can("view_amounts") ? " · " + money(x.o.amount) : ""}</div></div>
+    ${avs(x.o.owners)}${isSched(x.o) ? chip(...schStatusLabel(x)) : x.late ? '<span class="chip" style="background:var(--bad-bg);color:var(--bad)">En retard</span>' : chip(s[1], s[2])}
+    ${x.status !== "sent" && canUpdateOcc(x.o) ? `<button class="btn sm" data-dl-sent="${x.o.id}|${x.key}" title="${isSched(x.o) ? "Marquer comme payée" : "Marquer comme remis"}">${isSched(x.o) ? "Payé" : "Remis"}</button>` : ""}</div>`;
 }
 function vDeadlines() {
   const f = S.ui.dl = { view: "upcoming", status: "open", ...(S.ui.dl || {}) };
@@ -1726,21 +1732,23 @@ function vDeadlines() {
   const late = list.filter(x => x.late), week = list.filter(x => !x.late && x.status !== "sent" && x.due <= addDays(today, 7)), d30 = all.filter(x => x.status !== "sent" && x.due >= today && x.due <= addDays(today, 30));
   const qStart = `${today.slice(0, 4)}-${String(Math.floor((+today.slice(5, 7) - 1) / 3) * 3 + 1).padStart(2, "0")}-01`;
   const sentQ = all.filter(x => x.status === "sent" && (x.st.at || "").slice(0, 10) >= qStart).length;
-  const tb = `<div class="toolbar"><div class="seg">${[["upcoming", "À venir"], ["calendar", "Calendrier"], ["matrix", "Suivi par période"], ["list", "Obligations"]].map(v => `<button class="${f.view === v[0] ? "on" : ""}" data-dlv="${v[0]}">${v[1]}</button>`).join("")}</div>
+  const tb = `<div class="toolbar"><div class="seg">${[["upcoming", "À venir"], ["calendar", "Calendrier"], ["matrix", "Suivi par période"], ["schedules", "Échéanciers"], ["list", "Obligations"]].map(v => `<button class="${f.view === v[0] ? "on" : ""}" data-dlv="${v[0]}">${v[1]}</button>`).join("")}</div>
     <select id="dl-f-fund" aria-label="Fonds"><option value="">Tous les fonds</option>${vehicles().map(v => `<option ${f.fund === v ? "selected" : ""}>${h(v)}</option>`).join("")}</select>
+    <select id="dl-f-ref" aria-label="Dossier ou société"><option value="">Tous dossiers et sociétés</option>${schRefs().map(([k, v]) => `<option value="${h(k)}" ${f.ref === k ? "selected" : ""}>${h(v)}</option>`).join("")}</select>
     <select id="dl-f-type" aria-label="Type"><option value="">Tous les types</option>${(S.cfg.deadlineTypes || []).map(t => `<option value="${t.id}" ${f.type === t.id ? "selected" : ""}>${h(t.label)}</option>`).join("")}</select>
     <select id="dl-f-owner" aria-label="Responsable"><option value="">Tous responsables</option><option value="_me" ${f.owner === "_me" ? "selected" : ""}>Mes échéances</option>${S.cfg.members.filter(m => !m.external).map(m => `<option value="${m.id}" ${f.owner === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select>
     <select id="dl-f-status" aria-label="Statut"><option value="" ${!f.status ? "selected" : ""}>Tous statuts</option><option value="open" ${f.status === "open" ? "selected" : ""}>À traiter</option><option value="late" ${f.status === "late" ? "selected" : ""}>En retard</option><option value="sent" ${f.status === "sent" ? "selected" : ""}>Remis</option></select>
-    <span class="spacer"></span><button class="btn" data-act3="dl-ics" title="Fichier à ouvrir dans Outlook pour ajouter les échéances à votre agenda">${ic("cal")}Exporter vers Outlook</button>${canManageDl() ? `<button class="btn pri" data-act3="dl-new">${ic("plus")}Nouvelle échéance</button>` : ""}</div>`;
+    <span class="spacer"></span><button class="btn" data-act3="dl-ics" title="Fichier à ouvrir dans Outlook pour ajouter les échéances à votre agenda">${ic("cal")}Exporter vers Outlook</button>${canManageDl() ? `<button class="btn" data-act7="sch-new" title="Toutes les échéances de remboursement d'un crédit en une fois">${ic("plus")}Nouvel échéancier</button><button class="btn pri" data-act3="dl-new">${ic("plus")}Nouvelle échéance</button>` : ""}</div>`;
   const kpis = `<div class="kpis"><div class="kpi ${late.length ? "alert" : ""}"><span class="l">En retard</span><span class="v">${late.length}</span><span class="l">selon les filtres</span></div>
     <div class="kpi"><span class="l">Dans les 7 jours</span><span class="v">${week.length}</span><span class="l">à remettre cette semaine</span></div>
     <div class="kpi"><span class="l">Dans les 30 jours</span><span class="v">${d30.length}</span><span class="l">toutes obligations</span></div>
     <div class="kpi"><span class="l">Remis ce trimestre</span><span class="v">${sentQ}</span><span class="l">reportings et échéances</span></div></div>`;
-  if (!visDeadlines().length) return tb + `<div class="empty"><b>Aucune échéance enregistrée</b><span>Créez vos obligations récurrentes (reporting bailleurs, valorisations, remboursements, covenants, AG, fiscalité) ou partez des échéances types d'INMA.</span><div class="row">${canManageDl() ? `<button class="btn pri" data-act3="dl-templates">Créer les échéances types INMA</button><button class="btn" data-act3="dl-new">${ic("plus")}Nouvelle échéance</button>` : ""}</div></div>`;
+  if (!visDeadlines().length) return tb + `<div class="empty"><b>Aucune échéance enregistrée</b><span>Créez vos obligations récurrentes (reporting bailleurs, valorisations, remboursements, covenants, AG, fiscalité) ou partez des échéances types d'INMA.</span><div class="row">${canManageDl() ? `<button class="btn" data-act7="sch-new">${ic("plus")}Nouvel échéancier de remboursement</button><button class="btn pri" data-act3="dl-templates">Créer les échéances types INMA</button><button class="btn" data-act3="dl-new">${ic("plus")}Nouvelle échéance</button>` : ""}</div></div>`;
   let body = "";
   if (f.view === "calendar") body = dlCalendar(dlFiltered(all, true));
   else if (f.view === "matrix") body = dlMatrix(dlFiltered(all, true));
   else if (f.view === "list") body = dlObligations();
+  else if (f.view === "schedules") return tb + vSchedules(f.ref);
   else {
     const groups = [["En retard", late], ["Cette semaine", list.filter(x => !x.late && x.due >= today && x.due <= addDays(today, 7))], ["Dans le mois", list.filter(x => !x.late && x.due > addDays(today, 7) && x.due <= addDays(today, 31))], ["Dans les 3 mois", list.filter(x => !x.late && x.due > addDays(today, 31) && x.due <= addDays(today, 92))]];
     if (f.status === "sent") groups.splice(0, 4, ["Remis", list.filter(x => x.status === "sent").reverse().slice(0, 40)]);
@@ -1776,7 +1784,7 @@ function dlMatrix(list) {
   </tbody></table><p class="muted" style="font-size:11.5px;margin:8px 12px">Colonnes : trimestre de la date limite. ✓ remis · … en cours · ○ à préparer · ! en retard. Cliquez une case pour la mettre à jour.</p></div>`;
 }
 function dlObligations() {
-  const list = visDeadlines().filter(o => { const f = S.ui.dl; return (!f.fund || o.fund === f.fund) && (!f.type || o.type === f.type) && (!f.owner || (f.owner === "_me" ? (o.owners || []).includes(me()?.id) : (o.owners || []).includes(f.owner))); });
+  const list = visDeadlines().filter(o => { const f = S.ui.dl; return schRefMatch(o, f.ref) && (!f.fund || o.fund === f.fund) && (!f.type || o.type === f.type) && (!f.owner || (f.owner === "_me" ? (o.owners || []).includes(me()?.id) : (o.owners || []).includes(f.owner))); });
   return `<div class="panel tablewrap"><table class="t"><thead><tr><th>Obligation</th><th>Type</th><th>Fonds</th><th>Règle</th><th>Destinataire</th><th>Responsables</th><th>Prochaine échéance</th><th></th></tr></thead><tbody>
   ${list.map(o => { const nx = occurrences(o, todayISO(), addDays(todayISO(), 400)).find(x => (o.done?.[x.key]?.status || "todo") !== "sent"); const t = dlType(o.type);
     return `<tr style="${o.active === false ? "opacity:.55" : ""}"><td><b>${h(o.title)}</b>${o.dossierId ? `<div class="muted" style="font-size:11.5px">${h(dossierById(o.dossierId)?.code || "")} ${h(dossierById(o.dossierId)?.name || "")}</div>` : ""}</td><td>${chip(t.label, t.color)}</td><td>${h(o.fund || "—")}</td><td style="font-size:12.5px">${h(ruleText(o.rule))}</td><td>${h(o.recipient || "—")}</td><td>${avs(o.owners)}</td><td>${nx ? due(nx.due) + ` <span class="muted" style="font-size:11.5px">${h(periodLabel(nx.key))}</span>` : '<span class="muted">—</span>'}</td><td>${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier</button>` : ""}</td></tr>`; }).join("") || `<tr><td colspan="8" class="muted">Aucune obligation.</td></tr>`}
@@ -1805,23 +1813,25 @@ function occModal(oid, key) {
   const x = dlOccAll(addDays(todayISO(), -800), addDays(todayISO(), 800)).find(y => y.o.id === oid && y.key === key) || { due: key, status: "todo", st: {}, label: periodLabel(key) };
   const ed = canUpdateOcc(o), t = dlType(o.type), dsr = o.dossierId && dossierById(o.dossierId);
   const hist = dlOccAll(addDays(todayISO(), -800), addDays(todayISO(), 30)).filter(y => y.o.id === oid && y.key !== key).reverse().slice(0, 6);
-  modal(`${o.title} · ${x.label}`, `<div class="row">${chip(t.label, t.color)}<span class="muted">${h(o.fund || "")}${o.recipient ? " · pour " + h(o.recipient) : ""}</span><span class="spacer"></span>${due(x.due, x.status === "sent")}</div>
+  modal(`${isSched(o) ? schOwnerName(o) : o.title} · ${x.label}`, `<div class="row">${chip(t.label, t.color)}<span class="muted">${h(o.fund || "")}${o.recipient ? " · pour " + h(o.recipient) : ""}</span><span class="spacer"></span>${due(x.due, x.status === "sent")}</div>
     ${x.late ? `<div class="banner warn">Échéance dépassée de ${-daysBetween(todayISO(), x.due)} jours.</div>` : ""}
     ${o.notes ? `<p style="margin:0;white-space:pre-line">${h(o.notes)}</p>` : ""}
+    ${isSched(o) ? `<div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div class="kpi"><span class="l">Capital</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.p) : "•••"}</span></div><div class="kpi"><span class="l">Intérêts</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.i) : "•••"}</span></div><div class="kpi"><span class="l">Total dû (${h(S.cfg.general.currency)})</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.amt) : "•••"}</span></div></div>
+    <div class="grid2"><label class="f"><span>Date de paiement</span><input type="date" id="oc-pdate" value="${h(x.st.paidDate || "")}" ${ed ? "" : "disabled"}></label>${can("view_amounts") ? `<label class="f"><span>Montant reçu</span><input type="number" step="0.001" id="oc-paid" value="${h(x.st.paid ?? "")}" placeholder="${h(x.amt ?? "")}" ${ed ? "" : "disabled"}></label>` : ""}</div>` : ""}
     <div class="row" style="gap:6px">${dsr ? `<button class="btn sm" data-open="${dsr.id}" data-mclose="1">${h(dsr.code)} · ${h(dsr.name)}</button>` : ""}${linkBtn(o.url, "Modèle / dossier OneDrive")}${o.amount && can("view_amounts") ? `<span class="chip">${money(o.amount)}</span>` : ""}<span class="muted" style="font-size:12px">Responsables :</span>${avs(o.owners)}</div>
-    <div class="grid2"><label class="f"><span>Statut</span><select id="oc-status" ${ed ? "" : "disabled"}>${DL_STATUS.map(s => `<option value="${s[0]}" ${x.status === s[0] ? "selected" : ""}>${s[1]}</option>`).join("")}</select></label>
+    <div class="grid2"><label class="f"><span>Statut</span><select id="oc-status" ${ed ? "" : "disabled"}>${DL_STATUS.map(s => `<option value="${s[0]}" ${x.status === s[0] ? "selected" : ""}>${isSched(o) ? { todo: "À échoir / impayé", doing: "Paiement partiel", sent: "Payé" }[s[0]] : s[1]}</option>`).join("")}</select></label>
       <label class="f"><span>Document remis (lien OneDrive / SharePoint)</span><input type="url" id="oc-url" value="${h(x.st.url || "")}" placeholder="https://…" ${ed ? "" : "disabled"}></label></div>
     <label class="f"><span>Commentaire</span><textarea id="oc-note" rows="2" ${ed ? "" : "disabled"}>${h(x.st.note || "")}</textarea></label>
     ${x.st.at ? `<p class="muted" style="font-size:12px;margin:0">Dernière mise à jour : ${h(mname(x.st.by))} · ${new Date(x.st.at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}</p>` : ""}
     ${hist.length ? `<div><div class="eyebrow" style="margin-bottom:4px">Périodes précédentes</div>${hist.map(y => `<div class="folder"><span class="nm">${h(y.label)} · ${h(fdate(y.due))}</span>${y.late ? '<span class="chip" style="background:var(--bad-bg);color:var(--bad)">Non remis</span>' : chip(dlStatus(y.status)[1], dlStatus(y.status)[2])}${isURL(y.st.url) ? `<a class="btn sm" href="${h(y.st.url)}" target="_blank" rel="noopener">${ic("ext")}Document</a>` : ""}</div>`).join("")}</div>` : ""}`,
-    `${canManageDl() ? `<button class="btn" data-dl-edit="${o.id}">Modifier l'obligation</button>` : ""}${can("task_create") ? `<button class="btn" id="oc-task">${ic("plus")}Créer une tâche</button>` : ""}<span class="spacer"></span><button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="oc-save">Enregistrer</button>` : ""}`, L => {
+    `${isSched(o) ? `<button class="btn" data-act7="sch-show" data-ref="${h(o.dossierId ? "d:" + o.dossierId : "c:" + (o.company || ""))}">Voir l'échéancier</button>` : ""}${canManageDl() ? `<button class="btn" data-dl-edit="${o.id}">${isSched(o) ? "Modifier l'échéancier" : "Modifier l'obligation"}</button>` : ""}${can("task_create") ? `<button class="btn" id="oc-task">${ic("plus")}Créer une tâche</button>` : ""}<span class="spacer"></span><button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="oc-save">Enregistrer</button>` : ""}`, L => {
       const save = async status => {
         const live = (S.deadlines || []).find(y => y.id === oid); if (!live) return;
         const u = $("#oc-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return false; }
         const prev = live.done?.[key]?.status || "todo";
-        live.done = { ...(live.done || {}), [key]: { status: status || $("#oc-status", L).value, url: u, note: $("#oc-note", L).value, at: new Date().toISOString(), by: me()?.id || null } };
+        live.done = { ...(live.done || {}), [key]: { status: status || $("#oc-status", L).value, url: u, note: $("#oc-note", L).value, at: new Date().toISOString(), by: me()?.id || null, ...(isSched(live) ? { paidDate: $("#oc-pdate", L)?.value || (($("#oc-status", L).value === "sent") ? todayISO() : ""), paid: $("#oc-paid", L) ? $("#oc-paid", L).value : (live.done?.[key]?.paid ?? "") } : {}) } };
         await putDoc("deadlines", live);
-        if (prev !== live.done[key].status) await log(`Échéance « ${live.title} » (${periodLabel(key)}) : ${dlStatus(live.done[key].status)[1].toLowerCase()}`, { dossierId: live.dossierId || null, notify: live.done[key].status === "sent" ? (live.owners || []).filter(id => id !== me()?.id) : [] });
+        if (prev !== live.done[key].status) await log(isSched(live) ? `${schOwnerName(live)} · ${x.label} (${fdate(x.due)}) : ${{ todo: "impayée", doing: "paiement partiel", sent: "payée" }[live.done[key].status]}` : `Échéance « ${live.title} » (${periodLabel(key)}) : ${dlStatus(live.done[key].status)[1].toLowerCase()}`, { dossierId: live.dossierId || null, notify: live.done[key].status === "sent" ? (live.owners || []).filter(id => id !== me()?.id) : [] });
         return true;
       };
       const sb = $("#oc-save", L); sb && (sb.onclick = async () => { if (await save() !== false) { L.remove(); toast("Échéance mise à jour"); render(); } });
@@ -1829,6 +1839,7 @@ function occModal(oid, key) {
     });
 }
 function dlModal(o0) {
+  if (isSched(o0)) return schModal(o0);
   const isNew = !o0; const o = o0 ? clone(o0) : { id: uid("dl"), title: "", type: (S.cfg.deadlineTypes || [])[0]?.id || "", fund: vehicles()[0] || "", dossierId: "", recipient: "", owners: me() ? [me().id] : [], rule: { type: "period", freq: "quarterly", offset: 45 }, reminder: S.cfg.notify.dueSoonDays, amount: "", url: "", notes: "", active: true, done: {}, createdAt: todayISO() };
   const r = o.rule || {};
   const inner = `<label class="f"><span>Intitulé</span><input type="text" id="dm-title" value="${h(o.title)}" placeholder="Ex. Reporting trimestriel aux bailleurs"></label>
@@ -1899,7 +1910,7 @@ document.addEventListener("click", async e => {
   const el = e.target.closest("[data-occ],[data-dl-sent],[data-dl-edit],[data-dlv],[data-dlcal],[data-act3]");
   if (!el) return;
   const ds = el.dataset;
-  if (ds.dlSent) { e.stopPropagation(); const [oid, key] = ds.dlSent.split("|"); const o = (S.deadlines || []).find(x => x.id === oid); if (!o) return; o.done = { ...(o.done || {}), [key]: { ...(o.done?.[key] || {}), status: "sent", at: new Date().toISOString(), by: me()?.id || null } }; await putDoc("deadlines", o); await log(`Échéance « ${o.title} » (${periodLabel(key)}) : remis`, { dossierId: o.dossierId || null, notify: (o.owners || []).filter(id => id !== me()?.id) }); toast("Marqué comme remis"); render(); return; }
+  if (ds.dlSent) { e.stopPropagation(); const [oid, key] = ds.dlSent.split("|"); const o = (S.deadlines || []).find(x => x.id === oid); if (!o) return; o.done = { ...(o.done || {}), [key]: { ...(o.done?.[key] || {}), status: "sent", at: new Date().toISOString(), by: me()?.id || null, ...(isSched(o) ? { paidDate: o.done?.[key]?.paidDate || todayISO() } : {}) } }; await putDoc("deadlines", o); await log(isSched(o) ? `${schOwnerName(o)} · échéance du ${fdate((schItems(o).find(it => schKey(o, it) === key) || {}).d || key)} : payée` : `Échéance « ${o.title} » (${periodLabel(key)}) : remis`, { dossierId: o.dossierId || null, notify: (o.owners || []).filter(id => id !== me()?.id) }); toast("Marqué comme remis"); render(); return; }
   if (ds.occ) { const [oid, key] = ds.occ.split("|"); S.inboxOpen = false; renderTop(); occModal(oid, key); return; }
   if (ds.dlEdit) { $("#modal")?.remove(); dlModal((S.deadlines || []).find(x => x.id === ds.dlEdit)); return; }
   if (ds.dlv) { S.ui.dl = { ...(S.ui.dl || {}), view: ds.dlv }; saveUI(); render(); return; }
@@ -1930,7 +1941,7 @@ function positionsPanel(f) {
   const totEq = eq.reduce((s, p) => s + (+p.amount || 0), 0), totDebt = debt.reduce((s, p) => s + (+(p.outstanding || p.amount) || 0), 0);
   return `<div class="panel"><header><h2>Participations et financements actuels · ${h(f.name)}</h2><span class="muted" style="font-size:12px">${act.length} en portefeuille${eq.length ? ` · investi ${money(totEq)}` : ""}${debt.length ? ` · encours ${money(totDebt)}` : ""}</span><span class="spacer"></span>${cpOn() && S.view === "funds" ? `<button class="btn sm cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${ef ? `<button class="btn sm pri" data-pos-new="${f.id}">${ic("plus")}Ajouter</button>` : ""}</header>
   <div class="body tablewrap">${list.length ? `<table class="t"><thead><tr><th></th><th>Société</th><th>Nature</th><th>Secteur</th><th>Instrument</th><th class="r">Investi / financé</th><th class="r">Encours</th><th>Entrée</th><th>Dernier reporting</th><th>Statut</th></tr></thead><tbody>
-    ${list.map(p => `<tr class="click" data-pos="${f.id}|${p.id}" style="${p.status === "exited" || p.status === "repaid" ? "opacity:.55" : ""}"><td>${hdot(p.health)}</td><td><b>${h(p.name)}</b>${p.boardSeat ? ' <span class="tag">Siège CA</span>' : ""}</td><td>${p.kind === "debt" ? "Financement" : "Participation"}</td><td>${h(p.sector || "—")}</td><td>${h(p.instrument || "—")}</td><td class="r">${p.amount ? money(p.amount) : '<span class="muted">—</span>'}</td><td class="r">${p.kind === "debt" && p.outstanding ? money(p.outstanding) : '<span class="muted">—</span>'}</td><td>${p.date ? h(fdate(p.date)) : "—"}</td><td>${p.lastReport ? due(p.lastReport, true) : '<span class="muted">—</span>'}</td><td>${chip(posStatus(p.status)[1], posStatus(p.status)[2])}</td></tr>`).join("")}
+    ${list.map(p => `<tr class="click" data-pos="${f.id}|${p.id}" style="${p.status === "exited" || p.status === "repaid" ? "opacity:.55" : ""}"><td>${hdot(p.health)}</td><td><b>${h(p.name)}</b>${p.boardSeat ? ' <span class="tag">Siège CA</span>' : ""}</td><td>${p.kind === "debt" ? "Financement" : "Participation"}</td><td>${h(p.sector || "—")}</td><td>${h(p.instrument || "—")}</td><td class="r">${p.amount ? money(p.amount) : '<span class="muted">—</span>'}</td><td class="r">${(() => { const sc = visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`); if (p.kind === "debt" && p.outstanding) return money(p.outstanding); if (sc) return `${money(schSummary(sc).crd)}<div class="muted" style="font-size:10.5px">selon échéancier</div>`; return '<span class="muted">—</span>'; })()}</td><td>${p.date ? h(fdate(p.date)) : "—"}</td><td>${p.lastReport ? due(p.lastReport, true) : '<span class="muted">—</span>'}</td><td>${chip(posStatus(p.status)[1], posStatus(p.status)[2])}</td></tr>`).join("")}
   </tbody></table>` : `<p class="muted" style="margin:0">Aucune participation ni aucun financement enregistré.${ef ? " Cliquez « Ajouter »." : ""}</p>`}</div></div>`;
 }
 function posModal(fid, pid) {
@@ -1951,7 +1962,8 @@ function posModal(fid, pid) {
       <label class="f"><span>Dossier OneDrive / SharePoint</span><input type="url" id="ps-url" value="${h(p.url || "")}" ${dis}></label></div>
     <label class="chk"><input type="checkbox" id="ps-board" ${p.boardSeat ? "checked" : ""} ${dis}>INMA siège au conseil d'administration</label>
     <label class="f"><span>Commentaire (faits marquants, points d'attention)</span><textarea id="ps-note" rows="3" ${dis}>${h(p.note || "")}</textarea></label>
-    ${isURL(p.url) ? `<div>${linkBtn(p.url, "Ouvrir le dossier")}</div>` : ""}`;
+    ${isURL(p.url) ? `<div>${linkBtn(p.url, "Ouvrir le dossier")}</div>` : ""}
+    ${!isNew ? (() => { const sc = visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`); return sc ? `<div class="row"><button class="btn" data-act7="sch-show" data-ref="${h(sc.dossierId ? "d:" + sc.dossierId : "c:" + (sc.company || ""))}">Voir l'échéancier de remboursement</button><span class="muted" style="font-size:12px">${schSummary(sc).paid}/${schSummary(sc).n} échéances payées${schSummary(sc).lateN ? ` · <b style="color:var(--bad)">${schSummary(sc).lateN} impayée(s)</b>` : ""}</span></div>` : can("deadlines") ? `<div><button class="btn" data-act7="sch-new" data-schpos="${f.id}|${p.id}">${ic("plus")}Créer l'échéancier de remboursement</button></div>` : ""; })() : ""}`;
   modal(isNew ? "Nouvelle participation / nouveau financement" : p.name, inner, `${!isNew && ef ? `<button class="btn danger" id="ps-del">Retirer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ef ? `<button class="btn pri" id="ps-save">Enregistrer</button>` : ""}`, L => {
     const sb = $("#ps-save", L); sb && (sb.onclick = () => {
       const name = $("#ps-name", L).value.trim(); if (!name) { toast("Indiquez le nom de la société."); return; }
@@ -2803,7 +2815,7 @@ Actions possibles (champs facultatifs sauf indication ; dates au format AAAA-MM-
 - {"type":"archive_dossier","dossier":"…","archived":true|false}
 - {"type":"add_note","dossier":"…","text":"…"} (note dans l'historique du dossier)
 - {"type":"create_deadline","title":"…","date":"…","owners":["Nom"],"fund":"…","dossier":"…","recipient":"…"}
-- {"type":"mark_deadline","deadline":"titre","date":"date de l'échéance concernée","status":"sent|doing|todo"}
+- {"type":"mark_deadline","deadline":"titre (ou nom de la société pour un échéancier de remboursement)","date":"date de l'échéance concernée","status":"sent|doing|todo"} (sent = remis, ou payé pour une échéance de prêt)
 - {"type":"create_project","title":"…","scope":"INMA Capital ou nom du fonds","category":"…","owner":"Nom","members":["Nom"],"due":"…","next_step":"…","milestones":["…"]}
 - {"type":"update_project","project":"titre","status":"todo|doing|paused|done","health":"green|amber|red","next_step":"…","progress":0-100,"milestone_done":"texte du jalon","add_milestone":"…"}
 - {"type":"upsert_position","fund":"…","company":"…","kind":"equity|debt","amount":nombre,"outstanding":nombre,"status":"active|watch|exited|repaid","health":"green|amber|red","sector":"…","instrument":"…","date":"…","last_report":"…","note":"…"}
@@ -2877,7 +2889,7 @@ function aiPlanOne(a) {
     if (T === "create_deadline") { const label = `Créer l'échéance « ${a.title} » le ${aiDate(a.date) ? fdate(a.date) : "?"}`; if (!can("deadlines")) return N(label, "votre rôle ne gère pas les échéances"); if (!a.title || !aiDate(a.date)) return N(label, "titre ou date manquant");
       const d = a.dossier ? aiDossier(a.dossier) : null; const f = a.fund ? (vehicles().find(v => aiNorm(v).includes(aiNorm(a.fund))) || "") : (d?.vehicle || "");
       return P(label, async () => { const o = { id: uid("dl"), title: String(a.title), type: (S.cfg.deadlineTypes || [])[0]?.id || "", fund: f, dossierId: d?.id || "", recipient: a.recipient || "", owners: aiMembers(a.owners).length ? aiMembers(a.owners) : [me()?.id].filter(Boolean), rule: { type: "once", date: a.date }, reminder: S.cfg.notify.dueSoonDays, amount: "", url: "", notes: "Créée par l'assistant.", active: true, done: {}, createdAt: todayISO() }; await putDoc("deadlines", o); await log(`Échéance créée : « ${o.title} »`, { dossierId: o.dossierId || null }); return "échéance créée"; }); }
-    if (T === "mark_deadline") { const o = aiFind(visDeadlines(), a.deadline, ["title", "id"]); const label = `Marquer « ${o?.title || a.deadline} » comme ${a.status === "doing" ? "en cours" : a.status === "todo" ? "à faire" : "remis"}`;
+    if (T === "mark_deadline") { const o = aiFind(visDeadlines(), a.deadline, ["title", "id", "company"]); const label = `Marquer « ${o?.title || a.deadline} » comme ${a.status === "doing" ? "en cours" : a.status === "todo" ? "à faire" : "remis"}`;
       if (!o) return N(label, "échéance introuvable"); if (!canUpdateOcc(o)) return N(label, "vous n'êtes pas responsable de cette échéance");
       const occ = dlOccAll(addDays(todayISO(), -200), addDays(todayISO(), 400)).filter(x => x.o.id === o.id); const x = (aiDate(a.date) && occ.find(y => y.due === a.date)) || occ.find(y => y.status !== "sent" && (y.late || y.due >= todayISO())) || occ[0];
       if (!x) return N(label, "aucune occurrence trouvée");
@@ -2934,6 +2946,150 @@ function aiMic() {
   rec.onend = () => { S.ai.rec = null; renderAI(); const t = finalTxt.trim(); if (t) aiSend(t); };
   try { rec.start(); renderAI(); } catch { S.ai.rec = null; toast("Impossible de démarrer le micro."); }
 }
+
+/* ---------- échéanciers de remboursement (un plan complet par dossier / société) ---------- */
+const SCH_FREQ = { monthly: ["Mensuelle", 1], quarterly: ["Trimestrielle", 3], semiannual: ["Semestrielle", 6], annual: ["Annuelle", 12] };
+const SCH_METHOD = { linear: "Amortissement constant du capital", annuity: "Échéances constantes (annuités)", bullet: "In fine (capital à la dernière échéance)" };
+const isSched = o => o?.rule?.type === "schedule";
+const schItems = o => (o?.rule?.items || []).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.d)).sort((a, b) => a.d.localeCompare(b.d));
+const schKey = (o, it) => it.k || it.d;
+const num = v => { if (v == null || v === "") return 0; const n = +String(v).replace(/[\s  ]/g, "").replace(",", "."); return isFinite(n) ? n : 0; };
+const fmtN = v => (Math.round(num(v) * 1000) / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 3 });
+const addMonthsISO = (iso, n) => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(Date.UTC(y, m - 1 + n, 1)); const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate(); t.setUTCDate(Math.min(d, last)); return t.toISOString().slice(0, 10); };
+const schStatusLabel = (x) => x.status === "sent" ? ["Payé", "var(--ok)"] : x.late ? ["Impayé", "var(--bad)"] : x.status === "doing" ? ["Paiement partiel", "#2F6FB0"] : ["À échoir", "#7B8794"];
+function schOwnerName(o) { if (o.company) return o.company; const d = o.dossierId && dossierById(o.dossierId); return d ? d.name : o.title; }
+function schSummary(o) {
+  const items = schItems(o), t = todayISO(); let paid = 0, paidP = 0, crd = 0, lateN = 0, lateAmt = 0, next = null;
+  const tot = items.reduce((s, it) => s + num(it.p) + num(it.i), 0), totP = items.reduce((s, it) => s + num(it.p), 0);
+  for (const it of items) { const st = o.done?.[schKey(o, it)]?.status || "todo"; const amt = num(it.p) + num(it.i);
+    if (st === "sent") { paid++; paidP += num(it.p); } else { crd += num(it.p); if (it.d < t) { lateN++; lateAmt += amt - num(o.done?.[schKey(o, it)]?.paid); } else if (!next) next = it; } }
+  return { items, n: items.length, paid, crd, totP, tot, lateN, lateAmt, next, first: items[0]?.d, last: items[items.length - 1]?.d };
+}
+function schGenerate(p) {
+  const amount = num(p.amount), n = Math.max(1, Math.round(num(p.n))), step = (SCH_FREQ[p.freq] || SCH_FREQ.quarterly)[1], grace = Math.max(0, Math.round(num(p.grace)));
+  const r = num(p.rate) / 100 * step / 12; const first = p.first || addMonthsISO(p.start || todayISO(), step);
+  const out = []; let crd = amount; const amortN = n - grace;
+  const annuity = amortN > 0 ? (r > 0 ? amount * r / (1 - Math.pow(1 + r, -amortN)) : amount / amortN) : 0;
+  for (let k = 0; k < n; k++) {
+    const d = addMonthsISO(first, k * step); const interest = crd * r; let princ = 0;
+    if (k >= grace) { if (p.method === "bullet") princ = k === n - 1 ? crd : 0; else if (p.method === "annuity") princ = k === n - 1 ? crd : annuity - interest; else princ = k === n - 1 ? crd : amount / amortN; }
+    princ = Math.round(princ * 1000) / 1000; const it = Math.round(interest * 1000) / 1000; crd = Math.round((crd - princ) * 1000) / 1000;
+    out.push({ d, p: princ, i: it });
+  }
+  return out;
+}
+function schParse(text) {
+  const rows = [], errs = [];
+  for (const [ln, raw] of String(text || "").split(/\r?\n/).entries()) {
+    const line = raw.trim(); if (!line) continue;
+    const cells = line.split(/\t|;|\s{2,}|\|/).map(s => s.trim()).filter(s => s !== "");
+    if (!cells.length) continue;
+    let d = cells[0], m;
+    if ((m = d.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/))) d = `${m[3].length === 2 ? "20" + m[3] : m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { if (ln === 0 || /date/i.test(line)) continue; errs.push(`ligne ${ln + 1} : date illisible « ${cells[0]} »`); continue; }
+    rows.push({ d, p: num(cells[1]), i: num(cells[2]), n: cells.slice(3).join(" ") });
+  }
+  return { rows: rows.sort((a, b) => a.d.localeCompare(b.d)), errs };
+}
+const schToText = items => items.map(it => [it.d.split("-").reverse().join("/"), fmtN(it.p).replace(/\s| | /g, ""), fmtN(it.i).replace(/\s| | /g, ""), it.n || ""].join(";").replace(/;$/, "")).join("\n");
+function schTable(o, opts = {}) {
+  const items = schItems(o), t = todayISO(), money0 = v => can("view_amounts") ? fmtN(v) : "•••"; let crd = items.reduce((s, it) => s + num(it.p), 0);
+  return `<div class="tablewrap"><table class="t sch-t"><thead><tr><th>N°</th><th>Date</th><th class="r">Capital</th><th class="r">Intérêts</th><th class="r">Total</th><th class="r">Capital restant dû</th><th>Statut</th>${opts.compact ? "" : "<th>Paiement</th>"}</tr></thead><tbody>
+    ${items.map((it, k) => { crd = Math.round((crd - num(it.p)) * 1000) / 1000; const key = schKey(o, it); const st = o.done?.[key] || {}; const x = { status: st.status || "todo", late: (st.status || "todo") !== "sent" && it.d < t }; const [lab, col] = schStatusLabel(x);
+      return `<tr class="click ${x.status === "sent" ? "sch-paid" : x.late ? "sch-late" : ""}" data-occ="${o.id}|${key}"><td class="num">${k + 1}</td><td>${fdate(it.d)}</td><td class="r num">${money0(it.p)}</td><td class="r num">${money0(it.i)}</td><td class="r num"><b>${money0(num(it.p) + num(it.i))}</b></td><td class="r num">${money0(crd)}</td><td>${chip(lab, col)}</td>${opts.compact ? "" : `<td style="font-size:12px">${st.paidDate ? fdate(st.paidDate) : ""}${st.paid && can("view_amounts") ? " · " + fmtN(st.paid) : ""}${x.status !== "sent" && canUpdateOcc(o) ? ` <button class="btn sm" data-dl-sent="${o.id}|${key}">Payé</button>` : ""}</td>`}</tr>`; }).join("")}
+    </tbody><tfoot><tr><th colspan="2">Total</th><th class="r num">${money0(items.reduce((s, it) => s + num(it.p), 0))}</th><th class="r num">${money0(items.reduce((s, it) => s + num(it.i), 0))}</th><th class="r num">${money0(items.reduce((s, it) => s + num(it.p) + num(it.i), 0))}</th><th colspan="${opts.compact ? 2 : 3}"></th></tr></tfoot></table></div>`;
+}
+function schCard(o, open) {
+  const s = schSummary(o), cur = S.cfg.general.currency, d = o.dossierId && dossierById(o.dossierId), L = o.rule.loan || {}, pct = s.n ? Math.round(s.paid / s.n * 100) : 0;
+  const m = v => can("view_amounts") ? `${fmtN(v)} ${h(cur)}` : "Masqué";
+  return `<details class="panel sch-card" ${open ? "open" : ""}><summary class="body"><div class="row" style="gap:10px;flex-wrap:nowrap;align-items:flex-start"><div class="grow" style="min-width:0">
+      <div class="row" style="gap:8px"><b style="font-size:15px">${h(schOwnerName(o))}</b>${s.lateN ? `<span class="chip" style="background:var(--bad-bg);color:var(--bad)">${s.lateN} impayé(s)</span>` : ""}${o.active === false ? '<span class="tag">Inactif</span>' : ""}</div>
+      <div class="muted" style="font-size:12px">${h(o.fund || "")}${d ? ` · ${h(d.code)}` : ""}${L.amount ? ` · prêt de ${m(L.amount)}${L.rate ? `, ${fmtN(L.rate)} %` : ""}${L.method ? ", " + h(SCH_METHOD[L.method] || "").toLowerCase() : ""}` : ""} · ${s.n} échéances ${s.first ? `du ${fdate(s.first)} au ${fdate(s.last)}` : ""}</div></div>
+      <div class="sch-kpi"><span>Capital restant dû</span><b>${m(s.crd)}</b></div>
+      <div class="sch-kpi"><span>Prochaine échéance</span><b>${s.next ? `${fdate(s.next.d)}` : "—"}</b>${s.next ? `<span class="muted">${m(num(s.next.p) + num(s.next.i))}</span>` : ""}</div>
+      <div class="sch-kpi"><span>Remboursé</span><b>${s.paid}/${s.n}</b><span class="msbar" style="min-width:70px"><span style="width:${pct}%"></span></span></div></div></summary>
+    <div class="body" style="border-top:1px solid var(--line)">${s.lateN ? `<div class="banner warn" style="margin-bottom:10px">${s.lateN} échéance(s) impayée(s) pour ${m(s.lateAmt)}.</div>` : ""}${schTable(o)}
+      <div class="row" style="margin-top:10px">${d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : ""}${o.posRef ? `<button class="btn sm" data-pos="${h(o.posRef)}">Fiche de la ligne</button>` : ""}${isURL(o.url) ? linkBtn(o.url, "Contrat / dossier OneDrive") : ""}<span class="spacer"></span><button class="btn sm" data-sch-csv="${o.id}">Exporter (Excel)</button>${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier l'échéancier</button>` : ""}</div></div></details>`;
+}
+function vSchedules(refFilter) {
+  const f = S.ui.dl || {};
+  const list = visDeadlines().filter(isSched).filter(o => (!f.fund || o.fund === f.fund) && (!refFilter || schRefMatch(o, refFilter)));
+  if (!list.length) return `<div class="empty"><b>Aucun échéancier${refFilter ? " pour ce dossier" : ""}</b><span>Un échéancier regroupe toutes les échéances de remboursement d'un même crédit : saisissez les conditions (montant, taux, durée, périodicité, différé) ou collez le tableau d'amortissement depuis Excel.</span>${canManageDl() ? `<button class="btn pri" data-act7="sch-new">${ic("plus")}Nouvel échéancier</button>` : ""}</div>`;
+  const tot = list.reduce((a, o) => { const s = schSummary(o); a.crd += s.crd; a.late += s.lateAmt; a.lateN += s.lateN; const n30 = s.items.filter(it => (o.done?.[schKey(o, it)]?.status || "todo") !== "sent" && it.d >= todayISO() && it.d <= addDays(todayISO(), 30)); a.n30 += n30.reduce((x, it) => x + num(it.p) + num(it.i), 0); return a; }, { crd: 0, late: 0, lateN: 0, n30: 0 });
+  const cur = S.cfg.general.currency, m = v => can("view_amounts") ? `${fmtN(v)} <small>${h(cur)}</small>` : "Masqué";
+  const groups = {}; for (const o of list) (groups[o.fund || "Sans fonds"] ||= []).push(o);
+  return `<div class="kpis"><div class="kpi"><span class="l">Échéanciers suivis</span><span class="v">${list.length}</span></div><div class="kpi"><span class="l">Capital restant dû</span><span class="v" style="font-size:20px">${m(tot.crd)}</span></div><div class="kpi"><span class="l">À encaisser sous 30 jours</span><span class="v" style="font-size:20px">${m(tot.n30)}</span></div><div class="kpi ${tot.lateN ? "alert" : ""}"><span class="l">Impayés</span><span class="v" style="font-size:20px">${tot.lateN ? m(tot.late) : "0"}</span><span class="l">${tot.lateN} échéance(s)</span></div></div>
+    ${Object.entries(groups).map(([g, l]) => `<div class="eyebrow" style="margin:4px 0 -4px">${h(g)}</div>${l.sort((a, b) => schOwnerName(a).localeCompare(schOwnerName(b))).map(o => schCard(o, !!refFilter || list.length === 1)).join("")}`).join("")}`;
+}
+function schRefs() {
+  const seen = new Map();
+  for (const o of visDeadlines()) { if (o.dossierId && dossierById(o.dossierId)) { const d = dossierById(o.dossierId); seen.set("d:" + d.id, `${d.code} · ${d.name}`); } if (o.company) seen.set("c:" + o.company, o.company); }
+  return [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+}
+const schRefMatch = (o, ref) => !ref || (ref.startsWith("d:") ? o.dossierId === ref.slice(2) : ref.startsWith("c:") ? o.company === ref.slice(2) : true);
+function schModal(o0, preset = {}) {
+  const isNew = !o0;
+  const o = o0 ? clone(o0) : { id: uid("dl"), title: "", type: (S.cfg.deadlineTypes || []).find(t => /rembours/i.test(t.label))?.id || (S.cfg.deadlineTypes || [])[0]?.id || "", fund: preset.fund || "", company: preset.company || "", posRef: preset.posRef || "", dossierId: preset.dossierId || "", recipient: "", owners: me() ? [me().id] : [], rule: { type: "schedule", items: [], loan: { amount: "", rate: "", start: todayISO(), n: 12, freq: "quarterly", method: "linear", grace: 0, first: "" } }, reminder: S.cfg.notify.dueSoonDays, amount: "", url: "", notes: "", active: true, done: {}, createdAt: todayISO() };
+  const Ln = o.rule.loan || {}; const debtPos = (S.cfg.funds || []).flatMap(f => (f.positions || []).map(p => ({ f, p }))).sort((a, b) => (a.p.kind === "debt" ? 0 : 1) - (b.p.kind === "debt" ? 0 : 1) || a.p.name.localeCompare(b.p.name));
+  const amtOk = can("view_amounts");
+  const inner = `<div class="grid2"><label class="f"><span>Société / emprunteur</span><select id="sc-pos"><option value="">— saisir un nom —</option>${debtPos.map(({ f, p }) => `<option value="${f.id}|${p.id}" ${o.posRef === `${f.id}|${p.id}` ? "selected" : ""}>${h(p.name)} · ${h(f.name)}</option>`).join("")}</select></label>
+      <label class="f"><span>Nom affiché</span><input type="text" id="sc-company" value="${h(o.company || "")}" placeholder="Ex. DAAM"></label></div>
+    <div class="grid3"><label class="f"><span>Fonds</span><select id="sc-fund"><option value="">—</option>${vehicles().map(v => `<option ${o.fund === v ? "selected" : ""}>${h(v)}</option>`).join("")}</select></label>
+      <label class="f"><span>Dossier lié (facultatif)</span><select id="sc-dossier"><option value="">—</option>${visDossiers().map(d => `<option value="${d.id}" ${o.dossierId === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
+      <label class="f"><span>Intitulé</span><input type="text" id="sc-title" value="${h(o.title)}" placeholder="Remboursement du crédit…"></label></div>
+    ${amtOk ? `<div class="panel"><header><h2>Calculer à partir des conditions du crédit</h2></header><div class="body" style="display:flex;flex-direction:column;gap:10px">
+      <div class="grid3"><label class="f"><span>Montant du crédit (${h(S.cfg.general.currency)})</span><input type="number" id="sc-amount" value="${h(Ln.amount || "")}"></label>
+        <label class="f"><span>Taux annuel (%)</span><input type="number" step="0.01" id="sc-rate" value="${h(Ln.rate ?? "")}"></label>
+        <label class="f"><span>Date de décaissement</span><input type="date" id="sc-start" value="${h(Ln.start || todayISO())}"></label>
+        <label class="f"><span>Nombre d'échéances</span><input type="number" min="1" max="600" id="sc-n" value="${h(Ln.n || 12)}"></label>
+        <label class="f"><span>Périodicité</span><select id="sc-freq">${Object.entries(SCH_FREQ).map(([k, v]) => `<option value="${k}" ${(Ln.freq || "quarterly") === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select></label>
+        <label class="f"><span>Différé (échéances d'intérêts seuls)</span><input type="number" min="0" id="sc-grace" value="${h(Ln.grace || 0)}"></label>
+        <label class="f"><span>Mode de remboursement</span><select id="sc-method">${Object.entries(SCH_METHOD).map(([k, v]) => `<option value="${k}" ${(Ln.method || "linear") === k ? "selected" : ""}>${v}</option>`).join("")}</select></label>
+        <label class="f"><span>Première échéance (facultatif)</span><input type="date" id="sc-first" value="${h(Ln.first || "")}"></label></div>
+      <div><button class="btn" id="sc-calc">Calculer l'échéancier</button> <span class="muted" style="font-size:12px">Intérêts calculés sur le capital restant dû au taux périodique (taux annuel × durée de la période).</span></div></div></div>` : ""}
+    <label class="f"><span>Tableau d'amortissement — une ligne par échéance : <span class="mono">date ; capital ; intérêts ; commentaire</span>. Vous pouvez coller directement les colonnes depuis Excel.</span><textarea id="sc-text" rows="9" class="mono" style="font-size:12px" ${amtOk ? "" : "disabled"}>${h(schToText(schItems(o)))}</textarea></label>
+    <div id="sc-prev" class="muted" style="font-size:12.5px"></div>
+    ${isNew ? `<label class="chk"><input type="checkbox" id="sc-pastpaid" checked>Considérer comme payées les échéances déjà passées</label>` : ""}
+    <div><div class="eyebrow" style="margin-bottom:6px">Responsables du suivi</div><div class="row">${internals().map(m => `<label class="chk"><input type="checkbox" data-sc-owner="${m.id}" ${(o.owners || []).includes(m.id) ? "checked" : ""}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
+    <div class="grid2"><label class="f"><span>Rappel (jours avant chaque échéance)</span><input type="number" id="sc-reminder" min="0" max="60" value="${h(o.reminder ?? 3)}"></label><label class="f"><span>Contrat / dossier OneDrive</span><input type="url" id="sc-url" value="${h(o.url || "")}" placeholder="https://…"></label></div>
+    <label class="f"><span>Notes (garanties, covenants, conditions particulières)</span><textarea id="sc-notes" rows="2">${h(o.notes || "")}</textarea></label>
+    <label class="chk"><input type="checkbox" id="sc-active" ${o.active !== false ? "checked" : ""}>Échéancier actif</label>`;
+  modal(isNew ? "Nouvel échéancier" : `Échéancier · ${schOwnerName(o)}`, inner, `${!isNew ? `<button class="btn danger" id="sc-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="sc-save">${isNew ? "Créer l'échéancier" : "Enregistrer"}</button>`, L => {
+    const prev = () => { if (!amtOk) { $("#sc-prev", L).textContent = `${schItems(o).length} échéances (montants masqués pour votre rôle).`; return; } const { rows, errs } = schParse($("#sc-text", L).value); const tp = rows.reduce((s, r) => s + r.p, 0), ti = rows.reduce((s, r) => s + r.i, 0);
+      $("#sc-prev", L).innerHTML = rows.length ? `<b>${rows.length} échéances</b> du ${fdate(rows[0].d)} au ${fdate(rows[rows.length - 1].d)} · capital ${fmtN(tp)} · intérêts ${fmtN(ti)} · total ${fmtN(tp + ti)} ${h(S.cfg.general.currency)}${errs.length ? `<div style="color:var(--bad)">${h(errs.slice(0, 3).join(" ; "))}</div>` : ""}` : (errs.length ? `<span style="color:var(--bad)">${h(errs.slice(0, 3).join(" ; "))}</span>` : "Aucune échéance pour l'instant : calculez-les ou collez le tableau."); };
+    const posSel = $("#sc-pos", L); posSel.onchange = () => { const [fid, pid] = posSel.value.split("|"); const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (p) { $("#sc-company", L).value = p.name; $("#sc-fund", L).value = f.name; if (p.dossierId) $("#sc-dossier", L).value = p.dossierId; if (!$("#sc-title", L).value) $("#sc-title", L).value = `Remboursement · ${p.name}`; if (amtOk && !$("#sc-amount", L).value && p.amount) $("#sc-amount", L).value = p.amount; } };
+    const cb = $("#sc-calc", L); cb && (cb.onclick = () => { const p = { amount: $("#sc-amount", L).value, rate: $("#sc-rate", L).value, start: $("#sc-start", L).value, n: $("#sc-n", L).value, freq: $("#sc-freq", L).value, method: $("#sc-method", L).value, grace: $("#sc-grace", L).value, first: $("#sc-first", L).value };
+      if (!num(p.amount) || !num(p.n)) { toast("Indiquez au moins le montant et le nombre d'échéances."); return; } if (num(p.grace) >= num(p.n)) { toast("Le différé doit être inférieur au nombre d'échéances."); return; }
+      $("#sc-text", L).value = schToText(schGenerate(p)); prev(); });
+    $("#sc-text", L).addEventListener("input", prev); prev();
+    $("#sc-save", L).onclick = async () => {
+      const company = $("#sc-company", L).value.trim(); const dossierId = $("#sc-dossier", L).value || ""; if (!company && !dossierId) { toast("Indiquez la société ou le dossier concerné."); return; }
+      let items = schItems(o);
+      if (amtOk) { const { rows, errs } = schParse($("#sc-text", L).value); if (errs.length) { toast("Corrigez le tableau : " + errs[0]); return; } if (!rows.length) { toast("L'échéancier est vide : calculez-le ou collez le tableau."); return; }
+        const keys = new Map(); items = rows.map(r => { let k = r.d; const c = (keys.get(r.d) || 0) + 1; keys.set(r.d, c); if (c > 1) k = `${r.d}#${c}`; return { d: r.d, p: r.p, i: r.i, n: r.n, ...(k !== r.d ? { k } : {}) }; }); }
+      const u = $("#sc-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
+      const live = isNew ? o : ((S.deadlines || []).find(y => y.id === o.id) || o);
+      const loan = amtOk && $("#sc-amount", L) ? { amount: $("#sc-amount", L).value, rate: $("#sc-rate", L).value, start: $("#sc-start", L).value, n: $("#sc-n", L).value, freq: $("#sc-freq", L).value, method: $("#sc-method", L).value, grace: $("#sc-grace", L).value, first: $("#sc-first", L).value } : (live.rule?.loan || {});
+      Object.assign(live, { title: $("#sc-title", L).value.trim() || `Remboursement · ${company || dossierById(dossierId)?.name || ""}`, company, posRef: $("#sc-pos", L).value || "", fund: $("#sc-fund", L).value, dossierId, owners: $$("[data-sc-owner]", L).filter(x => x.checked).map(x => x.dataset.scOwner), reminder: +$("#sc-reminder", L).value || 0, url: u, notes: $("#sc-notes", L).value, active: $("#sc-active", L).checked, rule: { type: "schedule", items, loan }, done: live.done || {} });
+      if (isNew && $("#sc-pastpaid", L)?.checked) for (const it of items) if (it.d < todayISO()) live.done[schKey(live, it)] = { status: "sent", at: new Date().toISOString(), by: me()?.id || null, note: "Antérieure à la création de l'échéancier" };
+      await putDoc("deadlines", live); await log(`${isNew ? "Échéancier créé" : "Échéancier modifié"} : ${schOwnerName(live)} (${items.length} échéances)`, { dossierId: live.dossierId || null });
+      L.remove(); toast(isNew ? "Échéancier créé" : "Échéancier enregistré"); S.ui.dl = { ...(S.ui.dl || {}), view: "schedules" }; saveUI(); if (S.view !== "deadlines") S.view = "deadlines"; render();
+    };
+    const del = $("#sc-del", L); del && (del.onclick = () => { L.remove(); confirmBox(`Supprimer l'échéancier de ${schOwnerName(o)} et l'historique des paiements ?`, "Supprimer", async () => { await delDoc("deadlines", o.id); toast("Échéancier supprimé"); render(); }); });
+  }, true);
+}
+function schCsv(o) {
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`; let crd = schItems(o).reduce((s, it) => s + num(it.p), 0);
+  const rows = [["N°", "Date", "Capital", "Intérêts", "Total", "Capital restant dû", "Statut", "Date de paiement", "Montant payé", "Commentaire"]].concat(schItems(o).map((it, k) => { crd -= num(it.p); const st = o.done?.[schKey(o, it)] || {}; const x = { status: st.status || "todo", late: (st.status || "todo") !== "sent" && it.d < todayISO() };
+    return [k + 1, fdate(it.d), String(num(it.p)).replace(".", ","), String(num(it.i)).replace(".", ","), String(num(it.p) + num(it.i)).replace(".", ","), String(Math.round(crd * 1000) / 1000).replace(".", ","), schStatusLabel(x)[0], st.paidDate ? fdate(st.paidDate) : "", st.paid ? String(st.paid).replace(".", ",") : "", st.note || it.n || ""]; }));
+  saveFile(`echeancier-${schOwnerName(o).replace(/[^\p{L}\p{N}]+/gu, "-")}-${todayISO()}.csv`, "﻿" + rows.map(r => r.map(q).join(";")).join("\n"));
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act7],[data-sch-csv]"); if (!el) return;
+  if (el.dataset.schCsv) { const o = (S.deadlines || []).find(x => x.id === el.dataset.schCsv); if (o) { if (!can("view_amounts")) { toast("Export réservé aux rôles qui voient les montants."); return; } schCsv(o); } return; }
+  if (el.dataset.act7 === "sch-new") { const ref = S.ui.dl?.ref || ""; const pre = {}; if (ref.startsWith("d:")) pre.dossierId = ref.slice(2); if (ref.startsWith("c:")) pre.company = ref.slice(2); if (el.dataset.schpos) { const [fid, pid] = el.dataset.schpos.split("|"); const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (p) Object.assign(pre, { posRef: el.dataset.schpos, company: p.name, fund: f.name, dossierId: p.dossierId || "" }); } $("#modal")?.remove(); schModal(null, pre); }
+  if (el.dataset.act7 === "sch-show") { $$("#modal").forEach(x => x.remove()); S.view = "deadlines"; S.ui.dl = { ...(S.ui.dl || {}), view: "schedules", ref: el.dataset.ref || "" }; saveUI(); render(); }
+});
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
