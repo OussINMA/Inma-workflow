@@ -368,6 +368,14 @@ a.btn{text-decoration:none}
 .sch-kpi{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:120px;font-size:12px}.sch-kpi>span:first-child{color:var(--muted)}.sch-kpi b{font-family:var(--f-mono);font-size:14px}
 .sch-t td,.sch-t th{white-space:nowrap}.sch-t tr.sch-paid td{color:var(--muted)}.sch-t tr.sch-late td{background:var(--bad-bg)}.sch-t tfoot th{border-top:2px solid var(--line)}
 @media (max-width:760px){.sch-kpi{display:none}}
+.sch-est{display:inline-block;font-size:10.5px;font-weight:700;color:#B7791F;background:color-mix(in oklab,#B7791F 14%,transparent);border-radius:4px;padding:1px 5px;vertical-align:middle}
+.sch-det{font-size:11px;color:var(--muted);white-space:normal;max-width:420px}
+.sch-rules input{min-width:90px;padding:4px 6px}
+.sch-prev{font-size:12.5px}
+.mb-row{border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.mb-params{display:flex;flex-direction:column;gap:8px;padding:8px 0 2px;border-top:1px dashed var(--line)}
+.mb-list{display:flex;flex-direction:column;gap:6px}
+.mb-text h4{font-size:18px}.mb-text{font-size:15px}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
 </style>
 
@@ -530,6 +538,7 @@ const DEFAULT_CFG = () => fixIds({
   fundTypes: ["Fonds propres & quasi-fonds propres", "Dette privée", "Multi-instruments", "SICAR", "FCPR"],
   fundFields: [ { id: "ff_ticket", label: "Ticket", type: "text", options: [] }, { id: "ff_dur", label: "Durée d'investissement", type: "text", options: [] }, { id: "ff_size", label: "Taille cible", type: "currency", options: [] }, { id: "ff_backers", label: "Bailleurs de fonds", type: "text", options: [] } ],
   fundTemplate: ["Gouvernance/Statuts & pacte", "Gouvernance/Conseils d'administration", "Gouvernance/Assemblées générales", "Investisseurs & bailleurs/Engagements & souscriptions", "Investisseurs & bailleurs/Reporting investisseurs", "Comité d'investissement/Notes", "Comité d'investissement/PV", "Pipeline [dossiers]", "Portefeuille", "Finance & comptabilité/États financiers", "Finance & comptabilité/Valorisation", "Juridique & conformité"],
+  tmm: [ { m: "2025-08", v: 7.5 }, { m: "2025-09", v: 7.49 }, { m: "2026-01", v: 7.08 }, { m: "2026-02", v: 6.99 }, { m: "2026-03", v: 6.99 }, { m: "2026-04", v: 6.99 }, { m: "2026-05", v: 6.99 }, { m: "2026-06", v: 6.99 }, { m: "2026-07", v: 6.99 }, { m: "2026-08", v: 7 }, { m: "2026-09", v: 7 } ],
   copilot: { enabled: true, url: "https://m365.cloud.microsoft/chat", amounts: true, intro: "", promptsText: "" },
   meetingTypes: [ { id: "mt_weekly", label: "Réunion d'équipe", color: "#E22529" }, { id: "mt_ic", label: "Comité d'investissement", color: "#212121" }, { id: "mt_credit", label: "Comité de crédit", color: "#2F6FB0" }, { id: "mt_board", label: "Conseil / AG", color: "#8A6D3B" }, { id: "mt_other", label: "Autre réunion", color: "#7B8794" } ],
   projectCategories: ["ESG", "Organisation & outils", "Levée de fonds", "Gouvernance", "Reporting investisseurs", "Conformité", "Communication", "Ressources humaines"],
@@ -1000,7 +1009,7 @@ const STABS = [["general","Général & charte","settings"],["roles","Rôles & pe
 function vSettings() {
   const tabs = STABS.filter(t => can(t[2])); if (!tabs.length) return `<div class="empty"><b>Accès réservé</b></div>`;
   if (!tabs.some(t => t[0] === S.ui.stab)) S.ui.stab = tabs[0][0];
-  const body = { externals: sExternals, funds: sFunds, general: () => sGeneral() + sCopilot(), roles: sRoles, members: sMembers, workflows: sWorkflows, fields: sFields, lists: sLists, automations: sAutomations, onedrive: sOneDrive, notify: sNotify, data: sData }[S.ui.stab]();
+  const body = { externals: sExternals, funds: sFunds, general: () => sGeneral() + sTmm() + sCopilot(), roles: sRoles, members: sMembers, workflows: sWorkflows, fields: sFields, lists: sLists, automations: sAutomations, onedrive: sOneDrive, notify: sNotify, data: sData }[S.ui.stab]();
   return `<div class="settings"><nav class="stabs">${tabs.map(t => `<button class="stab ${S.ui.stab === t[0] ? "on" : ""}" data-stab="${t[0]}">${t[1]}</button>`).join("")}</nav><div style="display:flex;flex-direction:column;gap:16px;min-width:0">${body}</div></div>`;
 }
 const inp = (path, val, type = "text", attrs = "") => `<input type="${type}" data-cfg="${path}" value="${h(val)}" ${attrs}>`;
@@ -1679,7 +1688,7 @@ function ruleText(r) {
 }
 function occurrences(o, from, to) {
   const r = o.rule || {}, out = [];
-  if (r.type === "schedule") { const items = schItems(o); items.forEach((it, k) => { if (it.d >= from && it.d <= to) out.push({ key: schKey(o, it), due: it.d, amt: num(it.p) + num(it.i), p: num(it.p), i: num(it.i), idx: k + 1, n: items.length }); }); }
+  if (r.type === "schedule") { const items = schItems(o); items.forEach((it, k) => { if (it.d >= from && it.d <= to) out.push({ key: schKey(o, it), due: it.d, amt: schAmt(it), p: num(it.p), i: num(it.i), v: num(it.v), det: it.det || "", est: !!it.est, idx: k + 1, n: items.length }); }); }
   else if (r.type === "once") { if (r.date && r.date >= from && r.date <= to) out.push({ key: "once", due: r.date }); }
   else if (r.type === "fixed") {
     for (let y = +from.slice(0, 4); y <= +to.slice(0, 4); y++) for (const md of r.dates || []) {
@@ -1704,7 +1713,7 @@ function dlOccAll(from, to) {
     for (const x of occurrences(o, from, to)) {
       const st = o.done?.[x.key] || {}; const status = st.status || "todo";
       if (!isSched(o) && o.createdAt && x.due < o.createdAt && !o.done?.[x.key]) continue; // periods before the obligation was created are not tracked
-      out.push({ o, key: x.key, due: x.due, status, st, late: status !== "sent" && x.due < todayISO(), label: isSched(o) ? `Échéance ${x.idx}/${x.n}` : periodLabel(x.key), amt: x.amt, p: x.p, i: x.i });
+      out.push({ o, key: x.key, due: x.due, status, st, late: status !== "sent" && x.due < todayISO(), label: isSched(o) ? `Échéance ${x.idx}/${x.n}` : periodLabel(x.key), amt: x.amt, p: x.p, i: x.i, v: x.v, det: x.det, est: x.est });
     }
   }
   return out.sort((a, b) => a.due < b.due ? -1 : a.due > b.due ? 1 : a.o.title.localeCompare(b.o.title));
@@ -1816,7 +1825,8 @@ function occModal(oid, key) {
   modal(`${isSched(o) ? schOwnerName(o) : o.title} · ${x.label}`, `<div class="row">${chip(t.label, t.color)}<span class="muted">${h(o.fund || "")}${o.recipient ? " · pour " + h(o.recipient) : ""}</span><span class="spacer"></span>${due(x.due, x.status === "sent")}</div>
     ${x.late ? `<div class="banner warn">Échéance dépassée de ${-daysBetween(todayISO(), x.due)} jours.</div>` : ""}
     ${o.notes ? `<p style="margin:0;white-space:pre-line">${h(o.notes)}</p>` : ""}
-    ${isSched(o) ? `<div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div class="kpi"><span class="l">Capital</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.p) : "•••"}</span></div><div class="kpi"><span class="l">Intérêts</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.i) : "•••"}</span></div><div class="kpi"><span class="l">Total dû (${h(S.cfg.general.currency)})</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.amt) : "•••"}</span></div></div>
+    ${isSched(o) ? `<div class="kpis" style="grid-template-columns:repeat(${x.v ? 4 : 3},minmax(0,1fr))"><div class="kpi"><span class="l">Capital</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.p) : "•••"}</span></div><div class="kpi"><span class="l">Intérêts</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.i) : "•••"}</span></div>${x.v ? `<div class="kpi"><span class="l">Part variable (CA)</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.v) : "•••"}</span></div>` : ""}<div class="kpi"><span class="l">Total dû (${h(S.cfg.general.currency)})${x.est ? " · estimé" : ""}</span><span class="v" style="font-size:18px">${can("view_amounts") ? fmtN(x.amt) : "•••"}</span></div></div>${x.det ? `<p class="muted" style="margin:0;font-size:12px">Calcul : ${h(x.det)}</p>` : ""}
+    ${canManageDl() && can("view_amounts") ? `<details ${(schItems(o).find(it => schKey(o, it) === key) || {}).noamt ? "open" : ""}><summary style="cursor:pointer;font-weight:600;font-size:13px">Modifier le montant de cette échéance</summary><div class="grid3" style="margin-top:8px"><label class="f"><span>Capital</span><input type="number" step="0.001" id="oc-ep" value="${h(x.p || "")}"></label><label class="f"><span>Intérêts</span><input type="number" step="0.001" id="oc-ei" value="${h(x.i || "")}"></label><label class="f"><span>Part variable (CA)</span><input type="number" step="0.001" id="oc-ev" value="${h(x.v || "")}"></label><label class="f"><span>Date de l'échéance</span><input type="date" id="oc-ed" value="${h(x.due)}"></label></div><p class="muted" style="margin:4px 0 0;font-size:12px">Une échéance modifiée à la main n'est plus recalculée automatiquement.</p></details>` : ""}
     <div class="grid2"><label class="f"><span>Date de paiement</span><input type="date" id="oc-pdate" value="${h(x.st.paidDate || "")}" ${ed ? "" : "disabled"}></label>${can("view_amounts") ? `<label class="f"><span>Montant reçu</span><input type="number" step="0.001" id="oc-paid" value="${h(x.st.paid ?? "")}" placeholder="${h(x.amt ?? "")}" ${ed ? "" : "disabled"}></label>` : ""}</div>` : ""}
     <div class="row" style="gap:6px">${dsr ? `<button class="btn sm" data-open="${dsr.id}" data-mclose="1">${h(dsr.code)} · ${h(dsr.name)}</button>` : ""}${linkBtn(o.url, "Modèle / dossier OneDrive")}${o.amount && can("view_amounts") ? `<span class="chip">${money(o.amount)}</span>` : ""}<span class="muted" style="font-size:12px">Responsables :</span>${avs(o.owners)}</div>
     <div class="grid2"><label class="f"><span>Statut</span><select id="oc-status" ${ed ? "" : "disabled"}>${DL_STATUS.map(s => `<option value="${s[0]}" ${x.status === s[0] ? "selected" : ""}>${isSched(o) ? { todo: "À échoir / impayé", doing: "Paiement partiel", sent: "Payé" }[s[0]] : s[1]}</option>`).join("")}</select></label>
@@ -1829,6 +1839,9 @@ function occModal(oid, key) {
         const live = (S.deadlines || []).find(y => y.id === oid); if (!live) return;
         const u = $("#oc-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return false; }
         const prev = live.done?.[key]?.status || "todo";
+        if (isSched(live) && $("#oc-ep", L)) { const it = (live.rule.items || []).find(y => schKey(live, y) === key); if (it) { const np = num($("#oc-ep", L).value), ni = num($("#oc-ei", L).value), nv = num($("#oc-ev", L).value), nd = $("#oc-ed", L).value;
+          const changed = r3(np) !== r3(num(it.p)) || r3(ni) !== r3(num(it.i)) || r3(nv) !== r3(num(it.v)) || (nd && nd !== it.d);
+          if (changed) { if (nd && nd !== it.d && !it.k) { it.k = it.d; } Object.assign(it, { p: np, i: ni, v: nv, d: nd || it.d, manual: true }); delete it.noamt; delete it.est; it.det = (it.det && it.det !== "Montant à saisir" && !/modifié à la main/.test(it.det) ? it.det + " · " : "") + "modifié à la main"; await log(`${schOwnerName(live)} : échéance du ${fdate(it.d)} modifiée (${fmtN(np + ni + nv)} ${S.cfg.general.currency})`, { dossierId: live.dossierId || null }); } } }
         live.done = { ...(live.done || {}), [key]: { status: status || $("#oc-status", L).value, url: u, note: $("#oc-note", L).value, at: new Date().toISOString(), by: me()?.id || null, ...(isSched(live) ? { paidDate: $("#oc-pdate", L)?.value || (($("#oc-status", L).value === "sent") ? todayISO() : ""), paid: $("#oc-paid", L) ? $("#oc-paid", L).value : (live.done?.[key]?.paid ?? "") } : {}) } };
         await putDoc("deadlines", live);
         if (prev !== live.done[key].status) await log(isSched(live) ? `${schOwnerName(live)} · ${x.label} (${fdate(x.due)}) : ${{ todo: "impayée", doing: "paiement partiel", sent: "payée" }[live.done[key].status]}` : `Échéance « ${live.title} » (${periodLabel(key)}) : ${dlStatus(live.done[key].status)[1].toLowerCase()}`, { dossierId: live.dossierId || null, notify: live.done[key].status === "sent" ? (live.owners || []).filter(id => id !== me()?.id) : [] });
@@ -2135,10 +2148,10 @@ function vMeeting() {
 }
 function vMeetingBoard() {
   const mt = S.ui.mt = { since: addDays(todayISO(), -7), fund: "", sections: {}, ...(S.ui.mt || {}) };
-  const slides = meetingSlides(mt);
+  const slides = boardSlides(mt);
   const tb = `<div class="toolbar"><label class="row" style="gap:6px;flex-wrap:nowrap"><span class="muted" style="font-size:12.5px">Depuis le</span><input type="date" id="mt-since" value="${h(mt.since)}" style="width:auto"></label>
     <select id="mt-fund" aria-label="Fonds"><option value="">Tous les fonds</option>${(S.cfg.funds || []).map(f => `<option value="${f.id}" ${mt.fund === f.id ? "selected" : ""}>${h(f.name)}</option>`).join("")}</select>
-    <span class="row" style="gap:4px">${MT_SECTIONS.map(([k, l]) => `<label class="chk mt-chip"><input type="checkbox" data-mt-sec="${k}" ${mt.sections[k] === 0 ? "" : "checked"}>${l}</label>`).join("")}</span>
+    <select id="mt-board" aria-label="Modèle de réunion">${mbBoards().map(b => `<option value="${b.id}" ${mbCurrent().id === b.id ? "selected" : ""}>${h(b.name)}</option>`).join("")}</select>${mbCanEdit() ? `<button class="btn" data-act8="mb-edit">${ic("gear")}Personnaliser</button>` : ""}
     <span class="spacer"></span>${window.INMA ? `<button class="btn" data-act4="mt-print" title="Imprimer ou enregistrer en PDF">Imprimer / PDF</button>` : ""}${cpOn() ? `<button class="btn cp-btn" data-cp="board|">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${can("meetings") ? `<button class="btn" data-act5="mt-new">${ic("plus")}Compte rendu</button>` : ""}<button class="btn pri" data-act4="mt-present">${ic("present")}Présenter</button></div>`;
   return tb + slides.map((s, i) => `<section class="mt-slide" id="slide-${s.id}"><div class="mt-head"><span class="mt-num">${String(i + 1).padStart(2, "0")}</span><div><h2 style="font-size:18px">${s.color ? `<span class="fdot" style="--fc:${h(s.color)};margin-right:8px;width:12px;height:12px"></span>` : ""}${h(s.title)}</h2><div class="muted" style="font-size:12.5px">${h(s.sub || "")}</div></div></div>${s.html}</section>`).join("");
 }
@@ -2148,7 +2161,7 @@ function presentMode(start) {
 }
 function drawPresent() {
   if (!S.present) { $("#present")?.remove(); return; }
-  const slides = meetingSlides(S.ui.mt || {}); if (!slides.length) { S.present = null; return; }
+  const slides = boardSlides({ since: addDays(todayISO(), -7), fund: "", ...(S.ui.mt || {}) }); if (!slides.length) { S.present = null; return; }
   S.present.i = Math.max(0, Math.min(slides.length - 1, S.present.i)); const s = slides[S.present.i];
   let el = $("#present"); if (!el) { el = document.createElement("div"); el.id = "present"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Présentation"); document.body.appendChild(el); }
   el.innerHTML = `<div class="pbar"><div class="wordmark" style="font-size:16px">INMA<small>RÉUNION D'ÉQUIPE</small></div><span class="spacer"></span><span class="muted num">${S.present.i + 1} / ${slides.length}</span><button class="btn sm" data-pv="-1" ${S.present.i === 0 ? "disabled" : ""} aria-label="Diapositive précédente">‹ Précédent</button><button class="btn sm" data-pv="1" ${S.present.i === slides.length - 1 ? "disabled" : ""} aria-label="Diapositive suivante">Suivant ›</button>${can("meetings") ? `<button class="btn sm" data-act5="mt-new">Rédiger le compte rendu</button>` : ""}<button class="btn sm" data-pv="x">Quitter</button></div>
@@ -2949,76 +2962,154 @@ function aiMic() {
 
 /* ---------- échéanciers de remboursement (un plan complet par dossier / société) ---------- */
 const SCH_FREQ = { monthly: ["Mensuelle", 1], quarterly: ["Trimestrielle", 3], semiannual: ["Semestrielle", 6], annual: ["Annuelle", 12] };
-const SCH_METHOD = { linear: "Amortissement constant du capital", annuity: "Échéances constantes (annuités)", bullet: "In fine (capital à la dernière échéance)" };
+const SCH_METHOD = { linear: "Amortissement constant du capital", annuity: "Échéances constantes (annuités, recalculées si le taux varie)", bullet: "In fine (capital à la dernière échéance)", manual: "Capital saisi dans le tableau (garder la colonne capital)" };
+const SCH_DAYS = { prop: "Proportionnel (taux annuel × mois / 12)", a360: "Jours exacts / 360", a365: "Jours exacts / 365" };
+const SCH_PREPAID = { none: "À terme échu (payés avec l'échéance)", period: "Précomptés (payés en début de période)", upfront: "Précomptés en totalité au décaissement" };
+const SCH_TMMREF = { prev: "TMM du mois précédant le début de la période", start: "TMM du mois de début de période", avg: "Moyenne des TMM de la période", due: "TMM du mois de l'échéance" };
 const isSched = o => o?.rule?.type === "schedule";
-const schItems = o => (o?.rule?.items || []).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.d)).sort((a, b) => a.d.localeCompare(b.d));
+const schItems = o => (o?.rule?.items || []).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.d)).sort((a, b) => a.d.localeCompare(b.d) || (a.k || "").localeCompare(b.k || ""));
 const schKey = (o, it) => it.k || it.d;
 const num = v => { if (v == null || v === "") return 0; const n = +String(v).replace(/[\s  ]/g, "").replace(",", "."); return isFinite(n) ? n : 0; };
-const fmtN = v => (Math.round(num(v) * 1000) / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 3 });
+const r3 = v => Math.round(v * 1000) / 1000;
+const fmtN = v => r3(num(v)).toLocaleString("fr-FR", { maximumFractionDigits: 3 });
+const schAmt = it => num(it.p) + num(it.i) + num(it.v);
 const addMonthsISO = (iso, n) => { const [y, m, d] = iso.split("-").map(Number); const t = new Date(Date.UTC(y, m - 1 + n, 1)); const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate(); t.setUTCDate(Math.min(d, last)); return t.toISOString().slice(0, 10); };
+const daysISO = (a, b) => Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 864e5);
 const schStatusLabel = (x) => x.status === "sent" ? ["Payé", "var(--ok)"] : x.late ? ["Impayé", "var(--bad)"] : x.status === "doing" ? ["Paiement partiel", "#2F6FB0"] : ["À échoir", "#7B8794"];
 function schOwnerName(o) { if (o.company) return o.company; const d = o.dossierId && dossierById(o.dossierId); return d ? d.name : o.title; }
-function schSummary(o) {
-  const items = schItems(o), t = todayISO(); let paid = 0, paidP = 0, crd = 0, lateN = 0, lateAmt = 0, next = null;
-  const tot = items.reduce((s, it) => s + num(it.p) + num(it.i), 0), totP = items.reduce((s, it) => s + num(it.p), 0);
-  for (const it of items) { const st = o.done?.[schKey(o, it)]?.status || "todo"; const amt = num(it.p) + num(it.i);
-    if (st === "sent") { paid++; paidP += num(it.p); } else { crd += num(it.p); if (it.d < t) { lateN++; lateAmt += amt - num(o.done?.[schKey(o, it)]?.paid); } else if (!next) next = it; } }
-  return { items, n: items.length, paid, crd, totP, tot, lateN, lateAmt, next, first: items[0]?.d, last: items[items.length - 1]?.d };
+/* ---- TMM ---- */
+const tmmList = () => (S.cfg.tmm || []).filter(x => /^\d{4}-\d{2}$/.test(x.m) && x.v !== "" && x.v != null).sort((a, b) => a.m.localeCompare(b.m));
+function tmmAt(month, future) {
+  const l = tmmList(); const exact = l.find(x => x.m === month); if (exact) return { v: num(exact.v), est: false };
+  const prior = l.filter(x => x.m < month); const last = l[l.length - 1];
+  if (last && month > last.m) return { v: future !== "" && future != null && future !== undefined && String(future).trim() !== "" ? num(future) : num(last.v), est: true, note: "hypothèse" };
+  if (prior.length) return { v: num(prior[prior.length - 1].v), est: true, note: "dernier TMM connu" };
+  return { v: NaN, est: true, note: "TMM inconnu" };
 }
-function schGenerate(p) {
-  const amount = num(p.amount), n = Math.max(1, Math.round(num(p.n))), step = (SCH_FREQ[p.freq] || SCH_FREQ.quarterly)[1], grace = Math.max(0, Math.round(num(p.grace)));
-  const r = num(p.rate) / 100 * step / 12; const first = p.first || addMonthsISO(p.start || todayISO(), step);
-  const out = []; let crd = amount; const amortN = n - grace;
-  const annuity = amortN > 0 ? (r > 0 ? amount * r / (1 - Math.pow(1 + r, -amortN)) : amount / amortN) : 0;
+const monthOf = iso => iso.slice(0, 7);
+const prevMonth = ym => { const [y, m] = ym.split("-").map(Number); return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, "0")}`; };
+function periodRate(L, start, end) {
+  if ((L.rateType || "fixed") === "fixed") return { rate: num(L.rate), det: `${fmtN(L.rate)} %`, est: false };
+  let t;
+  if (L.tmmRef === "avg") { const ms = []; let m = monthOf(start); const me_ = monthOf(addDays(end, -1)); while (m <= me_ && ms.length < 60) { ms.push(m); const [y, mm] = m.split("-").map(Number); m = mm === 12 ? `${y + 1}-01` : `${y}-${String(mm + 1).padStart(2, "0")}`; } const vals = ms.map(x => tmmAt(x, L.tmmFuture)); t = { v: vals.reduce((s, x) => s + x.v, 0) / (vals.length || 1), est: vals.some(x => x.est), note: vals.some(x => x.est) ? "moyenne, dont mois estimés" : "moyenne" }; }
+  else t = tmmAt(L.tmmRef === "due" ? monthOf(end) : L.tmmRef === "start" ? monthOf(start) : prevMonth(monthOf(start)), L.tmmFuture);
+  let rate = t.v + num(L.margin); let floorNote = "";
+  if (L.floor !== "" && L.floor != null && num(L.floor) && rate < num(L.floor)) { rate = num(L.floor); floorNote = " (plancher)"; }
+  if (L.cap !== "" && L.cap != null && num(L.cap) && rate > num(L.cap)) { rate = num(L.cap); floorNote = " (plafond)"; }
+  return { rate, det: isNaN(t.v) ? "TMM inconnu" : `TMM ${fmtN(t.v)} %${t.note ? ` (${t.note})` : ""} + ${fmtN(L.margin)} % = ${fmtN(rate)} %${floorNote}`, est: t.est || isNaN(t.v) };
+}
+function interestFor(L, crd, start, end, step) {
+  const pr = periodRate(L, start, end); if (isNaN(pr.rate)) return { i: 0, det: pr.det, est: true };
+  const dc = L.dayCount || "prop"; const days = daysISO(start, end);
+  const frac = dc === "a360" ? days / 360 : dc === "a365" ? days / 365 : step / 12;
+  return { i: r3(crd * pr.rate / 100 * frac), det: `${pr.det}${dc === "prop" ? "" : ` · ${days} j`}`, est: pr.est };
+}
+/* ---- rémunération indexée sur le chiffre d'affaires ---- */
+function caAnnualVar(L, ca, year) {
+  const row = (ca || []).find(r => String(r.y) === String(year)); const rules = (L.caRules || []).filter(r => num(r.pct));
+  if (!rules.length) return { v: 0 };
+  if (!row) return { v: 0, det: `CA ${year} non renseigné`, est: true, missing: true };
+  let tot = 0; const parts = [];
+  for (const r of rules) { const base = r.seg ? num(row.segs?.[r.seg]) : num(row.total); const lo = num(r.from), hi = r.to === "" || r.to == null ? Infinity : num(r.to);
+    const slice = Math.max(0, Math.min(base, hi) - lo); const amt = slice * num(r.pct) / 100; tot += amt; parts.push(`${fmtN(r.pct)} % × ${r.seg ? r.seg : "CA"}${lo || hi !== Infinity ? ` (${fmtN(lo)}–${hi === Infinity ? "∞" : fmtN(hi)})` : ""}`); }
+  let note = ""; if (num(L.caCap) && tot > num(L.caCap)) { tot = num(L.caCap); note = " (plafonné)"; } if (num(L.caFloor) && tot < num(L.caFloor)) { tot = num(L.caFloor); note = " (minimum)"; }
+  return { v: tot, det: `CA ${year}${row.est ? " prév." : ""} : ${parts.join(" + ")}${note}`, est: !!row.est };
+}
+/* ---- moteur de calcul ---- */
+function schCompute(L, ca, opts = {}) {
+  const amount = num(L.amount), n = Math.max(1, Math.round(num(L.n))), step = (SCH_FREQ[L.freq] || SCH_FREQ.quarterly)[1], grace = Math.max(0, Math.round(num(L.grace)));
+  const start = L.start || todayISO(), first = L.first || addMonthsISO(start, step), method = L.method || "linear", pre = L.prepaid || "none";
+  const manualP = opts.manualP || [];
+  const dates = []; for (let k = 0; k < n; k++) dates.push(addMonthsISO(first, k * step));
+  const pStart = k => k === 0 ? start : dates[k - 1];
+  const locked = opts.locked || new Map();
+  // 1. capital
+  const princ = []; let crd = amount; const amortN = n - grace;
   for (let k = 0; k < n; k++) {
-    const d = addMonthsISO(first, k * step); const interest = crd * r; let princ = 0;
-    if (k >= grace) { if (p.method === "bullet") princ = k === n - 1 ? crd : 0; else if (p.method === "annuity") princ = k === n - 1 ? crd : annuity - interest; else princ = k === n - 1 ? crd : amount / amortN; }
-    princ = Math.round(princ * 1000) / 1000; const it = Math.round(interest * 1000) / 1000; crd = Math.round((crd - princ) * 1000) / 1000;
-    out.push({ d, p: princ, i: it });
+    const lk = locked.get(dates[k]); let p;
+    if (lk) p = num(lk.p);
+    else if (k < grace) p = 0;
+    else if (method === "manual") p = num(manualP[k]);
+    else if (method === "bullet") p = k === n - 1 ? crd : 0;
+    else if (method === "annuity") { const ir = interestFor(L, crd, pStart(k), dates[k], step); const rem = n - k; const rP = crd ? ir.i / crd : 0; p = k === n - 1 ? crd : (rP > 0 ? crd * rP / (1 - Math.pow(1 + rP, -rem)) - ir.i : crd / rem); }
+    else p = k === n - 1 ? crd : amount / amortN;
+    p = r3(Math.max(0, Math.min(p, crd))); princ.push(p); crd = r3(crd - p);
   }
-  return out;
+  // 2. intérêts
+  const rows = dates.map((d, k) => ({ d, p: princ[k], i: 0, v: 0, det: [], est: false }));
+  let crdBefore = amount; const crdAt = []; for (let k = 0; k < n; k++) { crdAt.push(crdBefore); crdBefore = r3(crdBefore - princ[k]); }
+  const pushDet = (row, t) => { if (t) row.det.push(t); };
+  if (pre === "none") rows.forEach((row, k) => { const ir = interestFor(L, crdAt[k], pStart(k), row.d, step); row.i = ir.i; pushDet(row, ir.det); row.est ||= ir.est; });
+  else {
+    const ints = rows.map((row, k) => interestFor(L, crdAt[k], pStart(k), row.d, step));
+    if (pre === "upfront") { const tot = r3(ints.reduce((s, x) => s + x.i, 0)); rows.unshift({ d: start, p: 0, i: tot, v: 0, det: ["Intérêts précomptés sur toute la durée"], est: ints.some(x => x.est), k: start + "#pre" }); }
+    else { rows.unshift({ d: start, p: 0, i: ints[0].i, v: 0, det: ["Intérêts précomptés période 1 · " + ints[0].det], est: ints[0].est, k: start + "#pre" });
+      for (let k = 0; k < n; k++) { const row = rows[k + 1]; if (k + 1 < n) { row.i = ints[k + 1].i; pushDet(row, `Intérêts précomptés période ${k + 2} · ${ints[k + 1].det}`); row.est ||= ints[k + 1].est; } } }
+  }
+  // 3. part indexée sur le CA
+  if ((L.caRules || []).some(r => num(r.pct))) {
+    const real = rows.filter(r => !String(r.k || "").endsWith("#pre")); const startIdx = Math.max(1, Math.round(num(L.caStart) || 1)) - 1;
+    const byYear = {}; real.forEach((r, idx) => { if (idx >= startIdx) (byYear[r.d.slice(0, 4)] ||= []).push(r); });
+    for (const [y, list] of Object.entries(byYear)) { const base = L.caBase === "same_year" ? +y : +y - 1; const a = caAnnualVar(L, ca, base);
+      const targets = L.caSplit === "once" ? [list[0]] : list; for (const r of targets) { r.v = r3(a.v / targets.length); pushDet(r, a.det + (targets.length > 1 ? ` ÷ ${targets.length}` : "")); r.est ||= !!a.est; } }
+  }
+  // 4. échéances déjà verrouillées (payées) : on garde les montants historiques
+  return rows.map(r => { const lk = locked.get(r.k || r.d); const base = lk ? { ...lk } : { d: r.d, p: r.p, i: r.i, v: r.v, det: r.det.join(" · "), ...(r.est ? { est: true } : {}) }; if (r.k) base.k = r.k; return base; });
+}
+function schSummary(o) {
+  const items = schItems(o), t = todayISO(); let paid = 0, crd = 0, lateN = 0, lateAmt = 0, next = null;
+  for (const it of items) { const st = o.done?.[schKey(o, it)]?.status || "todo";
+    if (st === "sent") paid++; else { crd += num(it.p); if (it.d < t) { lateN++; lateAmt += schAmt(it) - num(o.done?.[schKey(o, it)]?.paid); } else if (!next) next = it; } }
+  return { items, n: items.length, paid, crd, lateN, lateAmt, next, first: items[0]?.d, last: items[items.length - 1]?.d, est: items.some(it => it.est && (o.done?.[schKey(o, it)]?.status || "todo") !== "sent") };
 }
 function schParse(text) {
   const rows = [], errs = [];
   for (const [ln, raw] of String(text || "").split(/\r?\n/).entries()) {
     const line = raw.trim(); if (!line) continue;
-    const cells = line.split(/\t|;|\s{2,}|\|/).map(s => s.trim()).filter(s => s !== "");
-    if (!cells.length) continue;
+    const cells = line.split(/\t|;|\|/).map(s => s.trim());
     let d = cells[0], m;
     if ((m = d.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/))) d = `${m[3].length === 2 ? "20" + m[3] : m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) { if (ln === 0 || /date/i.test(line)) continue; errs.push(`ligne ${ln + 1} : date illisible « ${cells[0]} »`); continue; }
-    rows.push({ d, p: num(cells[1]), i: num(cells[2]), n: cells.slice(3).join(" ") });
+    rows.push({ d, p: num(cells[1]), i: num(cells[2]), v: num(cells[3]), n: cells.slice(4).join(" ").trim() });
   }
   return { rows: rows.sort((a, b) => a.d.localeCompare(b.d)), errs };
 }
-const schToText = items => items.map(it => [it.d.split("-").reverse().join("/"), fmtN(it.p).replace(/\s| | /g, ""), fmtN(it.i).replace(/\s| | /g, ""), it.n || ""].join(";").replace(/;$/, "")).join("\n");
+const schToText = items => items.map(it => [it.d.split("-").reverse().join("/"), ...[it.p, it.i, it.v].map(x => String(r3(num(x))).replace(".", ",")), String(it.n || "").replace(/[;\n]/g, ",")].join(";").replace(/;+$/, "")).join("\n");
 function schTable(o, opts = {}) {
-  const items = schItems(o), t = todayISO(), money0 = v => can("view_amounts") ? fmtN(v) : "•••"; let crd = items.reduce((s, it) => s + num(it.p), 0);
-  return `<div class="tablewrap"><table class="t sch-t"><thead><tr><th>N°</th><th>Date</th><th class="r">Capital</th><th class="r">Intérêts</th><th class="r">Total</th><th class="r">Capital restant dû</th><th>Statut</th>${opts.compact ? "" : "<th>Paiement</th>"}</tr></thead><tbody>
-    ${items.map((it, k) => { crd = Math.round((crd - num(it.p)) * 1000) / 1000; const key = schKey(o, it); const st = o.done?.[key] || {}; const x = { status: st.status || "todo", late: (st.status || "todo") !== "sent" && it.d < t }; const [lab, col] = schStatusLabel(x);
-      return `<tr class="click ${x.status === "sent" ? "sch-paid" : x.late ? "sch-late" : ""}" data-occ="${o.id}|${key}"><td class="num">${k + 1}</td><td>${fdate(it.d)}</td><td class="r num">${money0(it.p)}</td><td class="r num">${money0(it.i)}</td><td class="r num"><b>${money0(num(it.p) + num(it.i))}</b></td><td class="r num">${money0(crd)}</td><td>${chip(lab, col)}</td>${opts.compact ? "" : `<td style="font-size:12px">${st.paidDate ? fdate(st.paidDate) : ""}${st.paid && can("view_amounts") ? " · " + fmtN(st.paid) : ""}${x.status !== "sent" && canUpdateOcc(o) ? ` <button class="btn sm" data-dl-sent="${o.id}|${key}">Payé</button>` : ""}</td>`}</tr>`; }).join("")}
-    </tbody><tfoot><tr><th colspan="2">Total</th><th class="r num">${money0(items.reduce((s, it) => s + num(it.p), 0))}</th><th class="r num">${money0(items.reduce((s, it) => s + num(it.i), 0))}</th><th class="r num">${money0(items.reduce((s, it) => s + num(it.p) + num(it.i), 0))}</th><th colspan="${opts.compact ? 2 : 3}"></th></tr></tfoot></table></div>`;
+  const items = schItems(o), t = todayISO(), m0 = v => can("view_amounts") ? fmtN(v) : "•••"; let crd = items.reduce((s, it) => s + num(it.p), 0);
+  const hasV = items.some(it => num(it.v));
+  return `<div class="tablewrap"><table class="t sch-t"><thead><tr><th>N°</th><th>Date</th><th class="r">Capital</th><th class="r">Intérêts</th>${hasV ? '<th class="r">Part variable (CA)</th>' : ""}<th class="r">Total</th><th class="r">Capital restant dû</th><th>Statut</th>${opts.compact ? "" : "<th>Paiement</th>"}</tr></thead><tbody>
+    ${items.map((it, k) => { crd = r3(crd - num(it.p)); const key = schKey(o, it); const st = o.done?.[key] || {}; const x = { status: st.status || "todo", late: (st.status || "todo") !== "sent" && it.d < t }; const [lab, col] = schStatusLabel(x);
+      return `<tr class="click ${x.status === "sent" ? "sch-paid" : x.late ? "sch-late" : ""}" data-occ="${o.id}|${key}" title="${h(it.det || "")}"><td class="num">${k + 1}</td><td>${fdate(it.d)}${it.est && x.status !== "sent" ? ' <span class="sch-est" title="Montant estimé : TMM futur ou chiffre d\'affaires prévisionnel">estimé</span>' : ""}${it.det && !opts.compact ? `<div class="sch-det">${h(it.det)}</div>` : ""}</td>${it.noamt && !schAmt(it) ? `<td class="r muted" colspan="${hasV ? 4 : 3}">montant à saisir</td>` : `<td class="r num">${m0(it.p)}</td><td class="r num">${m0(it.i)}</td>${hasV ? `<td class="r num">${m0(it.v)}</td>` : ""}<td class="r num"><b>${m0(schAmt(it))}</b>${it.manual ? ' <span class="sch-est" style="color:#2F6FB0;background:color-mix(in oklab,#2F6FB0 12%,transparent)" title="Montant modifié à la main : non recalculé">manuel</span>' : ""}</td>`}<td class="r num">${m0(crd)}</td><td>${chip(lab, col)}</td>${opts.compact ? "" : `<td style="font-size:12px">${st.paidDate ? fdate(st.paidDate) : ""}${st.paid && can("view_amounts") ? " · " + fmtN(st.paid) : ""}${x.status !== "sent" && canUpdateOcc(o) ? ` <button class="btn sm" data-dl-sent="${o.id}|${key}">Payé</button>` : ""}</td>`}</tr>`; }).join("")}
+    </tbody><tfoot><tr><th colspan="2">Total</th><th class="r num">${m0(items.reduce((s, it) => s + num(it.p), 0))}</th><th class="r num">${m0(items.reduce((s, it) => s + num(it.i), 0))}</th>${hasV ? `<th class="r num">${m0(items.reduce((s, it) => s + num(it.v), 0))}</th>` : ""}<th class="r num">${m0(items.reduce((s, it) => s + schAmt(it), 0))}</th><th colspan="${opts.compact ? 2 : 3}"></th></tr></tfoot></table></div>`;
+}
+function schLoanText(L) {
+  if (!L || !L.amount) return "";
+  const rate = (L.rateType || "fixed") === "tmm" ? `TMM + ${fmtN(L.margin)} %${num(L.floor) ? `, plancher ${fmtN(L.floor)} %` : ""}` : `${fmtN(L.rate)} %`;
+  const ca = (L.caRules || []).filter(r => num(r.pct)).map(r => `${fmtN(r.pct)} % ${r.seg ? (/^ca\b/i.test(r.seg) ? "du " + r.seg : "du CA " + r.seg) : "du CA"}${num(r.from) || (r.to !== "" && r.to != null) ? ` (${fmtN(r.from)}–${r.to === "" || r.to == null ? "∞" : fmtN(r.to)})` : ""}`).join(" + ");
+  return `prêt de ${can("view_amounts") ? fmtN(L.amount) + " " + h(S.cfg.general.currency) : "—"} · ${rate}${ca ? " + " + ca : ""}${L.prepaid && L.prepaid !== "none" ? " · intérêts précomptés" : ""}`;
 }
 function schCard(o, open) {
   const s = schSummary(o), cur = S.cfg.general.currency, d = o.dossierId && dossierById(o.dossierId), L = o.rule.loan || {}, pct = s.n ? Math.round(s.paid / s.n * 100) : 0;
   const m = v => can("view_amounts") ? `${fmtN(v)} ${h(cur)}` : "Masqué";
   return `<details class="panel sch-card" ${open ? "open" : ""}><summary class="body"><div class="row" style="gap:10px;flex-wrap:nowrap;align-items:flex-start"><div class="grow" style="min-width:0">
-      <div class="row" style="gap:8px"><b style="font-size:15px">${h(schOwnerName(o))}</b>${s.lateN ? `<span class="chip" style="background:var(--bad-bg);color:var(--bad)">${s.lateN} impayé(s)</span>` : ""}${o.active === false ? '<span class="tag">Inactif</span>' : ""}</div>
-      <div class="muted" style="font-size:12px">${h(o.fund || "")}${d ? ` · ${h(d.code)}` : ""}${L.amount ? ` · prêt de ${m(L.amount)}${L.rate ? `, ${fmtN(L.rate)} %` : ""}${L.method ? ", " + h(SCH_METHOD[L.method] || "").toLowerCase() : ""}` : ""} · ${s.n} échéances ${s.first ? `du ${fdate(s.first)} au ${fdate(s.last)}` : ""}</div></div>
+      <div class="row" style="gap:8px"><b style="font-size:15px">${h(schOwnerName(o))}</b>${s.lateN ? `<span class="chip" style="background:var(--bad-bg);color:var(--bad)">${s.lateN} impayé(s)</span>` : ""}${s.est ? '<span class="sch-est">montants estimés</span>' : ""}${o.active === false ? '<span class="tag">Inactif</span>' : ""}</div>
+      <div class="muted" style="font-size:12px">${h(o.fund || "")}${d ? ` · ${h(d.code)}` : ""}${L.amount ? " · " + schLoanText(L) : ""} · ${s.n} échéances ${s.first ? `du ${fdate(s.first)} au ${fdate(s.last)}` : ""}</div></div>
       <div class="sch-kpi"><span>Capital restant dû</span><b>${m(s.crd)}</b></div>
-      <div class="sch-kpi"><span>Prochaine échéance</span><b>${s.next ? `${fdate(s.next.d)}` : "—"}</b>${s.next ? `<span class="muted">${m(num(s.next.p) + num(s.next.i))}</span>` : ""}</div>
+      <div class="sch-kpi"><span>Prochaine échéance</span><b>${s.next ? `${fdate(s.next.d)}` : "—"}</b>${s.next ? `<span class="muted">${m(schAmt(s.next))}</span>` : ""}</div>
       <div class="sch-kpi"><span>Remboursé</span><b>${s.paid}/${s.n}</b><span class="msbar" style="min-width:70px"><span style="width:${pct}%"></span></span></div></div></summary>
-    <div class="body" style="border-top:1px solid var(--line)">${s.lateN ? `<div class="banner warn" style="margin-bottom:10px">${s.lateN} échéance(s) impayée(s) pour ${m(s.lateAmt)}.</div>` : ""}${schTable(o)}
-      <div class="row" style="margin-top:10px">${d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : ""}${o.posRef ? `<button class="btn sm" data-pos="${h(o.posRef)}">Fiche de la ligne</button>` : ""}${isURL(o.url) ? linkBtn(o.url, "Contrat / dossier OneDrive") : ""}<span class="spacer"></span><button class="btn sm" data-sch-csv="${o.id}">Exporter (Excel)</button>${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier l'échéancier</button>` : ""}</div></div></details>`;
+    <div class="body" style="border-top:1px solid var(--line)">${s.lateN ? `<div class="banner warn" style="margin-bottom:10px">${s.lateN} échéance(s) impayée(s) pour ${m(s.lateAmt)}.</div>` : ""}${s.est ? `<p class="muted" style="font-size:12px;margin:0 0 8px">« estimé » : montant calculé avec un TMM futur (hypothèse) ou un chiffre d'affaires prévisionnel. Mettez à jour le TMM (Paramètres) ou le CA réel puis cliquez « Recalculer ».</p>` : ""}${schTable(o)}
+      <div class="row" style="margin-top:10px">${d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : ""}${o.posRef ? `<button class="btn sm" data-pos="${h(o.posRef)}">Fiche de la ligne</button>` : ""}${isURL(o.url) ? linkBtn(o.url, "Contrat / dossier OneDrive") : ""}<span class="spacer"></span><button class="btn sm" data-sch-csv="${o.id}">Exporter (Excel)</button>${canManageDl() && L.amount && can("view_amounts") ? `<button class="btn sm" data-sch-recalc="${o.id}" title="Recalcule les échéances non payées avec le TMM et le CA à jour">Recalculer</button>` : ""}${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier l'échéancier</button>` : ""}</div></div></details>`;
 }
 function vSchedules(refFilter) {
   const f = S.ui.dl || {};
   const list = visDeadlines().filter(isSched).filter(o => (!f.fund || o.fund === f.fund) && (!refFilter || schRefMatch(o, refFilter)));
-  if (!list.length) return `<div class="empty"><b>Aucun échéancier${refFilter ? " pour ce dossier" : ""}</b><span>Un échéancier regroupe toutes les échéances de remboursement d'un même crédit : saisissez les conditions (montant, taux, durée, périodicité, différé) ou collez le tableau d'amortissement depuis Excel.</span>${canManageDl() ? `<button class="btn pri" data-act7="sch-new">${ic("plus")}Nouvel échéancier</button>` : ""}</div>`;
-  const tot = list.reduce((a, o) => { const s = schSummary(o); a.crd += s.crd; a.late += s.lateAmt; a.lateN += s.lateN; const n30 = s.items.filter(it => (o.done?.[schKey(o, it)]?.status || "todo") !== "sent" && it.d >= todayISO() && it.d <= addDays(todayISO(), 30)); a.n30 += n30.reduce((x, it) => x + num(it.p) + num(it.i), 0); return a; }, { crd: 0, late: 0, lateN: 0, n30: 0 });
+  if (!list.length) return `<div class="empty"><b>Aucun échéancier${refFilter ? " pour ce dossier" : ""}</b><span>Un échéancier regroupe toutes les échéances de remboursement d'un même crédit. L'outil calcule chaque échéance : taux fixe ou TMM + marge, intérêts précomptés, rémunération indexée sur tout ou partie du chiffre d'affaires, différé, plancher… Vous pouvez aussi coller un tableau depuis Excel.</span>${canManageDl() ? `<button class="btn pri" data-act7="sch-new">${ic("plus")}Nouvel échéancier</button>` : ""}</div>`;
+  const tot = list.reduce((a, o) => { const s = schSummary(o); a.crd += s.crd; a.late += s.lateAmt; a.lateN += s.lateN; a.n30 += s.items.filter(it => (o.done?.[schKey(o, it)]?.status || "todo") !== "sent" && it.d >= todayISO() && it.d <= addDays(todayISO(), 30)).reduce((x, it) => x + schAmt(it), 0); return a; }, { crd: 0, late: 0, lateN: 0, n30: 0 });
   const cur = S.cfg.general.currency, m = v => can("view_amounts") ? `${fmtN(v)} <small>${h(cur)}</small>` : "Masqué";
   const groups = {}; for (const o of list) (groups[o.fund || "Sans fonds"] ||= []).push(o);
-  return `<div class="kpis"><div class="kpi"><span class="l">Échéanciers suivis</span><span class="v">${list.length}</span></div><div class="kpi"><span class="l">Capital restant dû</span><span class="v" style="font-size:20px">${m(tot.crd)}</span></div><div class="kpi"><span class="l">À encaisser sous 30 jours</span><span class="v" style="font-size:20px">${m(tot.n30)}</span></div><div class="kpi ${tot.lateN ? "alert" : ""}"><span class="l">Impayés</span><span class="v" style="font-size:20px">${tot.lateN ? m(tot.late) : "0"}</span><span class="l">${tot.lateN} échéance(s)</span></div></div>
+  const tl = tmmList(), lastT = tl[tl.length - 1];
+  return `<div class="kpis"><div class="kpi"><span class="l">Échéanciers suivis</span><span class="v">${list.length}</span><span class="l">${lastT ? `TMM ${h(lastT.m.split("-").reverse().join("/"))} : ${fmtN(lastT.v)} %` : "TMM non renseigné"}</span></div><div class="kpi"><span class="l">Capital restant dû</span><span class="v" style="font-size:20px">${m(tot.crd)}</span></div><div class="kpi"><span class="l">À encaisser sous 30 jours</span><span class="v" style="font-size:20px">${m(tot.n30)}</span></div><div class="kpi ${tot.lateN ? "alert" : ""}"><span class="l">Impayés</span><span class="v" style="font-size:20px">${tot.lateN ? m(tot.late) : "0"}</span><span class="l">${tot.lateN} échéance(s)</span></div></div>
     ${Object.entries(groups).map(([g, l]) => `<div class="eyebrow" style="margin:4px 0 -4px">${h(g)}</div>${l.sort((a, b) => schOwnerName(a).localeCompare(schOwnerName(b))).map(o => schCard(o, !!refFilter || list.length === 1)).join("")}`).join("")}`;
 }
 function schRefs() {
@@ -3027,69 +3118,298 @@ function schRefs() {
   return [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]));
 }
 const schRefMatch = (o, ref) => !ref || (ref.startsWith("d:") ? o.dossierId === ref.slice(2) : ref.startsWith("c:") ? o.company === ref.slice(2) : true);
+const lockedOf = o => new Map(schItems(o).filter(it => it.manual || (o.done?.[schKey(o, it)]?.status || "todo") === "sent").map(it => [schKey(o, it), it]));
+async function schRecalc(o) {
+  const L = o.rule.loan || {}; if (!L.amount || L.datesOnly) { toast("Cet échéancier n'a pas de conditions de calcul : saisissez les montants échéance par échéance."); return; }
+  const before = schItems(o).reduce((s, it) => s + schAmt(it), 0);
+  const items = schCompute(L, o.rule.ca || [], { locked: lockedOf(o), manualP: schItems(o).filter(it => !String(it.k || "").endsWith("#pre")).map(it => it.p) });
+  o.rule = { ...o.rule, items }; o.rule.computedAt = new Date().toISOString(); await putDoc("deadlines", o);
+  const after = items.reduce((s, it) => s + schAmt(it), 0);
+  await log(`Échéancier recalculé : ${schOwnerName(o)}`, { dossierId: o.dossierId || null });
+  toast(Math.abs(after - before) < 0.001 ? "Recalculé : aucun changement" : `Recalculé : total ${after > before ? "+" : ""}${fmtN(after - before)} ${S.cfg.general.currency}`); render();
+}
+/* ---- fenêtre de saisie ---- */
 function schModal(o0, preset = {}) {
   const isNew = !o0;
-  const o = o0 ? clone(o0) : { id: uid("dl"), title: "", type: (S.cfg.deadlineTypes || []).find(t => /rembours/i.test(t.label))?.id || (S.cfg.deadlineTypes || [])[0]?.id || "", fund: preset.fund || "", company: preset.company || "", posRef: preset.posRef || "", dossierId: preset.dossierId || "", recipient: "", owners: me() ? [me().id] : [], rule: { type: "schedule", items: [], loan: { amount: "", rate: "", start: todayISO(), n: 12, freq: "quarterly", method: "linear", grace: 0, first: "" } }, reminder: S.cfg.notify.dueSoonDays, amount: "", url: "", notes: "", active: true, done: {}, createdAt: todayISO() };
-  const Ln = o.rule.loan || {}; const debtPos = (S.cfg.funds || []).flatMap(f => (f.positions || []).map(p => ({ f, p }))).sort((a, b) => (a.p.kind === "debt" ? 0 : 1) - (b.p.kind === "debt" ? 0 : 1) || a.p.name.localeCompare(b.p.name));
-  const amtOk = can("view_amounts");
+  const o = o0 ? clone(o0) : { id: uid("dl"), title: "", type: (S.cfg.deadlineTypes || []).find(t => /rembours/i.test(t.label))?.id || (S.cfg.deadlineTypes || [])[0]?.id || "", fund: preset.fund || "", company: preset.company || "", posRef: preset.posRef || "", dossierId: preset.dossierId || "", recipient: "", owners: me() ? [me().id] : [], rule: { type: "schedule", items: [], loan: {}, ca: [] }, reminder: S.cfg.notify.dueSoonDays, amount: "", url: "", notes: "", active: true, done: {}, createdAt: todayISO() };
+  const L = { amount: "", start: todayISO(), n: 12, freq: "quarterly", method: "linear", grace: 0, first: "", rateType: "fixed", rate: "", margin: "", tmmRef: "prev", tmmFuture: "", floor: "", cap: "", dayCount: "prop", prepaid: "none", caRules: [], caBase: "prev_year", caSplit: "split", caStart: 1, caCap: "", caFloor: "", ...(o.rule.loan || {}) };
+  const CA = clone(o.rule.ca || []);
+  const debtPos = (S.cfg.funds || []).flatMap(f => (f.positions || []).map(p => ({ f, p }))).sort((a, b) => (a.p.kind === "debt" ? 0 : 1) - (b.p.kind === "debt" ? 0 : 1) || a.p.name.localeCompare(b.p.name));
+  const amtOk = can("view_amounts"); const sel = (id, map, v) => `<select id="${id}">${Object.entries(map).map(([k, l]) => `<option value="${k}" ${v === k ? "selected" : ""}>${l}</option>`).join("")}</select>`;
+  const tl = tmmList(), lastT = tl[tl.length - 1];
   const inner = `<div class="grid2"><label class="f"><span>Société / emprunteur</span><select id="sc-pos"><option value="">— saisir un nom —</option>${debtPos.map(({ f, p }) => `<option value="${f.id}|${p.id}" ${o.posRef === `${f.id}|${p.id}` ? "selected" : ""}>${h(p.name)} · ${h(f.name)}</option>`).join("")}</select></label>
       <label class="f"><span>Nom affiché</span><input type="text" id="sc-company" value="${h(o.company || "")}" placeholder="Ex. DAAM"></label></div>
     <div class="grid3"><label class="f"><span>Fonds</span><select id="sc-fund"><option value="">—</option>${vehicles().map(v => `<option ${o.fund === v ? "selected" : ""}>${h(v)}</option>`).join("")}</select></label>
       <label class="f"><span>Dossier lié (facultatif)</span><select id="sc-dossier"><option value="">—</option>${visDossiers().map(d => `<option value="${d.id}" ${o.dossierId === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
       <label class="f"><span>Intitulé</span><input type="text" id="sc-title" value="${h(o.title)}" placeholder="Remboursement du crédit…"></label></div>
-    ${amtOk ? `<div class="panel"><header><h2>Calculer à partir des conditions du crédit</h2></header><div class="body" style="display:flex;flex-direction:column;gap:10px">
-      <div class="grid3"><label class="f"><span>Montant du crédit (${h(S.cfg.general.currency)})</span><input type="number" id="sc-amount" value="${h(Ln.amount || "")}"></label>
-        <label class="f"><span>Taux annuel (%)</span><input type="number" step="0.01" id="sc-rate" value="${h(Ln.rate ?? "")}"></label>
-        <label class="f"><span>Date de décaissement</span><input type="date" id="sc-start" value="${h(Ln.start || todayISO())}"></label>
-        <label class="f"><span>Nombre d'échéances</span><input type="number" min="1" max="600" id="sc-n" value="${h(Ln.n || 12)}"></label>
-        <label class="f"><span>Périodicité</span><select id="sc-freq">${Object.entries(SCH_FREQ).map(([k, v]) => `<option value="${k}" ${(Ln.freq || "quarterly") === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select></label>
-        <label class="f"><span>Différé (échéances d'intérêts seuls)</span><input type="number" min="0" id="sc-grace" value="${h(Ln.grace || 0)}"></label>
-        <label class="f"><span>Mode de remboursement</span><select id="sc-method">${Object.entries(SCH_METHOD).map(([k, v]) => `<option value="${k}" ${(Ln.method || "linear") === k ? "selected" : ""}>${v}</option>`).join("")}</select></label>
-        <label class="f"><span>Première échéance (facultatif)</span><input type="date" id="sc-first" value="${h(Ln.first || "")}"></label></div>
-      <div><button class="btn" id="sc-calc">Calculer l'échéancier</button> <span class="muted" style="font-size:12px">Intérêts calculés sur le capital restant dû au taux périodique (taux annuel × durée de la période).</span></div></div></div>` : ""}
-    <label class="f"><span>Tableau d'amortissement — une ligne par échéance : <span class="mono">date ; capital ; intérêts ; commentaire</span>. Vous pouvez coller directement les colonnes depuis Excel.</span><textarea id="sc-text" rows="9" class="mono" style="font-size:12px" ${amtOk ? "" : "disabled"}>${h(schToText(schItems(o)))}</textarea></label>
-    <div id="sc-prev" class="muted" style="font-size:12.5px"></div>
+    ${amtOk ? `<div class="panel"><header><h2>1. Crédit</h2></header><div class="body grid3">
+        <label class="f"><span>Montant (${h(S.cfg.general.currency)})</span><input type="number" id="sc-amount" value="${h(L.amount)}"></label>
+        <label class="f"><span>Date de décaissement</span><input type="date" id="sc-start" value="${h(L.start)}"></label>
+        <label class="f"><span>Nombre d'échéances</span><input type="number" min="1" max="600" id="sc-n" value="${h(L.n)}"></label>
+        <label class="f"><span>Périodicité</span>${sel("sc-freq", Object.fromEntries(Object.entries(SCH_FREQ).map(([k, v]) => [k, v[0]])), L.freq)}</label>
+        <label class="f"><span>Différé (échéances sans capital)</span><input type="number" min="0" id="sc-grace" value="${h(L.grace)}"></label>
+        <label class="f"><span>Première échéance (facultatif)</span><input type="date" id="sc-first" value="${h(L.first)}"></label>
+        <label class="f" style="grid-column:1/-1"><span>Remboursement du capital</span>${sel("sc-method", SCH_METHOD, L.method)}</label></div></div>
+    <div class="panel"><header><h2>2. Taux et intérêts</h2></header><div class="body" style="display:flex;flex-direction:column;gap:10px">
+        <div class="seg" role="radiogroup"><button type="button" class="${L.rateType !== "tmm" ? "on" : ""}" data-sc-rt="fixed">Taux fixe</button><button type="button" class="${L.rateType === "tmm" ? "on" : ""}" data-sc-rt="tmm">Taux variable TMM + marge</button></div>
+        <div class="grid3"><label class="f" data-rt="fixed" ${L.rateType === "tmm" ? "hidden" : ""}><span>Taux annuel (%)</span><input type="number" step="0.001" id="sc-rate" value="${h(L.rate)}"></label>
+          <label class="f" data-rt="tmm" ${L.rateType === "tmm" ? "" : "hidden"}><span>Marge sur TMM (%)</span><input type="number" step="0.001" id="sc-margin" value="${h(L.margin)}"></label>
+          <label class="f" data-rt="tmm" ${L.rateType === "tmm" ? "" : "hidden"}><span>TMM retenu</span>${sel("sc-tmmref", SCH_TMMREF, L.tmmRef)}</label>
+          <label class="f" data-rt="tmm" ${L.rateType === "tmm" ? "" : "hidden"}><span>Hypothèse de TMM futur (%)</span><input type="number" step="0.001" id="sc-tmmf" value="${h(L.tmmFuture)}" placeholder="${lastT ? "dernier connu : " + fmtN(lastT.v) : "à renseigner"}"></label>
+          <label class="f" data-rt="tmm" ${L.rateType === "tmm" ? "" : "hidden"}><span>Taux plancher (%, facultatif)</span><input type="number" step="0.001" id="sc-floor" value="${h(L.floor)}"></label>
+          <label class="f" data-rt="tmm" ${L.rateType === "tmm" ? "" : "hidden"}><span>Taux plafond (%, facultatif)</span><input type="number" step="0.001" id="sc-cap" value="${h(L.cap)}"></label>
+          <label class="f"><span>Calcul des intérêts</span>${sel("sc-days", SCH_DAYS, L.dayCount)}</label>
+          <label class="f"><span>Paiement des intérêts</span>${sel("sc-pre", SCH_PREPAID, L.prepaid)}</label></div>
+        <p class="muted" data-rt="tmm" ${L.rateType === "tmm" ? "" : "hidden"} style="margin:0;font-size:12px">TMM connus : ${tl.length ? tl.slice(-4).map(x => `${x.m.split("-").reverse().join("/")} ${fmtN(x.v)} %`).join(" · ") : "aucun"}${can("settings") || can("deadlines") ? ` — <button class="linkish" type="button" id="sc-tmm-edit">mettre à jour l'historique du TMM</button>` : ""}</p></div></div>
+    <div class="panel"><header><h2>3. Rémunération indexée sur le chiffre d'affaires</h2><span class="spacer"></span><span class="muted" style="font-size:12px">facultatif</span></header><div class="body" style="display:flex;flex-direction:column;gap:10px">
+        <div id="sc-carules"></div><div><button class="btn sm" type="button" id="sc-addrule">${ic("plus")}Ajouter une composante</button> <span class="muted" style="font-size:12px">Ex. 1 % du CA total · 2 % du CA export · 0,5 % de la tranche de CA au-delà de 10 MTND</span></div>
+        <div class="grid3"><label class="f"><span>CA de référence</span>${sel("sc-cabase", { prev_year: "Exercice précédant l'échéance (N-1)", same_year: "Exercice de l'échéance (N)" }, L.caBase)}</label>
+          <label class="f"><span>Paiement</span>${sel("sc-casplit", { split: "Réparti sur les échéances de l'année", once: "En une fois à la 1re échéance de l'année" }, L.caSplit)}</label>
+          <label class="f"><span>À partir de l'échéance n°</span><input type="number" min="1" id="sc-castart" value="${h(L.caStart || 1)}"></label>
+          <label class="f"><span>Plafond annuel (facultatif)</span><input type="number" id="sc-cacap" value="${h(L.caCap)}"></label>
+          <label class="f"><span>Minimum annuel (facultatif)</span><input type="number" id="sc-cafloor" value="${h(L.caFloor)}"></label></div>
+        <div id="sc-catable"></div></div></div>
+    <div class="row"><button class="btn pri" id="sc-calc" type="button">Calculer l'échéancier</button><button class="btn" id="sc-dates" type="button" title="Crée seulement les dates ; les montants pourront être saisis plus tard, échéance par échéance">Dates seulement (sans montants)</button><span class="muted" style="font-size:12px">Les échéances déjà payées ou modifiées à la main ne sont jamais recalculées.</span></div>` : `<div class="panel"><header><h2>Dates des échéances</h2></header><div class="body grid3">
+        <label class="f"><span>Date de décaissement</span><input type="date" id="sc-start" value="${h(L.start)}"></label><label class="f"><span>Nombre d'échéances</span><input type="number" min="1" max="600" id="sc-n" value="${h(L.n)}"></label>
+        <label class="f"><span>Périodicité</span>${sel("sc-freq", Object.fromEntries(Object.entries(SCH_FREQ).map(([k, v]) => [k, v[0]])), L.freq)}</label><label class="f"><span>Première échéance (facultatif)</span><input type="date" id="sc-first" value="${h(L.first)}"></label>
+        <div style="grid-column:1/-1"><button class="btn pri" id="sc-dates" type="button">Créer les dates (sans montants)</button></div></div></div>`}
+    <details ${amtOk ? "" : "open"}><summary style="cursor:pointer;font-weight:600;font-size:13px">Tableau des échéances (modifiable, ou à coller depuis Excel : date ; capital ; intérêts ; part variable ; commentaire)</summary>
+      <textarea id="sc-text" rows="9" class="mono" style="font-size:12px;margin-top:8px" ${amtOk ? "" : "disabled"}>${h(schToText(schItems(o)))}</textarea></details>
+    <div id="sc-prev"></div>
     ${isNew ? `<label class="chk"><input type="checkbox" id="sc-pastpaid" checked>Considérer comme payées les échéances déjà passées</label>` : ""}
     <div><div class="eyebrow" style="margin-bottom:6px">Responsables du suivi</div><div class="row">${internals().map(m => `<label class="chk"><input type="checkbox" data-sc-owner="${m.id}" ${(o.owners || []).includes(m.id) ? "checked" : ""}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
     <div class="grid2"><label class="f"><span>Rappel (jours avant chaque échéance)</span><input type="number" id="sc-reminder" min="0" max="60" value="${h(o.reminder ?? 3)}"></label><label class="f"><span>Contrat / dossier OneDrive</span><input type="url" id="sc-url" value="${h(o.url || "")}" placeholder="https://…"></label></div>
     <label class="f"><span>Notes (garanties, covenants, conditions particulières)</span><textarea id="sc-notes" rows="2">${h(o.notes || "")}</textarea></label>
     <label class="chk"><input type="checkbox" id="sc-active" ${o.active !== false ? "checked" : ""}>Échéancier actif</label>`;
-  modal(isNew ? "Nouvel échéancier" : `Échéancier · ${schOwnerName(o)}`, inner, `${!isNew ? `<button class="btn danger" id="sc-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="sc-save">${isNew ? "Créer l'échéancier" : "Enregistrer"}</button>`, L => {
-    const prev = () => { if (!amtOk) { $("#sc-prev", L).textContent = `${schItems(o).length} échéances (montants masqués pour votre rôle).`; return; } const { rows, errs } = schParse($("#sc-text", L).value); const tp = rows.reduce((s, r) => s + r.p, 0), ti = rows.reduce((s, r) => s + r.i, 0);
-      $("#sc-prev", L).innerHTML = rows.length ? `<b>${rows.length} échéances</b> du ${fdate(rows[0].d)} au ${fdate(rows[rows.length - 1].d)} · capital ${fmtN(tp)} · intérêts ${fmtN(ti)} · total ${fmtN(tp + ti)} ${h(S.cfg.general.currency)}${errs.length ? `<div style="color:var(--bad)">${h(errs.slice(0, 3).join(" ; "))}</div>` : ""}` : (errs.length ? `<span style="color:var(--bad)">${h(errs.slice(0, 3).join(" ; "))}</span>` : "Aucune échéance pour l'instant : calculez-les ou collez le tableau."); };
-    const posSel = $("#sc-pos", L); posSel.onchange = () => { const [fid, pid] = posSel.value.split("|"); const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (p) { $("#sc-company", L).value = p.name; $("#sc-fund", L).value = f.name; if (p.dossierId) $("#sc-dossier", L).value = p.dossierId; if (!$("#sc-title", L).value) $("#sc-title", L).value = `Remboursement · ${p.name}`; if (amtOk && !$("#sc-amount", L).value && p.amount) $("#sc-amount", L).value = p.amount; } };
-    const cb = $("#sc-calc", L); cb && (cb.onclick = () => { const p = { amount: $("#sc-amount", L).value, rate: $("#sc-rate", L).value, start: $("#sc-start", L).value, n: $("#sc-n", L).value, freq: $("#sc-freq", L).value, method: $("#sc-method", L).value, grace: $("#sc-grace", L).value, first: $("#sc-first", L).value };
+  modal(isNew ? "Nouvel échéancier" : `Échéancier · ${schOwnerName(o)}`, inner, `${!isNew ? `<button class="btn danger" id="sc-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="sc-save">${isNew ? "Créer l'échéancier" : "Enregistrer"}</button>`, Lm => {
+    let rt = L.rateType === "tmm" ? "tmm" : "fixed"; let rules = clone(L.caRules || []); let computed = null;
+    const segs = () => [...new Set(rules.map(r => (r.seg || "").trim()).filter(Boolean))];
+    const syncRules = () => { rules = $$("[data-cr]", Lm).map(row => ({ label: "", seg: $("[data-crf=seg]", row).value.trim(), from: $("[data-crf=from]", row).value, to: $("[data-crf=to]", row).value, pct: $("[data-crf=pct]", row).value })); };
+    const syncCA = () => { $$("[data-ca]", Lm).forEach(row => { const y = row.dataset.ca; let r = CA.find(x => String(x.y) === y); if (!r) { r = { y, segs: {} }; CA.push(r); } r.total = $("[data-caf=total]", row).value; r.est = $("[data-caf=est]", row).checked; r.segs = r.segs || {}; $$("[data-caseg]", row).forEach(i => r.segs[i.dataset.caseg] = i.value); }); };
+    const drawRules = () => { const box = $("#sc-carules", Lm); if (!box) return;
+      box.innerHTML = rules.length ? `<table class="t sch-rules"><thead><tr><th>Assiette (vide = CA total, sinon nom de la partie du CA)</th><th>Tranche de</th><th>à</th><th>%</th><th></th></tr></thead><tbody>${rules.map((r, k) => `<tr data-cr="${k}"><td><input type="text" data-crf="seg" value="${h(r.seg || "")}" placeholder="CA total" list="sc-seglist"></td><td><input type="number" data-crf="from" value="${h(r.from ?? "")}" placeholder="0"></td><td><input type="number" data-crf="to" value="${h(r.to ?? "")}" placeholder="∞"></td><td><input type="number" step="0.001" data-crf="pct" value="${h(r.pct ?? "")}"></td><td><button class="btn sm ghost danger" type="button" data-crdel="${k}" aria-label="Retirer">${ic("trash")}</button></td></tr>`).join("")}</tbody></table><datalist id="sc-seglist">${segs().map(s => `<option value="${h(s)}">`).join("")}<option value="CA export"><option value="CA local"></datalist>` : '<p class="muted" style="margin:0;font-size:12.5px">Aucune composante : pas de rémunération indexée sur le CA.</p>'; drawCA(); };
+    const drawCA = () => { const box = $("#sc-catable", Lm); if (!box) return; Lm._caKey = segs().join("|") + "/" + rules.some(r => num(r.pct)); if (!rules.some(r => num(r.pct))) { box.innerHTML = ""; return; }
+      const start = $("#sc-start", Lm)?.value || todayISO(); const nY = Math.ceil((num($("#sc-n", Lm)?.value) || 12) * (SCH_FREQ[$("#sc-freq", Lm)?.value] || SCH_FREQ.quarterly)[1] / 12) + 2;
+      const y0 = +start.slice(0, 4) - 1; const years = [...new Set([...Array(nY)].map((_, k) => String(y0 + k)).concat(CA.map(r => String(r.y))))].sort(); const sg = segs();
+      box.innerHTML = `<div class="eyebrow" style="margin-bottom:6px">Chiffres d'affaires de la société</div><div class="tablewrap"><table class="t sch-rules"><thead><tr><th>Exercice</th><th>CA total</th>${sg.map(s => `<th>${h(s)}</th>`).join("")}<th>Prévisionnel</th></tr></thead><tbody>${years.map(y => { const r = CA.find(x => String(x.y) === y) || { segs: {} }; return `<tr data-ca="${y}"><td><b>${y}</b></td><td><input type="number" data-caf="total" value="${h(r.total ?? "")}"></td>${sg.map(s => `<td><input type="number" data-caseg="${h(s)}" value="${h(r.segs?.[s] ?? "")}"></td>`).join("")}<td><label class="chk"><input type="checkbox" data-caf="est" ${r.est ? "checked" : ""}>prév.</label></td></tr>`; }).join("")}</tbody></table></div><p class="muted" style="margin:6px 0 0;font-size:12px">Renseignez le CA réel dès qu'il est connu, puis « Recalculer » : les échéances non payées sont mises à jour.</p>`; };
+    const readL = () => ({ amount: $("#sc-amount", Lm).value, start: $("#sc-start", Lm).value, n: $("#sc-n", Lm).value, freq: $("#sc-freq", Lm).value, grace: $("#sc-grace", Lm).value, first: $("#sc-first", Lm).value, method: $("#sc-method", Lm).value,
+      rateType: rt, rate: $("#sc-rate", Lm).value, margin: $("#sc-margin", Lm).value, tmmRef: $("#sc-tmmref", Lm).value, tmmFuture: $("#sc-tmmf", Lm).value, floor: $("#sc-floor", Lm).value, cap: $("#sc-cap", Lm).value, dayCount: $("#sc-days", Lm).value, prepaid: $("#sc-pre", Lm).value,
+      caRules: rules.filter(r => num(r.pct)), caBase: $("#sc-cabase", Lm).value, caSplit: $("#sc-casplit", Lm).value, caStart: $("#sc-castart", Lm).value, caCap: $("#sc-cacap", Lm).value, caFloor: $("#sc-cafloor", Lm).value });
+    const prevTable = items => { const cur = S.cfg.general.currency; const hasV = items.some(it => num(it.v)); const tot = k => items.reduce((s, it) => s + num(it[k]), 0);
+      return `<div class="sch-prev"><b>${items.length} échéances</b> du ${fdate(items[0].d)} au ${fdate(items[items.length - 1].d)} · capital ${fmtN(tot("p"))} · intérêts ${fmtN(tot("i"))}${hasV ? ` · part variable ${fmtN(tot("v"))}` : ""} · <b>total ${fmtN(items.reduce((s, it) => s + schAmt(it), 0))} ${h(cur)}</b>${items.some(it => it.est) ? ' · <span class="sch-est">contient des estimations</span>' : ""}
+        <div class="tablewrap" style="max-height:260px;overflow:auto;margin-top:6px"><table class="t sch-t"><thead><tr><th>Date</th><th class="r">Capital</th><th class="r">Intérêts</th>${hasV ? '<th class="r">Variable</th>' : ""}<th class="r">Total</th><th>Détail du calcul</th></tr></thead><tbody>${items.map(it => `<tr><td>${fdate(it.d)}${it.est ? ' <span class="sch-est">est.</span>' : ""}</td><td class="r num">${fmtN(it.p)}</td><td class="r num">${fmtN(it.i)}</td>${hasV ? `<td class="r num">${fmtN(it.v)}</td>` : ""}<td class="r num"><b>${fmtN(schAmt(it))}</b></td><td class="sch-det">${h(it.det || it.n || "")}</td></tr>`).join("")}</tbody></table></div></div>`; };
+    const prev = () => { if (!amtOk) { $("#sc-prev", Lm).innerHTML = `<p class="muted">${schItems(o).length} échéances (montants masqués pour votre rôle).</p>`; return; }
+      if (computed) { $("#sc-prev", Lm).innerHTML = prevTable(computed); return; }
+      const { rows, errs } = schParse($("#sc-text", Lm).value); $("#sc-prev", Lm).innerHTML = rows.length ? prevTable(rows.map(r => ({ ...r, det: r.n }))) + (errs.length ? `<div style="color:var(--bad)">${h(errs.slice(0, 3).join(" ; "))}</div>` : "") : (errs.length ? `<span style="color:var(--bad)">${h(errs.slice(0, 3).join(" ; "))}</span>` : `<p class="muted" style="margin:0">Renseignez les conditions puis « Calculer l'échéancier », ou collez un tableau.</p>`); };
+    Lm.addEventListener("click", e => {
+      const b = e.target.closest("[data-sc-rt]"); if (b) { rt = b.dataset.scRt; $$("[data-sc-rt]", Lm).forEach(x => x.classList.toggle("on", x === b)); $$("[data-rt]", Lm).forEach(x => x.hidden = x.dataset.rt !== rt); return; }
+      const d = e.target.closest("[data-crdel]"); if (d) { syncRules(); syncCA(); rules.splice(+d.dataset.crdel, 1); drawRules(); return; }
+      if (e.target.closest("#sc-addrule")) { syncRules(); syncCA(); rules.push({ seg: "", from: "", to: "", pct: "" }); drawRules(); return; }
+      if (e.target.closest("#sc-tmm-edit")) { tmmModal(() => { computed = null; const p = $("#sc-prev", Lm); p && (p.innerHTML = '<p class="muted">TMM mis à jour : cliquez « Calculer l\'échéancier ».</p>'); }); return; }
+    });
+    Lm.addEventListener("change", e => { if (e.target.closest("[data-cr]")) { syncRules(); syncCA(); const key = segs().join("|") + "/" + rules.some(r => num(r.pct)); if (key !== Lm._caKey) { Lm._caKey = key; drawCA(); } } if (["sc-start", "sc-n", "sc-freq"].includes(e.target.id)) { syncCA(); drawCA(); } });
+    drawRules();
+    const posSel = $("#sc-pos", Lm); posSel.onchange = () => { const [fid, pid] = posSel.value.split("|"); const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (p) { $("#sc-company", Lm).value = p.name; $("#sc-fund", Lm).value = f.name; if (p.dossierId) $("#sc-dossier", Lm).value = p.dossierId; if (!$("#sc-title", Lm).value) $("#sc-title", Lm).value = `Remboursement · ${p.name}`; if (amtOk && !$("#sc-amount", Lm).value && p.amount) $("#sc-amount", Lm).value = p.amount; } };
+    const cb = $("#sc-calc", Lm); cb && (cb.onclick = () => { syncRules(); syncCA(); const p = readL();
       if (!num(p.amount) || !num(p.n)) { toast("Indiquez au moins le montant et le nombre d'échéances."); return; } if (num(p.grace) >= num(p.n)) { toast("Le différé doit être inférieur au nombre d'échéances."); return; }
-      $("#sc-text", L).value = schToText(schGenerate(p)); prev(); });
-    $("#sc-text", L).addEventListener("input", prev); prev();
-    $("#sc-save", L).onclick = async () => {
-      const company = $("#sc-company", L).value.trim(); const dossierId = $("#sc-dossier", L).value || ""; if (!company && !dossierId) { toast("Indiquez la société ou le dossier concerné."); return; }
-      let items = schItems(o);
-      if (amtOk) { const { rows, errs } = schParse($("#sc-text", L).value); if (errs.length) { toast("Corrigez le tableau : " + errs[0]); return; } if (!rows.length) { toast("L'échéancier est vide : calculez-le ou collez le tableau."); return; }
-        const keys = new Map(); items = rows.map(r => { let k = r.d; const c = (keys.get(r.d) || 0) + 1; keys.set(r.d, c); if (c > 1) k = `${r.d}#${c}`; return { d: r.d, p: r.p, i: r.i, n: r.n, ...(k !== r.d ? { k } : {}) }; }); }
-      const u = $("#sc-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
+      if (p.rateType === "fixed" && p.rate === "") { toast("Indiquez le taux annuel."); return; } if (p.rateType === "tmm" && p.margin === "") { toast("Indiquez la marge sur TMM (0 si aucune)."); return; }
+      if (p.rateType === "tmm" && !tmmList().length && p.tmmFuture === "") { toast("Aucun TMM connu : mettez à jour l'historique du TMM ou indiquez une hypothèse."); return; }
+      const manualP = p.method === "manual" ? schParse($("#sc-text", Lm).value).rows.map(r => r.p) : [];
+      if (p.method === "manual" && Math.abs(manualP.reduce((s, x) => s + x, 0) - num(p.amount)) > 1) toast(`Attention : le capital saisi (${fmtN(manualP.reduce((s, x) => s + x, 0))}) ne correspond pas au montant du crédit.`);
+      computed = schCompute(p, CA.filter(r => r.total !== "" || Object.values(r.segs || {}).some(v => v !== "")), { locked: isNew ? new Map() : lockedOf(o), manualP });
+      $("#sc-text", Lm).value = schToText(computed.map(it => ({ ...it, n: it.det }))); prev(); });
+    $("#sc-dates", Lm).onclick = () => { const n = Math.round(num($("#sc-n", Lm).value)), step = (SCH_FREQ[$("#sc-freq", Lm).value] || SCH_FREQ.quarterly)[1], start = $("#sc-start", Lm).value || todayISO(), first = $("#sc-first", Lm).value || addMonthsISO(start, step);
+      if (!n) { toast("Indiquez le nombre d'échéances."); return; }
+      computed = [...Array(n)].map((_, k) => ({ d: addMonthsISO(first, k * step), p: 0, i: 0, v: 0, noamt: true, det: "Montant à saisir" }));
+      Lm._datesOnly = { start, n, freq: $("#sc-freq", Lm).value, first: $("#sc-first", Lm).value, datesOnly: true };
+      if (amtOk) $("#sc-text", Lm).value = schToText(computed.map(it => ({ ...it, n: it.det }))); prev(); };
+    $("#sc-text", Lm).addEventListener("input", () => { computed = null; prev(); }); prev();
+    $("#sc-save", Lm).onclick = async () => {
+      const company = $("#sc-company", Lm).value.trim(); const dossierId = $("#sc-dossier", Lm).value || ""; if (!company && !dossierId) { toast("Indiquez la société ou le dossier concerné."); return; }
+      let items = schItems(o); let loan = o.rule.loan || {};
+      if (computed && computed.every(it => it.noamt)) { items = computed; loan = amtOk && num($("#sc-amount", Lm)?.value) ? { ...readL(), datesOnly: true } : (Lm._datesOnly || loan); }
+      else if (amtOk) {
+        syncRules(); syncCA();
+        if (computed) { items = computed; loan = readL(); }
+        else { const { rows, errs } = schParse($("#sc-text", Lm).value); if (errs.length) { toast("Corrigez le tableau : " + errs[0]); return; } if (!rows.length) { toast("L'échéancier est vide : calculez-le ou collez le tableau."); return; }
+          const keys = new Map(); items = rows.map(r => { let k = r.d; const c = (keys.get(r.d) || 0) + 1; keys.set(r.d, c); if (c > 1) k = `${r.d}#${c}`; const prevIt = schItems(o).find(x => schKey(o, x) === k); const changed = prevIt && (r3(num(prevIt.p)) !== r3(r.p) || r3(num(prevIt.i)) !== r3(r.i) || r3(num(prevIt.v)) !== r3(r.v)); const noamt = !r.p && !r.i && !r.v;
+            return { d: r.d, p: r.p, i: r.i, v: r.v, ...(r.n ? { det: r.n } : {}), ...(prevIt?.est && !changed && r.n === (prevIt.det || "") ? { est: true } : {}), ...(changed || prevIt?.manual ? { manual: true } : {}), ...(noamt ? { noamt: true } : {}), ...(k !== r.d ? { k } : {}) }; });
+          if (num($("#sc-amount", Lm).value)) loan = readL(); }
+      }
+      const u = $("#sc-url", Lm).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
       const live = isNew ? o : ((S.deadlines || []).find(y => y.id === o.id) || o);
-      const loan = amtOk && $("#sc-amount", L) ? { amount: $("#sc-amount", L).value, rate: $("#sc-rate", L).value, start: $("#sc-start", L).value, n: $("#sc-n", L).value, freq: $("#sc-freq", L).value, method: $("#sc-method", L).value, grace: $("#sc-grace", L).value, first: $("#sc-first", L).value } : (live.rule?.loan || {});
-      Object.assign(live, { title: $("#sc-title", L).value.trim() || `Remboursement · ${company || dossierById(dossierId)?.name || ""}`, company, posRef: $("#sc-pos", L).value || "", fund: $("#sc-fund", L).value, dossierId, owners: $$("[data-sc-owner]", L).filter(x => x.checked).map(x => x.dataset.scOwner), reminder: +$("#sc-reminder", L).value || 0, url: u, notes: $("#sc-notes", L).value, active: $("#sc-active", L).checked, rule: { type: "schedule", items, loan }, done: live.done || {} });
-      if (isNew && $("#sc-pastpaid", L)?.checked) for (const it of items) if (it.d < todayISO()) live.done[schKey(live, it)] = { status: "sent", at: new Date().toISOString(), by: me()?.id || null, note: "Antérieure à la création de l'échéancier" };
+      Object.assign(live, { title: $("#sc-title", Lm).value.trim() || `Remboursement · ${company || dossierById(dossierId)?.name || ""}`, company, posRef: $("#sc-pos", Lm).value || "", fund: $("#sc-fund", Lm).value, dossierId, owners: $$("[data-sc-owner]", Lm).filter(x => x.checked).map(x => x.dataset.scOwner), reminder: +$("#sc-reminder", Lm).value || 0, url: u, notes: $("#sc-notes", Lm).value, active: $("#sc-active", Lm).checked, rule: { type: "schedule", items, loan, ca: amtOk ? CA.filter(r => r.total !== "" || Object.values(r.segs || {}).some(v => v !== "")) : (o.rule.ca || []), computedAt: new Date().toISOString() }, done: live.done || {} });
+      if (isNew && $("#sc-pastpaid", Lm)?.checked) for (const it of items) if (it.d < todayISO()) live.done[schKey(live, it)] = { status: "sent", at: new Date().toISOString(), by: me()?.id || null, note: "Antérieure à la création de l'échéancier" };
       await putDoc("deadlines", live); await log(`${isNew ? "Échéancier créé" : "Échéancier modifié"} : ${schOwnerName(live)} (${items.length} échéances)`, { dossierId: live.dossierId || null });
-      L.remove(); toast(isNew ? "Échéancier créé" : "Échéancier enregistré"); S.ui.dl = { ...(S.ui.dl || {}), view: "schedules" }; saveUI(); if (S.view !== "deadlines") S.view = "deadlines"; render();
+      Lm.remove(); toast(isNew ? "Échéancier créé" : "Échéancier enregistré"); S.ui.dl = { ...(S.ui.dl || {}), view: "schedules" }; saveUI(); if (S.view !== "deadlines") S.view = "deadlines"; render();
     };
-    const del = $("#sc-del", L); del && (del.onclick = () => { L.remove(); confirmBox(`Supprimer l'échéancier de ${schOwnerName(o)} et l'historique des paiements ?`, "Supprimer", async () => { await delDoc("deadlines", o.id); toast("Échéancier supprimé"); render(); }); });
+    const del = $("#sc-del", Lm); del && (del.onclick = () => { Lm.remove(); confirmBox(`Supprimer l'échéancier de ${schOwnerName(o)} et l'historique des paiements ?`, "Supprimer", async () => { await delDoc("deadlines", o.id); toast("Échéancier supprimé"); render(); }); });
   }, true);
 }
+/* ---- historique du TMM ---- */
+function tmmModal(onSaved) {
+  const rows = clone(S.cfg.tmm || []).sort((a, b) => b.m.localeCompare(a.m));
+  const inner = `<p class="muted" style="margin:0;font-size:12.5px">Taux moyen mensuel du marché monétaire publié par la BCT. Pour un mois manquant, l'outil prend le dernier TMM connu ; pour les mois futurs, l'hypothèse saisie dans l'échéancier (ou à défaut le dernier TMM).</p>
+    <label class="f"><span>Une ligne par mois : <span class="mono">mois/année ; taux</span> (ex. 09/2026 ; 7)</span><textarea id="tmm-text" rows="12" class="mono">${h(rows.map(r => `${r.m.split("-").reverse().join("/")};${String(r.v).replace(".", ",")}`).join("\n"))}</textarea></label>`;
+  modal("Historique du TMM", inner, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="tmm-save">Enregistrer</button>`, L => {
+    $("#tmm-save", L).onclick = () => { const out = []; for (const line of $("#tmm-text", L).value.split(/\r?\n/)) { const m = line.trim().match(/^(\d{1,2})[\/.-](\d{4})\s*[;\t ]\s*([\d.,]+)/) || line.trim().match(/^(\d{4})-(\d{2})\s*[;\t ]\s*([\d.,]+)/); if (!m) continue; const ym = m[1].length === 4 ? `${m[1]}-${m[2]}` : `${m[2]}-${m[1].padStart(2, "0")}`; out.push({ m: ym, v: num(m[3]) }); }
+      S.cfg.tmm = [...new Map(out.map(x => [x.m, x])).values()].sort((a, b) => a.m.localeCompare(b.m)); L.remove(); saveCfg("TMM mis à jour"); onSaved && onSaved(); };
+  });
+}
 function schCsv(o) {
-  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`; let crd = schItems(o).reduce((s, it) => s + num(it.p), 0);
-  const rows = [["N°", "Date", "Capital", "Intérêts", "Total", "Capital restant dû", "Statut", "Date de paiement", "Montant payé", "Commentaire"]].concat(schItems(o).map((it, k) => { crd -= num(it.p); const st = o.done?.[schKey(o, it)] || {}; const x = { status: st.status || "todo", late: (st.status || "todo") !== "sent" && it.d < todayISO() };
-    return [k + 1, fdate(it.d), String(num(it.p)).replace(".", ","), String(num(it.i)).replace(".", ","), String(num(it.p) + num(it.i)).replace(".", ","), String(Math.round(crd * 1000) / 1000).replace(".", ","), schStatusLabel(x)[0], st.paidDate ? fdate(st.paidDate) : "", st.paid ? String(st.paid).replace(".", ",") : "", st.note || it.n || ""]; }));
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`; const c = v => String(r3(num(v))).replace(".", ","); let crd = schItems(o).reduce((s, it) => s + num(it.p), 0);
+  const rows = [["N°", "Date", "Capital", "Intérêts", "Part variable (CA)", "Total", "Capital restant dû", "Statut", "Estimé", "Détail du calcul", "Date de paiement", "Montant payé", "Commentaire"]].concat(schItems(o).map((it, k) => { crd -= num(it.p); const st = o.done?.[schKey(o, it)] || {}; const x = { status: st.status || "todo", late: (st.status || "todo") !== "sent" && it.d < todayISO() };
+    return [k + 1, fdate(it.d), c(it.p), c(it.i), c(it.v), c(schAmt(it)), c(crd), schStatusLabel(x)[0], it.est ? "oui" : "", it.det || "", st.paidDate ? fdate(st.paidDate) : "", st.paid ? c(st.paid) : "", st.note || it.n || ""]; }));
   saveFile(`echeancier-${schOwnerName(o).replace(/[^\p{L}\p{N}]+/gu, "-")}-${todayISO()}.csv`, "﻿" + rows.map(r => r.map(q).join(";")).join("\n"));
 }
-document.addEventListener("click", e => {
-  const el = e.target.closest("[data-act7],[data-sch-csv]"); if (!el) return;
+function sTmm() {
+  const tl = tmmList();
+  return `<div class="panel"><header><h2>Taux de référence (TMM)</h2><span class="spacer"></span><button class="btn sm" data-act7="tmm-edit">Mettre à jour</button></header><div class="body"><p class="muted" style="margin:0;font-size:12.5px">${tl.length ? `${tl.length} mois renseignés, dernier : ${h(tl[tl.length - 1].m.split("-").reverse().join("/"))} = ${fmtN(tl[tl.length - 1].v)} %. Utilisé par les échéanciers à taux variable.` : "Aucun TMM renseigné."}</p></div></div>`;
+}
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-act7],[data-sch-csv],[data-sch-recalc]"); if (!el) return;
   if (el.dataset.schCsv) { const o = (S.deadlines || []).find(x => x.id === el.dataset.schCsv); if (o) { if (!can("view_amounts")) { toast("Export réservé aux rôles qui voient les montants."); return; } schCsv(o); } return; }
+  if (el.dataset.schRecalc) { const o = (S.deadlines || []).find(x => x.id === el.dataset.schRecalc); if (o) await schRecalc(o); return; }
+  if (el.dataset.act7 === "tmm-edit") { tmmModal(() => render()); return; }
   if (el.dataset.act7 === "sch-new") { const ref = S.ui.dl?.ref || ""; const pre = {}; if (ref.startsWith("d:")) pre.dossierId = ref.slice(2); if (ref.startsWith("c:")) pre.company = ref.slice(2); if (el.dataset.schpos) { const [fid, pid] = el.dataset.schpos.split("|"); const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (p) Object.assign(pre, { posRef: el.dataset.schpos, company: p.name, fund: f.name, dossierId: p.dossierId || "" }); } $("#modal")?.remove(); schModal(null, pre); }
   if (el.dataset.act7 === "sch-show") { $$("#modal").forEach(x => x.remove()); S.view = "deadlines"; S.ui.dl = { ...(S.ui.dl || {}), view: "schedules", ref: el.dataset.ref || "" }; saveUI(); render(); }
 });
+
+/* ---------- réunion d'équipe personnalisable (modèles de réunion) ---------- */
+const MB_BUILTIN = { summary: "Synthèse INMA Capital", followup: "Suivi des actions de la dernière réunion", dossiers: "Avancement des dossiers (une diapositive par workflow)", funds: "Vue par fonds (portefeuille, pipeline, projets)", projects: "Projets transverses", deadlines: "Échéances et reportings", decisions: "Points de décision et d'attention" };
+const MB_TYPES = { text: "Texte libre (ordre du jour, message, consignes…)", kpis: "Indicateurs choisis", dossiers: "Liste de dossiers filtrée", tasks: "Liste de tâches filtrée", deadlines: "Échéances filtrées", projects: "Projets filtrés", schedules: "Remboursements et impayés (échéanciers)", link: "Lien vers un document (OneDrive, SharePoint, PowerPoint…)", ai: "Analyse de l'assistant IA (question préparée)" };
+const MB_KPIS = { dossiers: "Dossiers actifs", amount: "Montants en cours", pending: "Validations en attente", openTasks: "Tâches ouvertes", lateTasks: "Tâches en retard", doneSince: "Tâches terminées depuis la date", stagesSince: "Étapes franchies depuis la date", dl30: "Échéances à 30 jours", dlLate: "Échéances en retard", projects: "Projets en cours", projRed: "Projets en difficulté", positions: "Lignes en portefeuille", crd: "Capital restant dû (échéanciers)", cash30: "À encaisser sous 30 jours", unpaid: "Impayés (échéanciers)" };
+const mbDefault = () => ({ id: "mb_default", name: "Réunion d'équipe", slides: Object.keys(MB_BUILTIN).map(k => ({ id: "b_" + k, type: "b:" + k, on: true, title: "" })) });
+const mbBoards = () => (S.cfg.meetingBoards && S.cfg.meetingBoards.length) ? S.cfg.meetingBoards : [mbDefault()];
+const mbCurrent = () => { const l = mbBoards(); return l.find(b => b.id === S.ui.mt?.board) || l[0]; };
+const mbCanEdit = () => can("meetings") || can("settings");
+const mbFund = (mt, def) => def.fund || mt.fund || "";
+function mbKpiValue(k, mt, fundId) {
+  const t = todayISO(), since = mt.since || addDays(t, -7), fn = fundId ? fundById(fundId)?.name : "";
+  const ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn)); const tk = visTasks().filter(x => !fn || dossierById(x.dossierId)?.vehicle === fn);
+  const occ = () => dlOccAll(addDays(t, -200), addDays(t, 31)).filter(x => x.status !== "sent" && (!fn || x.o.fund === fn));
+  const sch = visDeadlines().filter(o => isSched(o) && (!fn || o.fund === fn)).map(schSummary);
+  const cur = S.cfg.general.currency, m = v => can("view_amounts") ? `${fmtN(v)} <small>${h(cur)}</small>` : "Masqué";
+  switch (k) {
+    case "dossiers": return [ds.length]; case "amount": return [m(ds.reduce((s, d) => s + num(d.amount), 0))]; case "pending": return [ds.filter(d => d.pendingApproval).length, ds.some(d => d.pendingApproval)];
+    case "openTasks": return [tk.filter(x => !isDone(x)).length]; case "lateTasks": { const n = tk.filter(x => !isDone(x) && x.due && x.due < t).length; return [n, n > 0]; }
+    case "doneSince": return [tk.filter(x => isDone(x) && (x.completedAt || "") >= since).length]; case "stagesSince": return [S.activity.filter(e => e.at >= since && /passe à l'étape/.test(e.text) && (!fn || dossierById(e.dossierId)?.vehicle === fn)).length];
+    case "dl30": return [occ().filter(x => !x.late && x.due <= addDays(t, 30)).length]; case "dlLate": { const n = occ().filter(x => x.late).length; return [n, n > 0]; }
+    case "projects": return [visProjects().filter(p => p.status !== "done" && (!fundId || p.scope === fundId)).length]; case "projRed": { const n = visProjects().filter(p => p.status !== "done" && p.health === "red" && (!fundId || p.scope === fundId)).length; return [n, n > 0]; }
+    case "positions": return [(S.cfg.funds || []).filter(f => !fundId || f.id === fundId).reduce((s, f) => s + livePositions(f).length, 0)];
+    case "crd": return [m(sch.reduce((s, x) => s + x.crd, 0))]; case "unpaid": { const a = sch.reduce((s, x) => s + x.lateAmt, 0); return [sch.some(x => x.lateN) ? m(a) : "0", a > 0]; }
+    case "cash30": return [m(visDeadlines().filter(o => isSched(o) && (!fn || o.fund === fn)).reduce((s, o) => s + schItems(o).filter(it => (o.done?.[schKey(o, it)]?.status || "todo") !== "sent" && it.d >= t && it.d <= addDays(t, 30)).reduce((x, it) => x + schAmt(it), 0), 0))];
+  }
+  return ["—"];
+}
+function mbCustomSlide(def, mt) {
+  const T = def.type, title = def.title || MB_TYPES[T] || "Diapositive", fid = mbFund(mt, def), fn = fid ? fundById(fid)?.name : "", t = todayISO();
+  const empty = msg => `<div class="panel"><div class="body"><p class="muted" style="margin:0">${msg}</p></div></div>`;
+  if (T === "text") return { title, sub: def.sub || "", html: `<div class="panel"><div class="body ai-a mb-text" style="border:0">${mdLite(def.body || "") || '<p class="muted">Texte vide : modifiez cette diapositive dans « Personnaliser ».</p>'}</div></div>` };
+  if (T === "kpis") { const ks = (def.kpis && def.kpis.length ? def.kpis : ["dossiers", "lateTasks", "dl30", "projects"]).filter(k => MB_KPIS[k]);
+    return { title, sub: fn || "", html: `<div class="kpis">${ks.map(k => { const [v, alert] = mbKpiValue(k, mt, fid); return `<div class="kpi ${alert ? "alert" : ""}"><span class="l">${h(MB_KPIS[k])}</span><span class="v" style="font-size:26px">${v}</span></div>`; }).join("")}</div>` }; }
+  if (T === "dossiers") { let ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn) && (!def.workflow || d.workflowId === def.workflow) && (!def.owner || d.ownerId === def.owner) && (!def.stage || aiNorm(stageOf(d)?.name).includes(aiNorm(def.stage))) && (!def.pending || d.pendingApproval) && (!def.late || S.tasks.some(x => x.dossierId === d.id && !isDone(x) && x.due && x.due < t)));
+    ds.sort(def.sort === "amount" ? (a, b) => num(b.amount) - num(a.amount) : def.sort === "recent" ? (a, b) => String(b.createdAt).localeCompare(String(a.createdAt)) : (a, b) => (wfById(b.workflowId)?.stages.findIndex(s => s.id === b.stageId) ?? 0) - (wfById(a.workflowId)?.stages.findIndex(s => s.id === a.stageId) ?? 0));
+    return { title, sub: `${ds.length} dossier(s)${fn ? " · " + fn : ""}`, html: ds.length ? `<div class="panel tablewrap"><table class="t mt-table"><thead><tr><th>Réf.</th><th>Dossier</th><th>Responsable</th><th style="min-width:180px">Avancement</th><th>Dans l'étape</th><th>Tâches</th><th>Prochaine action</th><th class="r">Montant</th></tr></thead><tbody>${ds.slice(0, 40).map(mtDossierRow).join("")}</tbody></table></div>` : empty("Aucun dossier ne correspond aux filtres de cette diapositive.") }; }
+  if (T === "tasks") { const who = def.assignee === "_me" ? me()?.id : def.assignee; let l = visTasks().filter(x => (!who || (x.assignees || []).includes(who)) && (!fn || dossierById(x.dossierId)?.vehicle === fn));
+    const st = def.status || "open"; l = l.filter(x => st === "done" ? isDone(x) && (x.completedAt || "") >= (mt.since || addDays(t, -7)) : !isDone(x) && (st === "late" ? x.due && x.due < t : st === "week" ? x.due && x.due <= addDays(t, 7) : true));
+    l.sort((a, b) => (a.due || "9").localeCompare(b.due || "9"));
+    return { title, sub: `${l.length} tâche(s)`, html: l.length ? `<div class="panel"><div class="body list">${l.slice(0, 40).map(taskLine).join("")}</div></div>` : empty("Aucune tâche ne correspond.") }; }
+  if (T === "deadlines") { const days = num(def.days) || 30; const l = dlOccAll(addDays(t, -200), addDays(t, days)).filter(x => x.status !== "sent" && (def.noLate ? !x.late : true) && (x.late || x.due <= addDays(t, days)) && (!fn || x.o.fund === fn) && (!def.dtype || x.o.type === def.dtype));
+    return { title, sub: `${def.noLate ? "" : "En retard et "}${days} prochains jours`, html: l.length ? `<div class="panel"><div class="body list">${l.slice(0, 40).map(occRow).join("")}</div></div>` : empty("Rien sur la période.") }; }
+  if (T === "projects") { const l = visProjects().filter(p => (!def.scope || p.scope === def.scope) && (def.all || p.status !== "done") && (!def.category || p.category === def.category));
+    return { title, sub: `${l.length} projet(s)`, html: l.length ? `<div class="prj-grid">${l.map(prjCard).join("")}</div>` : empty("Aucun projet ne correspond.") }; }
+  if (T === "schedules") { const l = visDeadlines().filter(o => isSched(o) && o.active !== false && (!fn || o.fund === fn)).map(o => ({ o, s: schSummary(o) })).sort((a, b) => b.s.lateN - a.s.lateN || (a.s.next?.d || "9").localeCompare(b.s.next?.d || "9"));
+    const m = v => can("view_amounts") ? fmtN(v) : "•••";
+    return { title, sub: fn || "Tous les fonds", html: l.length ? `<div class="panel tablewrap"><table class="t"><thead><tr><th>Société</th><th>Prochaine échéance</th><th class="r">Montant</th><th class="r">Capital restant dû</th><th>Remboursé</th><th>Impayés</th></tr></thead><tbody>${l.map(({ o, s }) => `<tr class="click" data-act7="sch-show" data-ref="${h(o.dossierId ? "d:" + o.dossierId : "c:" + (o.company || ""))}"><td><b>${h(schOwnerName(o))}</b><div class="muted" style="font-size:11.5px">${h(o.fund || "")}</div></td><td>${s.next ? fdate(s.next.d) : "—"}</td><td class="r num">${s.next ? m(schAmt(s.next)) : "—"}</td><td class="r num">${m(s.crd)}</td><td class="num">${s.paid}/${s.n}</td><td>${s.lateN ? `<span class="chip" style="background:var(--bad-bg);color:var(--bad)">${s.lateN} · ${m(s.lateAmt)}</span>` : '<span class="muted">—</span>'}</td></tr>`).join("")}</tbody></table></div>` : empty("Aucun échéancier.") }; }
+  if (T === "link") return { title, sub: def.note || "", html: `<div class="panel"><div class="body" style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">${def.note ? `<p style="margin:0">${h(def.note)}</p>` : ""}${isURL(def.url) ? `<a class="btn pri" href="${h(def.url)}" target="_blank" rel="noopener">${ic("ext")}${h(def.label || "Ouvrir le document")}</a>` : '<span class="muted">Aucun lien renseigné.</span>'}</div></div>` };
+  if (T === "ai") { const r = (S.mbAi || {})[def.id];
+    return { title, sub: def.prompt ? "Question : " + def.prompt.slice(0, 140) : "", html: `<div class="panel"><div class="body">${r?.busy ? '<span class="ai-dots"><i></i><i></i><i></i></span> <span class="muted">L\'assistant analyse les données…</span>' : r?.text ? `<div class="ai-a" style="border:0;padding:0">${mdLite(r.text)}</div>` : r?.err ? `<p style="color:var(--bad);margin:0">${h(r.err)}</p>` : '<p class="muted" style="margin:0">Analyse non générée.</p>'}
+      ${aiAllowed() && def.prompt ? `<div style="margin-top:10px"><button class="btn sm" data-mb-ai="${h(def.id)}" ${r?.busy ? "disabled" : ""}>${ic("spark")}${r?.text ? "Régénérer" : "Générer l'analyse"}</button></div>` : !def.prompt ? '<p class="muted">Aucune question préparée.</p>' : ""}</div></div>` }; }
+  return { title, html: empty("Type de diapositive inconnu.") };
+}
+function boardSlides(mt) {
+  const b = mbCurrent(); const out = [];
+  for (const def of b.slides || []) {
+    if (def.on === false) continue;
+    if (def.type.startsWith("b:")) { const key = def.type.slice(2); const secs = Object.fromEntries(Object.keys(MB_BUILTIN).map(k => [k, k === key ? 1 : 0]));
+      const l = meetingSlides({ ...mt, sections: secs }); if (def.title && l.length === 1) l[0].title = def.title; l.forEach((s, i) => s.id = `${def.id}-${i}`); out.push(...l); }
+    else { const s = mbCustomSlide(def, mt); s.id = def.id; out.push(s); }
+  }
+  return out;
+}
+async function mbRunAi(id) {
+  const def = mbCurrent().slides.find(x => x.id === id); if (!def?.prompt) return;
+  S.mbAi = S.mbAi || {}; S.mbAi[id] = { busy: true }; render(); if (S.present) drawPresent();
+  try {
+    await aiInit(); if (!S.ai.engine) throw { message: "L'assistant n'est pas disponible ici." };
+    const prompt = def.prompt + "\nRéponds de façon synthétique, prête à être présentée en réunion (titres courts, puces).";
+    const system = aiSystem(def.prompt);
+    let text;
+    if (S.ai.engine === "server") text = (await window.INMA.ai.chat({ system, messages: [{ role: "user", content: prompt }] })).text;
+    else text = (await S.ai.sample([{ role: "user", content: system }, { role: "user", content: prompt }], { cache: { gcTime: 3600000 } })).text;
+    S.mbAi[id] = { text: aiSplitActions(text).text };
+  } catch (e) { S.mbAi[id] = { err: e?.message || "Analyse impossible." }; }
+  render(); if (S.present) drawPresent();
+}
+/* ---- éditeur des modèles ---- */
+function mbParamsForm(d) {
+  const T = d.type; const f = (k, lab, inner) => `<label class="f"><span>${lab}</span>${inner}</label>`; const val = k => h(d[k] ?? "");
+  const fundSel = `<select data-mbp="fund"><option value="">Fonds choisi dans la barre (ou tous)</option>${(S.cfg.funds || []).map(x => `<option value="${x.id}" ${d.fund === x.id ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select>`;
+  const memSel = (k, extra) => `<select data-mbp="${k}"><option value="">Tous</option>${extra || ""}${internals().map(m => `<option value="${m.id}" ${d[k] === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select>`;
+  if (T.startsWith("b:")) return `<p class="muted" style="margin:0;font-size:12px">Section standard : seul le titre se modifie (pour les sections à une diapositive).</p>`;
+  if (T === "text") return `${f("sub", "Sous-titre", `<input type="text" data-mbp="sub" value="${val("sub")}">`)}${f("body", "Contenu (titres ##, listes -, **gras**)", `<textarea data-mbp="body" rows="6">${val("body")}</textarea>`)}`;
+  if (T === "kpis") return `<div class="row">${Object.entries(MB_KPIS).map(([k, l]) => `<label class="chk"><input type="checkbox" data-mbk="${k}" ${(d.kpis || []).includes(k) ? "checked" : ""}>${h(l)}</label>`).join("")}</div>${f("fund", "Fonds", fundSel)}`;
+  if (T === "dossiers") return `<div class="grid3">${f("workflow", "Workflow", `<select data-mbp="workflow"><option value="">Tous</option>${S.cfg.workflows.map(w => `<option value="${w.id}" ${d.workflow === w.id ? "selected" : ""}>${h(w.name)}</option>`).join("")}</select>`)}${f("fund", "Fonds", fundSel)}${f("owner", "Responsable", memSel("owner"))}${f("stage", "Étape (contient)", `<input type="text" data-mbp="stage" value="${val("stage")}" placeholder="Ex. Due diligence">`)}${f("sort", "Tri", `<select data-mbp="sort">${[["", "Du plus avancé au plus récent"], ["amount", "Montant décroissant"], ["recent", "Plus récents d'abord"]].map(([k, l]) => `<option value="${k}" ${(d.sort || "") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}</div><div class="row"><label class="chk"><input type="checkbox" data-mbb="pending" ${d.pending ? "checked" : ""}>Seulement en attente de validation</label><label class="chk"><input type="checkbox" data-mbb="late" ${d.late ? "checked" : ""}>Seulement avec des tâches en retard</label></div>`;
+  if (T === "tasks") return `<div class="grid3">${f("assignee", "Assignées à", memSel("assignee", `<option value="_me" ${d.assignee === "_me" ? "selected" : ""}>La personne qui présente</option>`))}${f("status", "Lesquelles", `<select data-mbp="status">${[["open", "Toutes les tâches ouvertes"], ["late", "En retard"], ["week", "À échéance sous 7 jours (et retards)"], ["done", "Terminées depuis la date"]].map(([k, l]) => `<option value="${k}" ${(d.status || "open") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("fund", "Fonds", fundSel)}</div>`;
+  if (T === "deadlines") return `<div class="grid3">${f("days", "Horizon (jours)", `<input type="number" data-mbp="days" value="${val("days") || 30}">`)}${f("dtype", "Type", `<select data-mbp="dtype"><option value="">Tous</option>${(S.cfg.deadlineTypes || []).map(x => `<option value="${x.id}" ${d.dtype === x.id ? "selected" : ""}>${h(x.label)}</option>`).join("")}</select>`)}${f("fund", "Fonds", fundSel)}</div><label class="chk"><input type="checkbox" data-mbb="noLate" ${d.noLate ? "checked" : ""}>Masquer les retards</label>`;
+  if (T === "projects") return `<div class="grid3">${f("scope", "Périmètre", `<select data-mbp="scope"><option value="">Tous</option><option value="inma" ${d.scope === "inma" ? "selected" : ""}>${h(scopeName("inma"))}</option>${(S.cfg.funds || []).map(x => `<option value="${x.id}" ${d.scope === x.id ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select>`)}${f("category", "Catégorie", `<select data-mbp="category"><option value="">Toutes</option>${(S.cfg.projectCategories || []).map(c => `<option ${d.category === c ? "selected" : ""}>${h(c)}</option>`).join("")}</select>`)}</div><label class="chk"><input type="checkbox" data-mbb="all" ${d.all ? "checked" : ""}>Inclure les projets terminés</label>`;
+  if (T === "schedules") return f("fund", "Fonds", fundSel);
+  if (T === "link") return `<div class="grid2">${f("url", "Lien (https://…)", `<input type="url" data-mbp="url" value="${val("url")}">`)}${f("label", "Texte du bouton", `<input type="text" data-mbp="label" value="${val("label")}" placeholder="Ouvrir le document">`)}</div>${f("note", "Commentaire", `<input type="text" data-mbp="note" value="${val("note")}">`)}`;
+  if (T === "ai") return `${f("prompt", "Question posée à l'assistant à chaque réunion", `<textarea data-mbp="prompt" rows="3" placeholder="Ex. Quels sont les 5 sujets prioritaires de la semaine et les risques sur le portefeuille INMA Finance ?">${val("prompt")}</textarea>`)}<p class="muted" style="margin:0;font-size:12px">L'analyse est générée à la demande pendant la réunion, avec les données que voit la personne qui présente.</p>`;
+  return "";
+}
+function mbEditor() {
+  if (!mbCanEdit()) return;
+  let boards = clone(mbBoards()); let cur = (boards.find(b => b.id === mbCurrent().id) || boards[0]).id; const open = new Set();
+  const B = () => boards.find(b => b.id === cur);
+  const sync = L => { const b = B(); const nm = $("#mb-name", L); if (nm) b.name = nm.value.trim() || b.name;
+    $$("[data-mbrow]", L).forEach(row => { const d = b.slides.find(x => x.id === row.dataset.mbrow); if (!d) return; d.on = $("[data-mbon]", row).checked; d.title = $("[data-mbtitle]", row).value;
+      $$("[data-mbp]", row).forEach(i => d[i.dataset.mbp] = i.value); $$("[data-mbb]", row).forEach(i => d[i.dataset.mbb] = i.checked); if ($$("[data-mbk]", row).length) d.kpis = $$("[data-mbk]", row).filter(i => i.checked).map(i => i.dataset.mbk); }); };
+  const draw = L => { const b = B();
+    $("#mb-body", L).innerHTML = `<div class="row" style="gap:8px"><label class="f" style="flex:1;min-width:180px"><span>Modèle de réunion</span><select id="mb-board">${boards.map(x => `<option value="${x.id}" ${x.id === cur ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select></label><label class="f" style="flex:1;min-width:180px"><span>Nom du modèle</span><input type="text" id="mb-name" value="${h(b.name)}"></label>
+        <div class="row" style="align-self:flex-end;gap:6px"><button class="btn sm" type="button" data-mb="new">Nouveau modèle</button><button class="btn sm" type="button" data-mb="dup">Dupliquer</button>${boards.length > 1 ? `<button class="btn sm danger" type="button" data-mb="delboard">Supprimer le modèle</button>` : ""}</div></div>
+      <div class="list mb-list">${b.slides.map((d, k) => `<div class="mb-row" data-mbrow="${h(d.id)}"><div class="row" style="gap:8px;flex-wrap:nowrap"><input type="checkbox" class="cb" data-mbon ${d.on !== false ? "checked" : ""} aria-label="Afficher"><span class="mt-num" style="font-size:11px;padding:3px 6px">${String(k + 1).padStart(2, "0")}</span>
+          <input type="text" data-mbtitle value="${h(d.title || "")}" placeholder="${h(d.type.startsWith("b:") ? MB_BUILTIN[d.type.slice(2)] : MB_TYPES[d.type] || "")}" style="flex:1;min-width:0">
+          <span class="tag" title="Type">${d.type.startsWith("b:") ? "Standard" : h((MB_TYPES[d.type] || "").split(" (")[0])}</span>
+          <button class="btn sm ghost" type="button" data-mbup="${k}" ${k === 0 ? "disabled" : ""} aria-label="Monter">▲</button><button class="btn sm ghost" type="button" data-mbdown="${k}" ${k === b.slides.length - 1 ? "disabled" : ""} aria-label="Descendre">▼</button>
+          <button class="btn sm ghost" type="button" data-mbopen="${h(d.id)}" aria-label="Réglages">${ic("gear")}</button><button class="btn sm ghost danger" type="button" data-mbdel="${k}" aria-label="Retirer">${ic("trash")}</button></div>
+        ${open.has(d.id) ? `<div class="mb-params">${mbParamsForm(d)}</div>` : ""}</div>`).join("")}</div>
+      <div class="row"><select id="mb-addtype" style="max-width:420px"><optgroup label="Diapositives personnalisées">${Object.entries(MB_TYPES).map(([k, l]) => `<option value="${k}">${h(l)}</option>`).join("")}</optgroup><optgroup label="Sections standard">${Object.entries(MB_BUILTIN).map(([k, l]) => `<option value="b:${k}">${h(l)}</option>`).join("")}</optgroup></select><button class="btn sm" type="button" data-mb="add">${ic("plus")}Ajouter la diapositive</button></div>`; };
+  modal("Personnaliser la réunion d'équipe", `<p class="muted" style="margin:0;font-size:12.5px">Choisissez les diapositives, leur ordre et leur contenu. Les modèles sont partagés avec l'équipe ; chacun choisit le modèle à afficher.</p><div id="mb-body" style="display:flex;flex-direction:column;gap:12px"></div>`,
+    `<button class="btn" type="button" data-mb="reset">Revenir au modèle standard</button><span class="spacer"></span><button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="mb-save">Enregistrer</button>`, L => {
+      draw(L);
+      L.addEventListener("change", e => { if (e.target.id === "mb-board") { sync(L); cur = e.target.value; draw(L); } });
+      L.addEventListener("click", e => { const t = e.target.closest("[data-mb],[data-mbup],[data-mbdown],[data-mbdel],[data-mbopen]"); if (!t) return; sync(L); const b = B(); const ds = t.dataset;
+        if (ds.mbup) { const k = +ds.mbup; [b.slides[k - 1], b.slides[k]] = [b.slides[k], b.slides[k - 1]]; }
+        if (ds.mbdown) { const k = +ds.mbdown; [b.slides[k + 1], b.slides[k]] = [b.slides[k], b.slides[k + 1]]; }
+        if (ds.mbdel) b.slides.splice(+ds.mbdel, 1);
+        if (ds.mbopen) { open.has(ds.mbopen) ? open.delete(ds.mbopen) : open.add(ds.mbopen); }
+        if (ds.mb === "add") { const ty = $("#mb-addtype", L).value; const d = { id: uid("sl"), type: ty, on: true, title: "" }; if (ty === "kpis") d.kpis = ["dossiers", "lateTasks", "dl30", "unpaid"]; b.slides.push(d); if (!ty.startsWith("b:")) open.add(d.id); }
+        if (ds.mb === "new") { const nb = { id: uid("mb"), name: "Nouveau modèle", slides: [] }; boards.push(nb); cur = nb.id; }
+        if (ds.mb === "dup") { const nb = { ...clone(b), id: uid("mb"), name: b.name + " (copie)" }; nb.slides.forEach(s => s.id = uid("sl")); boards.push(nb); cur = nb.id; }
+        if (ds.mb === "delboard" && boards.length > 1) { boards = boards.filter(x => x.id !== cur); cur = boards[0].id; }
+        if (ds.mb === "reset") { const nb = mbDefault(); Object.assign(b, { slides: nb.slides }); }
+        draw(L); });
+      $("#mb-save", L).onclick = () => { sync(L); S.cfg.meetingBoards = boards; S.ui.mt = { ...(S.ui.mt || {}), board: cur }; saveUI(); L.remove(); saveCfg("Réunion d'équipe personnalisée"); render(); };
+    }, true);
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-mb-ai],[data-act8]"); if (!el) return;
+  if (el.dataset.mbAi) { mbRunAi(el.dataset.mbAi); return; }
+  if (el.dataset.act8 === "mb-edit") mbEditor();
+});
+document.addEventListener("change", e => { if (e.target.id === "mt-board") { S.ui.mt = { ...(S.ui.mt || {}), board: e.target.value }; saveUI(); render(); } });
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
