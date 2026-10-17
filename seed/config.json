@@ -132,7 +132,8 @@
    "onedrive": true,
    "tasks": true,
    "team": true,
-   "funds": true
+   "funds": true,
+   "deadlines": true
   },
   "tagline": "Partenaire de votre développement",
   "weekStart": 1,
@@ -265,7 +266,8 @@
     "view_amounts": true,
     "workflows": true,
     "funds": true,
-    "externals": true
+    "externals": true,
+    "deadlines": true
    }
   },
   {
@@ -290,7 +292,8 @@
     "view_amounts": true,
     "workflows": true,
     "funds": true,
-    "externals": true
+    "externals": true,
+    "deadlines": true
    }
   },
   {
@@ -315,7 +318,8 @@
     "view_amounts": true,
     "workflows": true,
     "funds": true,
-    "externals": true
+    "externals": true,
+    "deadlines": true
    }
   },
   {
@@ -340,7 +344,8 @@
     "view_amounts": true,
     "workflows": false,
     "funds": false,
-    "externals": false
+    "externals": false,
+    "deadlines": true
    }
   },
   {
@@ -365,7 +370,8 @@
     "view_amounts": false,
     "workflows": false,
     "funds": false,
-    "externals": false
+    "externals": false,
+    "deadlines": false
    }
   },
   {
@@ -390,7 +396,8 @@
     "view_amounts": true,
     "workflows": false,
     "funds": false,
-    "externals": false
+    "externals": false,
+    "deadlines": true
    }
   },
   {
@@ -415,7 +422,8 @@
     "view_amounts": false,
     "workflows": false,
     "funds": false,
-    "externals": false
+    "externals": false,
+    "deadlines": false
    }
   }
  ],
@@ -1685,5 +1693,42 @@
   "Finance & comptabilité/États financiers",
   "Finance & comptabilité/Valorisation",
   "Juridique & conformité"
+ ],
+ "deadlineTypes": [
+  {
+   "id": "dt_investors",
+   "label": "Reporting bailleurs",
+   "color": "#E22529"
+  },
+  {
+   "id": "dt_portfolio",
+   "label": "Reporting participations",
+   "color": "#2F6FB0"
+  },
+  {
+   "id": "dt_valuation",
+   "label": "Valorisation",
+   "color": "#7A5BB0"
+  },
+  {
+   "id": "dt_repayment",
+   "label": "Remboursement / échéance de prêt",
+   "color": "#B7791F"
+  },
+  {
+   "id": "dt_covenant",
+   "label": "Covenants",
+   "color": "#8A6D3B"
+  },
+  {
+   "id": "dt_governance",
+   "label": "Gouvernance (CA, AG)",
+   "color": "#212121"
+  },
+  {
+   "id": "dt_regulatory",
+   "label": "Fiscal et réglementaire",
+   "color": "#2F8A5B"
+  }
  ]
 }

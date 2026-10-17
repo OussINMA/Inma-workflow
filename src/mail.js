@@ -10,6 +10,15 @@ async function graphAppToken(env) {
   return appToken.value;
 }
 // "graph" only when everything needed to send is present; otherwise invitations are shown on screen to forward by hand.
+export function mailMissing(env) {
+  const miss = [];
+  if (!env.AZURE_TENANT_ID) miss.push("AZURE_TENANT_ID");
+  if (!env.AZURE_CLIENT_ID) miss.push("AZURE_CLIENT_ID");
+  if (!env.MAIL_FROM) miss.push("MAIL_FROM");
+  if (!env.AZURE_CLIENT_SECRET || /^(aucun|none|-|x)$/i.test(String(env.AZURE_CLIENT_SECRET).trim())) miss.push("AZURE_CLIENT_SECRET");
+  if (env.MAIL_MODE && env.MAIL_MODE.toLowerCase() !== "graph") miss.push("MAIL_MODE (doit valoir graph)");
+  return miss;
+}
 export function mailMode(env) {
   const m = (env.MAIL_MODE || "graph").toLowerCase();
   const secretOk = env.AZURE_CLIENT_SECRET && !/^(aucun|none|-|x)$/i.test(String(env.AZURE_CLIENT_SECRET).trim());

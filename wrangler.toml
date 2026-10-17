@@ -3,6 +3,8 @@ name = "inma-workflow"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
 workers_dev = true
+# Conserver les variables saisies dans le tableau de bord Cloudflare à chaque nouveau déploiement
+keep_vars = true
 
 [assets]
 directory = "./public"
@@ -15,18 +17,8 @@ database_name = "inma-workflow"
 
 [vars]
 APP_NAME = "INMA Workflow"
-# Laisser vide : l'adresse est détectée automatiquement (https://inma-workflow.<compte>.workers.dev)
-APP_URL = ""
-# Accès administrateur complet (séparer par des virgules)
-ADMIN_EMAILS = ""
-# Microsoft Entra ID (gratuit avec Microsoft 365)
-AZURE_TENANT_ID = ""
-AZURE_CLIENT_ID = ""
-# Envoi des e-mails via Microsoft 365 dès que AZURE_CLIENT_SECRET et MAIL_FROM sont renseignés
 MAIL_MODE = "graph"
-MAIL_FROM = ""
-# true = charge les 10 dossiers de démonstration au premier démarrage
 SEED_DEMO = "true"
-SESSION_DAYS = "14"
-DEV_MODE = "false"
-# Secrets (jamais ici) : ADMIN_PASSWORD et AZURE_CLIENT_SECRET, saisis lors du déploiement ou dans Cloudflare › Paramètres › Variables et secrets
+# Les autres réglages se saisissent dans Cloudflare › inma-workflow › Paramètres › Variables et secrets :
+#   ADMIN_EMAILS, AZURE_TENANT_ID, AZURE_CLIENT_ID, MAIL_FROM (type Texte)
+#   ADMIN_PASSWORD, AZURE_CLIENT_SECRET (type Secret)

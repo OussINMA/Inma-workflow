@@ -1,7 +1,7 @@
 // INMA Workflow — Cloudflare Worker (free plan): API, sign-in, invitations. Static files are served from ./public.
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { context, snapshot, checkWrite, checkDelete, Denied, activeGrants } from "./acl.js";
-import { sendMail, inviteEmail, otpEmail, mailMode } from "./mail.js";
+import { sendMail, inviteEmail, otpEmail, mailMode, mailMissing } from "./mail.js";
 import seedConfig from "../seed/config.json";
 import seedDemo from "../seed/demo.json";
 
@@ -60,7 +60,7 @@ async function loadAll(env) {
   const v = await getVersion(env);
   if (cache.v === v && cache.all) return { all: cache.all, v };
   const { results } = await env.DB.prepare("select coll, id, data, version from docs").all();
-  const all = { cfg: null, dossiers: [], tasks: [], activity: [] };
+  const all = { cfg: null, dossiers: [], tasks: [], activity: [], deadlines: [] };
   for (const r of results) { const d = parseDoc(r); if (r.coll === "ws" && r.id === "config") all.cfg = d; else if (all[r.coll]) all[r.coll].push(d); }
   cache.v = v; cache.all = all;
   return { all, v };
@@ -158,7 +158,7 @@ async function api(req, env, url) {
 
   if (p === "/api/public-config") {
     await getConfig(env, origin);
-    return json({ appName: appName(env), appUrl, clientId: env.AZURE_CLIENT_ID || "", tenantId: env.AZURE_TENANT_ID || "", msEnabled: !!(env.AZURE_CLIENT_ID && env.AZURE_TENANT_ID), dev, mailReady, adminPassword: !!env.ADMIN_PASSWORD });
+    return json({ appName: appName(env), appUrl, clientId: env.AZURE_CLIENT_ID || "", tenantId: env.AZURE_TENANT_ID || "", msEnabled: !!(env.AZURE_CLIENT_ID && env.AZURE_TENANT_ID), dev, mailReady, mailMissing: mailMissing(env), adminPassword: !!env.ADMIN_PASSWORD });
   }
   if (p === "/api/auth/microsoft" && method === "POST") {
     if (!env.AZURE_CLIENT_ID || !env.AZURE_TENANT_ID) return fail(400, "Connexion Microsoft non configurée.");
@@ -230,13 +230,13 @@ async function api(req, env, url) {
   await getConfig(env, origin);
   const { all, v } = await loadAll(env);
   const c = context(user, all.cfg, adminList(env));
-  if (p === "/api/me") return json(snapshot(c, { dossiers: [], tasks: [], activity: [] }, v).me);
+  if (p === "/api/me") return json(snapshot(c, { dossiers: [], tasks: [], activity: [], deadlines: [] }, v).me);
   if (p === "/api/snapshot") return json(snapshot(c, all, v));
 
   const doc = p.match(/^\/api\/docs\/([\w-]+)\/([\w.:@+~-]{1,200})$/);
   if (doc && (method === "PUT" || method === "DELETE")) {
     const [, coll, id] = doc;
-    if (!["ws", "dossiers", "tasks", "activity", "claims"].includes(coll)) return fail(400, "Document inconnu.");
+    if (!["ws", "dossiers", "tasks", "activity", "claims", "deadlines"].includes(coll)) return fail(400, "Document inconnu.");
     const dossierOf = did => all.dossiers.find(d => d.id === did);
     if (coll === "claims") {
       if (method === "DELETE") {
@@ -292,7 +292,7 @@ async function api(req, env, url) {
     const role = (cfg.roles || []).find(r => r.id === m.roleId);
     try {
       await sendMail(env, { to: email, ...inviteEmail({ name: m.name, inviter: c.member?.name || user.name || "L'équipe INMA", roleLabel: role?.name, code, appUrl, appName: appName(env), external: !!m.external, items }) });
-      return json({ ok: true, sentTo: email, code, mode: env.DEV_MODE === "true" ? "dev" : mailMode(env) });
+      return json({ ok: true, sentTo: email, code, mode: env.DEV_MODE === "true" ? "dev" : mailMode(env), missing: mailMissing(env) });
     } catch (e) { return fail(502, "Invitation créée mais e-mail non envoyé : " + e.message, { code }); }
   }
   return fail(404, "Adresse inconnue.");

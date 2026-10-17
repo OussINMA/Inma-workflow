@@ -1,6 +1,6 @@
 // Access control: what each signed-in person may read and write. Pure functions (no I/O).
 export const ALL_PERMS = ["settings", "roles", "members", "workflows", "automations", "view_all", "view_amounts", "dossier_create", "dossier_edit_all",
-  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export"];
+  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines"];
 const CONFIG_PERMS = ["settings", "roles", "members", "workflows", "automations", "onedrive", "funds", "externals", "export"];
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -85,6 +85,7 @@ export function snapshot(c, all, version) {
     version,
     config: sanitizeConfig(c),
     dossiers, tasks, activity,
+    deadlines: c.isExt ? [] : (all.deadlines || []).map(o => c.can("view_amounts") ? o : (({ amount, ...rest }) => rest)(o)),
     claims: c.member ? [{ id: c.user.id, memberId: c.member.id, code: seesCodes ? (c.member.code || "") : "" }] : [],
     me: { userId: c.user.id, email: c.user.email, name: c.user.name, isAdmin: c.isAdmin, memberId: c.member?.id || null, external: c.isExt },
   };
@@ -151,6 +152,13 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     }
     return data;
   }
+  if (coll === "deadlines") {
+    if (c.isExt) throw new Denied();
+    if (c.isAdmin || c.can("deadlines")) { const out = { ...data }; if (!c.can("view_amounts") && existing) out.amount = existing.amount; return out; }
+    if (!existing) throw new Denied("Votre rôle ne permet pas de créer des échéances.");
+    if ((existing.owners || []).includes(c.member?.id)) return { ...existing, done: data.done || existing.done };
+    throw new Denied("Seuls les responsables de cette échéance peuvent la mettre à jour.");
+  }
   if (coll === "activity") {
     if (existing) throw new Denied();
     return { ...data, by: c.member?.id || null };
@@ -159,6 +167,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
 }
 
 export function checkDelete(c, coll, existing, dossierOf) {
+  if (coll === "deadlines") { if (c.isExt || !(c.isAdmin || c.can("deadlines"))) throw new Denied("Votre rôle ne permet pas de supprimer des échéances."); return; }
   if (coll === "dossiers") { if (c.isExt || !c.can("dossier_delete")) throw new Denied("Votre rôle ne permet pas de supprimer des dossiers."); return; }
   if (coll === "tasks") {
     if (!existing) return;
