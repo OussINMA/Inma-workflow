@@ -1,6 +1,6 @@
 // Access control: what each signed-in person may read and write. Pure functions (no I/O).
 export const ALL_PERMS = ["settings", "roles", "members", "workflows", "automations", "view_all", "view_amounts", "dossier_create", "dossier_edit_all",
-  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects"];
+  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects", "meetings"];
 const CONFIG_PERMS = ["settings", "roles", "members", "workflows", "automations", "onedrive", "funds", "externals", "export"];
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -18,6 +18,16 @@ export function context(user, cfg, adminEmails) {
 export const activeGrants = m => (m?.grants || []).filter(g => !g.until || g.until >= today());
 const grantFor = (c, kind, id) => activeGrants(c.member).find(g => g.kind === kind && g.id === id) || null;
 
+export function canSeeMeeting(c, m) {
+  if (!m || c.isExt) return false;
+  if (c.isAdmin) return true;
+  const id = c.member?.id; if (!id) return false;
+  if (m.createdBy === id || m.secretaryId === id || (m.participants || []).includes(id)) return true;
+  if (!m.visibility || m.visibility === "all") return true;
+  if (m.visibility === "roles") return (m.roles || []).includes(c.member.roleId);
+  return false;
+}
+const canEditMeeting = (c, m) => canSeeMeeting(c, m) && (c.isAdmin || c.can("meetings") || m.createdBy === c.member?.id || m.secretaryId === c.member?.id);
 export function canSeeDossier(c, d) {
   if (!d) return false;
   if (c.isExt) return !!grantFor(c, "dossier", d.id);
@@ -88,6 +98,7 @@ export function snapshot(c, all, version) {
     config: sanitizeConfig(c),
     dossiers, tasks, activity,
     projects: c.isExt ? [] : (all.projects || []),
+    meetings: (all.meetings || []).filter(m => canSeeMeeting(c, m)),
     deadlines: c.isExt ? [] : (all.deadlines || []).map(o => c.can("view_amounts") ? o : (({ amount, ...rest }) => rest)(o)),
     claims: c.member ? [{ id: c.user.id, memberId: c.member.id, code: seesCodes ? (c.member.code || "") : "" }] : [],
     me: { userId: c.user.id, email: c.user.email, name: c.user.name, isAdmin: c.isAdmin, memberId: c.member?.id || null, external: c.isExt },
@@ -166,6 +177,15 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     if ((existing.owners || []).includes(c.member?.id)) return { ...existing, done: data.done || existing.done };
     throw new Denied("Seuls les responsables de cette échéance peuvent la mettre à jour.");
   }
+  if (coll === "meetings") {
+    if (c.isExt) throw new Denied();
+    if (!existing) {
+      if (!(c.isAdmin || c.can("meetings"))) throw new Denied("Votre rôle ne permet pas de rédiger des comptes rendus.");
+      return { ...data, createdBy: c.member?.id || data.createdBy || null };
+    }
+    if (!canEditMeeting(c, existing)) throw new Denied("Vous ne pouvez pas modifier ce compte rendu.");
+    return { ...data, createdBy: existing.createdBy };
+  }
   if (coll === "projects") {
     if (c.isExt) throw new Denied();
     if (c.isAdmin || c.can("projects")) return data;
@@ -184,6 +204,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
 
 export function checkDelete(c, coll, existing, dossierOf) {
   if (coll === "deadlines") { if (c.isExt || !(c.isAdmin || c.can("deadlines"))) throw new Denied("Votre rôle ne permet pas de supprimer des échéances."); return; }
+  if (coll === "meetings") { if (c.isExt || !(c.isAdmin || (c.can("meetings") && canSeeMeeting(c, existing)))) throw new Denied("Votre rôle ne permet pas de supprimer ce compte rendu."); return; }
   if (coll === "projects") { if (c.isExt || !(c.isAdmin || c.can("projects"))) throw new Denied("Votre rôle ne permet pas de supprimer des projets."); return; }
   if (coll === "dossiers") { if (c.isExt || !c.can("dossier_delete")) throw new Denied("Votre rôle ne permet pas de supprimer des dossiers."); return; }
   if (coll === "tasks") {

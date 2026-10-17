@@ -60,7 +60,7 @@ async function loadAll(env) {
   const v = await getVersion(env);
   if (cache.v === v && cache.all) return { all: cache.all, v };
   const { results } = await env.DB.prepare("select coll, id, data, version from docs").all();
-  const all = { cfg: null, dossiers: [], tasks: [], activity: [], deadlines: [], projects: [] };
+  const all = { cfg: null, dossiers: [], tasks: [], activity: [], deadlines: [], projects: [], meetings: [] };
   for (const r of results) { const d = parseDoc(r); if (r.coll === "ws" && r.id === "config") all.cfg = d; else if (all[r.coll]) all[r.coll].push(d); }
   cache.v = v; cache.all = all;
   return { all, v };
@@ -230,13 +230,13 @@ async function api(req, env, url) {
   await getConfig(env, origin);
   const { all, v } = await loadAll(env);
   const c = context(user, all.cfg, adminList(env));
-  if (p === "/api/me") return json(snapshot(c, { dossiers: [], tasks: [], activity: [], deadlines: [], projects: [] }, v).me);
+  if (p === "/api/me") return json(snapshot(c, { dossiers: [], tasks: [], activity: [], deadlines: [], projects: [], meetings: [] }, v).me);
   if (p === "/api/snapshot") return json(snapshot(c, all, v));
 
   const doc = p.match(/^\/api\/docs\/([\w-]+)\/([\w.:@+~-]{1,200})$/);
   if (doc && (method === "PUT" || method === "DELETE")) {
     const [, coll, id] = doc;
-    if (!["ws", "dossiers", "tasks", "activity", "claims", "deadlines", "projects"].includes(coll)) return fail(400, "Document inconnu.");
+    if (!["ws", "dossiers", "tasks", "activity", "claims", "deadlines", "projects", "meetings"].includes(coll)) return fail(400, "Document inconnu.");
     const dossierOf = did => all.dossiers.find(d => d.id === did);
     if (coll === "claims") {
       if (method === "DELETE") {

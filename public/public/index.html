@@ -324,6 +324,17 @@ pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:
 #present .pdots button{width:9px;height:9px;border-radius:50%;border:0;background:var(--line);cursor:pointer;padding:0}
 #present .pdots button.on{background:var(--accent);width:22px;border-radius:5px}
 @media print{.rail,.mobilenav,.topbar,.toolbar,#present,.btn{display:none!important}.app{display:block}.content{padding:0}.mt-slide{break-after:page;border:0}.dash{grid-template-columns:1fr 1fr}body{background:#fff}}
+.mt-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:4px;overflow-x:auto}
+.mt-tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.mt-tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.mt-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.mt-line .grow{flex:1 1 220px;min-width:0}
+.mt-point{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.mt-text{white-space:pre-wrap;font-size:13.5px;line-height:1.5}
+.mj-row{cursor:pointer}.mj-row:hover{background:var(--surface-2)}
+.mj-date{display:flex;flex-direction:column;align-items:center;min-width:44px;border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--surface)}
+.mj-date b{font-family:var(--f-mono);font-size:17px;line-height:1.1}.mj-date span{font-size:10.5px;text-transform:uppercase;color:var(--accent);font-weight:700}
+.linkish{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:var(--line);cursor:pointer}
+@media print{.mt-tabs{display:none!important}details.panel{display:none}}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
 </style>
 
@@ -390,7 +401,7 @@ const PERMS = [
   ["workflows","Workflows, champs & statuts"],["automations","Automatisations"],["view_all","Voir tous les dossiers"],
   ["view_amounts","Voir les montants"],["dossier_create","Créer des dossiers"],["dossier_edit_all","Modifier tous les dossiers"],
   ["dossier_delete","Supprimer / archiver"],["stage_advance","Faire avancer les étapes"],["stage_approve","Valider les étapes soumises à approbation"],
-  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"]
+  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["meetings","Rédiger les comptes rendus de réunion"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"]
 ];
 const ALL = Object.fromEntries(PERMS.map(p => [p[0], true]));
 const pset = keys => Object.fromEntries(PERMS.map(p => [p[0], keys.includes(p[0])]));
@@ -404,10 +415,10 @@ const DEFAULT_CFG = () => fixIds({
     modules: { dashboard: true, meeting: true, funds: true, projects: true, deadlines: true, dossiers: true, tasks: true, calendar: true, team: true, onedrive: true } },
   roles: [
     { id: "r_partner", name: "Associé", color: "#E22529", perms: { ...ALL } },
-    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","onedrive","export","workflows","automations","funds","externals","deadlines","projects"]) },
-    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","onedrive","export","deadlines","projects"]) },
+    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","onedrive","export","workflows","automations","funds","externals","deadlines","projects","meetings"]) },
+    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","onedrive","export","deadlines","projects","meetings"]) },
     { id: "r_junior", name: "Analyste junior", color: "#7A5BB0", perms: pset(["view_all","task_create","onedrive"]) },
-    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","onedrive","export","members","deadlines","projects"]) },
+    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","onedrive","export","members","deadlines","projects","meetings"]) },
     { id: "r_guest", name: "Invité externe", color: "#7B8794", perms: pset([]) }
   ],
   teams: ["Direction Générale","Investissement","Financement (dette privée)","Finance & Comptabilité","Juridique","Ressources Humaines","Informatique","Support"],
@@ -485,6 +496,7 @@ const DEFAULT_CFG = () => fixIds({
   fundTypes: ["Fonds propres & quasi-fonds propres", "Dette privée", "Multi-instruments", "SICAR", "FCPR"],
   fundFields: [ { id: "ff_ticket", label: "Ticket", type: "text", options: [] }, { id: "ff_dur", label: "Durée d'investissement", type: "text", options: [] }, { id: "ff_size", label: "Taille cible", type: "currency", options: [] }, { id: "ff_backers", label: "Bailleurs de fonds", type: "text", options: [] } ],
   fundTemplate: ["Gouvernance/Statuts & pacte", "Gouvernance/Conseils d'administration", "Gouvernance/Assemblées générales", "Investisseurs & bailleurs/Engagements & souscriptions", "Investisseurs & bailleurs/Reporting investisseurs", "Comité d'investissement/Notes", "Comité d'investissement/PV", "Pipeline [dossiers]", "Portefeuille", "Finance & comptabilité/États financiers", "Finance & comptabilité/Valorisation", "Juridique & conformité"],
+  meetingTypes: [ { id: "mt_weekly", label: "Réunion d'équipe", color: "#E22529" }, { id: "mt_ic", label: "Comité d'investissement", color: "#212121" }, { id: "mt_credit", label: "Comité de crédit", color: "#2F6FB0" }, { id: "mt_board", label: "Conseil / AG", color: "#8A6D3B" }, { id: "mt_other", label: "Autre réunion", color: "#7B8794" } ],
   projectCategories: ["ESG", "Organisation & outils", "Levée de fonds", "Gouvernance", "Reporting investisseurs", "Conformité", "Communication", "Ressources humaines"],
   funds: [
     { id: "f_holding", name: "INMA Holding", status: "fs_active", type: "Fonds propres & quasi-fonds propres", year: "2018", color: "#E22529", url: "",
@@ -508,7 +520,7 @@ const DEFAULT_CFG = () => fixIds({
 function fixIds(c) { c.workflows.forEach(w => w.stages.forEach((s, i) => s.id = w.id + "_s" + (i + 1))); c.automations.forEach((a, i) => a.id = "a_def_" + (i + 1)); return c; }
 /* ---------- state ---------- */
 const S = {
-  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [], projects: [],
+  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [], projects: [], meetings: [], mtDraft: null,
   mode: "loading", db: null, user: null, uid: null, isOwner: false, canEditArtifact: false, downloads: null,
   view: "dashboard", sim: null, ui: store.get("inma-wf-ui", { dView: "kanban", tView: "list", wf: "all", calMonth: null, filters: {}, cols: ["code","name","stage","owner","amount","due","prio"], stab: "general" }),
   openDossier: null, inboxOpen: false
@@ -517,7 +529,7 @@ const saveUI = () => store.set("inma-wf-ui", S.ui);
 
 /* ---------- persistence ---------- */
 const LOCAL_KEY = "inma-wf-local-v1";
-function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, activity: S.activity.slice(0, 300) }); }
+function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, activity: S.activity.slice(0, 300) }); }
 let cfgTimer;
 function saveCfg(msg) {
   applyBranding();
@@ -627,8 +639,8 @@ function applyPrefs() {
   if (p.density) r.style.setProperty("--density", p.density);
 }
 function migrateCfg(raw) {
-  if (S._migrated || !raw) return; S._migrated = true; let ch = !raw.funds || !raw.projectCategories; const D = DEFAULT_CFG();
-  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : !!(r.perms.settings && r.perms.roles); ch = true; } }
+  if (S._migrated || !raw) return; S._migrated = true; let ch = !raw.funds || !raw.projectCategories || !raw.meetingTypes; const D = DEFAULT_CFG();
+  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects", "meetings"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : !!(r.perms.settings && r.perms.roles); ch = true; } }
   for (const f of S.cfg.funds || []) if (!Array.isArray(f.positions)) { f.positions = DEF_POS(f.id); ch = true; }
   if (!window.INMA) for (const m of S.cfg.members) if (!m.code) { m.code = genCode(); ch = true; }
   if (ch && (S.isOwner || can("settings") || can("members"))) saveCfg("Espace mis à jour : fonds, accès externes et codes d'accès");
@@ -1025,6 +1037,7 @@ function sLists() {
   const rowEd = (key, arr, extra) => `<div style="display:flex;flex-direction:column;gap:6px">${arr.map((x, i) => `<div class="row"><input type="color" data-cfg="${key}.${i}.color" value="${h(x.color)}"><input type="text" data-cfg="${key}.${i}.label" value="${h(x.label)}" style="max-width:240px">${extra ? extra(x, i) : ""}<button class="btn sm" data-arr-mv="${key}|${i}|-1" ${i === 0 ? "disabled" : ""}>${ic("up")}</button><button class="btn sm ghost danger" data-arr-del="${key}|${i}">${ic("trash")}</button></div>`).join("")}<div><button class="btn sm" data-arr-add="${key}">${ic("plus")}Ajouter</button></div></div>`;
   return `<div class="panel"><header><h2>Statuts des tâches</h2></header><div class="body">${rowEd("statuses", S.cfg.statuses, (x, i) => `<label class="chk"><input type="checkbox" data-cfgbool="statuses.${i}.done" ${x.done ? "checked" : ""}>Clôture la tâche</label>`)}</div></div>
     <div class="panel"><header><h2>Types d'échéances et de reportings</h2></header><div class="body">${rowEd("deadlineTypes", S.cfg.deadlineTypes || [])}</div></div>
+    <div class="panel"><header><h2>Types de réunions</h2></header><div class="body">${rowEd("meetingTypes", S.cfg.meetingTypes || [])}</div></div>
     <div class="panel"><header><h2>Priorités</h2></header><div class="body">${rowEd("priorities", S.cfg.priorities)}</div></div>
     <div class="panel"><header><h2>Autres véhicules (hors fonds)</h2></header><div class="body"><p class="muted" style="margin:0 0 8px;font-size:12px">Les fonds se gèrent dans l'onglet Fonds. Ajoutez ici les rattachements qui ne sont pas des fonds (ex. Transverse).</p>${listEditor("vehicles", S.cfg.vehicles)}</div></div>
     <div class="panel"><header><h2>Secteurs</h2></header><div class="body">${listEditor("sectors", S.cfg.sectors)}</div></div>
@@ -2030,6 +2043,7 @@ function meetingSlides(mt) {
       <div class="dash"><div class="panel"><header><h2>Depuis la dernière réunion</h2></header><div class="body"><div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div class="kpi"><span class="l">Étapes franchies</span><span class="v">${ev.filter(e => /passe à l'étape/.test(e.text)).length}</span></div><div class="kpi"><span class="l">Tâches terminées</span><span class="v">${doneT}</span></div><div class="kpi"><span class="l">Reportings remis</span><span class="v">${ev.filter(e => /: remis/.test(e.text)).length}</span></div></div></div></div>
       <div class="panel"><header><h2>Faits marquants</h2></header><div class="body list">${moves.map(e => `<div class="li">${av(e.by)}<div class="grow"><div class="t1" style="white-space:normal;font-weight:500">${h(e.text)}</div><div class="t2">${new Date(e.at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun fait marquant sur la période.</p>'}</div></div></div>` });
   }
+  if (sec.followup !== 0) { const fu = lastMeetingFollowup(); if (fu) slides.push(fu); }
   if (sec.dossiers !== 0) for (const w of S.cfg.workflows) {
     const ds = dsAll.filter(d => d.workflowId === w.id); if (!ds.length) continue;
     ds.sort((a, b) => w.stages.findIndex(s => s.id === b.stageId) - w.stages.findIndex(s => s.id === a.stageId));
@@ -2066,14 +2080,22 @@ function meetingSlides(mt) {
   }
   return slides;
 }
-const MT_SECTIONS = [["summary", "Synthèse"], ["dossiers", "Avancement des dossiers"], ["funds", "Vue par fonds"], ["projects", "Projets transverses"], ["deadlines", "Échéances"], ["decisions", "Décisions"]];
+const MT_SECTIONS = [["summary", "Synthèse"], ["followup", "Suivi des actions"], ["dossiers", "Avancement des dossiers"], ["funds", "Vue par fonds"], ["projects", "Projets transverses"], ["deadlines", "Échéances"], ["decisions", "Décisions"]];
 function vMeeting() {
+  const tab = S.ui.mtTab || "board"; const nJ = visMeetings().length;
+  const tabs = `<div class="mt-tabs" role="tablist"><button role="tab" class="${tab === "board" ? "on" : ""}" data-act5="mt-tab" data-tab="board">Tableau de réunion</button><button role="tab" class="${tab !== "board" ? "on" : ""}" data-act5="mt-tab" data-tab="journal">Journal des réunions <span class="chip">${nJ}</span></button></div>`;
+  if (tab === "journal") return tabs + vJournal();
+  if (tab === "edit") return tabs + vMeetingEdit();
+  if (tab.startsWith("view:")) return tabs + vMeetingView((S.meetings || []).find(x => x.id === tab.slice(5)));
+  return tabs + vMeetingBoard();
+}
+function vMeetingBoard() {
   const mt = S.ui.mt = { since: addDays(todayISO(), -7), fund: "", sections: {}, ...(S.ui.mt || {}) };
   const slides = meetingSlides(mt);
   const tb = `<div class="toolbar"><label class="row" style="gap:6px;flex-wrap:nowrap"><span class="muted" style="font-size:12.5px">Depuis le</span><input type="date" id="mt-since" value="${h(mt.since)}" style="width:auto"></label>
     <select id="mt-fund" aria-label="Fonds"><option value="">Tous les fonds</option>${(S.cfg.funds || []).map(f => `<option value="${f.id}" ${mt.fund === f.id ? "selected" : ""}>${h(f.name)}</option>`).join("")}</select>
     <span class="row" style="gap:4px">${MT_SECTIONS.map(([k, l]) => `<label class="chk mt-chip"><input type="checkbox" data-mt-sec="${k}" ${mt.sections[k] === 0 ? "" : "checked"}>${l}</label>`).join("")}</span>
-    <span class="spacer"></span>${window.INMA ? `<button class="btn" data-act4="mt-print" title="Imprimer ou enregistrer en PDF">Imprimer / PDF</button>` : ""}<button class="btn pri" data-act4="mt-present">${ic("present")}Présenter</button></div>`;
+    <span class="spacer"></span>${window.INMA ? `<button class="btn" data-act4="mt-print" title="Imprimer ou enregistrer en PDF">Imprimer / PDF</button>` : ""}${can("meetings") ? `<button class="btn" data-act5="mt-new">${ic("plus")}Compte rendu</button>` : ""}<button class="btn pri" data-act4="mt-present">${ic("present")}Présenter</button></div>`;
   return tb + slides.map((s, i) => `<section class="mt-slide" id="slide-${s.id}"><div class="mt-head"><span class="mt-num">${String(i + 1).padStart(2, "0")}</span><div><h2 style="font-size:18px">${s.color ? `<span class="fdot" style="--fc:${h(s.color)};margin-right:8px;width:12px;height:12px"></span>` : ""}${h(s.title)}</h2><div class="muted" style="font-size:12.5px">${h(s.sub || "")}</div></div></div>${s.html}</section>`).join("");
 }
 function presentMode(start) {
@@ -2085,7 +2107,7 @@ function drawPresent() {
   const slides = meetingSlides(S.ui.mt || {}); if (!slides.length) { S.present = null; return; }
   S.present.i = Math.max(0, Math.min(slides.length - 1, S.present.i)); const s = slides[S.present.i];
   let el = $("#present"); if (!el) { el = document.createElement("div"); el.id = "present"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Présentation"); document.body.appendChild(el); }
-  el.innerHTML = `<div class="pbar"><div class="wordmark" style="font-size:16px">INMA<small>RÉUNION D'ÉQUIPE</small></div><span class="spacer"></span><span class="muted num">${S.present.i + 1} / ${slides.length}</span><button class="btn sm" data-pv="-1" ${S.present.i === 0 ? "disabled" : ""} aria-label="Diapositive précédente">‹ Précédent</button><button class="btn sm" data-pv="1" ${S.present.i === slides.length - 1 ? "disabled" : ""} aria-label="Diapositive suivante">Suivant ›</button><button class="btn sm" data-pv="x">Quitter</button></div>
+  el.innerHTML = `<div class="pbar"><div class="wordmark" style="font-size:16px">INMA<small>RÉUNION D'ÉQUIPE</small></div><span class="spacer"></span><span class="muted num">${S.present.i + 1} / ${slides.length}</span><button class="btn sm" data-pv="-1" ${S.present.i === 0 ? "disabled" : ""} aria-label="Diapositive précédente">‹ Précédent</button><button class="btn sm" data-pv="1" ${S.present.i === slides.length - 1 ? "disabled" : ""} aria-label="Diapositive suivante">Suivant ›</button>${can("meetings") ? `<button class="btn sm" data-act5="mt-new">Rédiger le compte rendu</button>` : ""}<button class="btn sm" data-pv="x">Quitter</button></div>
     <div class="pbody"><div class="mt-head"><span class="mt-num">${String(S.present.i + 1).padStart(2, "0")}</span><div><h2 style="font-size:26px">${s.color ? `<span class="fdot" style="--fc:${h(s.color)};margin-right:10px;width:14px;height:14px"></span>` : ""}${h(s.title)}</h2><div class="muted">${h(s.sub || "")}</div></div></div>${s.html}</div>
     <div class="pdots">${slides.map((x, i) => `<button class="${i === S.present.i ? "on" : ""}" data-pv-go="${i}" aria-label="${h(x.title)}" title="${h(x.title)}"></button>`).join("")}</div>`;
 }
@@ -2128,6 +2150,225 @@ function fundProjectsPanel(f) {
   const l = visProjects().filter(p => p.scope === f.id);
   return `<div class="panel"><header><h2>Projets corporate · ${h(f.name)}</h2><span class="muted" style="font-size:12px">${l.filter(p => p.status !== "done").length} en cours</span><span class="spacer"></span>${can("projects") ? `<button class="btn sm" data-act4="prj-new-fund" data-fid="${f.id}">${ic("plus")}Nouveau projet</button>` : ""}</header><div class="body ${l.length ? "prj-grid" : ""}">${l.map(prjCard).join("") || '<p class="muted" style="margin:0">Aucun projet corporate pour ce fonds (levée, gouvernance, reporting, agrément…).</p>'}</div></div>`;
 }
+
+/* ---------- journal des réunions (comptes rendus) ---------- */
+const MT_VIS = [["all", "Toute l'équipe interne"], ["roles", "Certains rôles + participants"], ["participants", "Participants uniquement"]];
+const internals = () => S.cfg.members.filter(m => !m.external);
+function canSeeMeeting(m) {
+  if (!m) return false; if (!S.sim && S.isOwner) return true;
+  const u = me(); if (!u || isExt(u)) return false;
+  if (m.createdBy === u.id || m.secretaryId === u.id || (m.participants || []).includes(u.id)) return true;
+  if (!m.visibility || m.visibility === "all") return true;
+  if (m.visibility === "roles") return (m.roles || []).includes(u.roleId);
+  return false;
+}
+const canEditMeeting = m => canSeeMeeting(m) && (can("meetings") || (!!me() && (m.createdBy === me().id || m.secretaryId === me().id)));
+const visMeetings = () => (S.meetings || []).filter(canSeeMeeting).sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.createdAt || "").localeCompare(a.createdAt || ""));
+const mtType = id => (S.cfg.meetingTypes || []).find(t => t.id === id) || { id: "", label: "Réunion", color: "#7B8794" };
+const nid = p => uid(p);
+function meetingSnapshot() {
+  const ds = visDossiers().filter(d => !d.archived);
+  return { at: new Date().toISOString(), dossiers: ds.map(d => { const w = wfById(d.workflowId), s = stageOf(d); return { id: d.id, code: d.code, name: d.name, vehicle: d.vehicle || "", stage: s?.name || "", idx: w ? w.stages.indexOf(s) : -1, n: w?.stages.length || 0, ownerId: d.ownerId, pending: !!d.pendingApproval }; }),
+    kpis: { dossiers: ds.length, lateTasks: visTasks().filter(t => !isDone(t) && t.due && t.due < todayISO()).length, openTasks: visTasks().filter(t => !isDone(t)).length, pending: ds.filter(d => d.pendingApproval).length, projects: visProjects().filter(p => p.status !== "done").length } };
+}
+function newMeeting() {
+  const fund = S.ui.mt?.fund || "";
+  const t = (S.cfg.meetingTypes || [])[0]?.id || "";
+  return { id: nid("mt"), title: `${mtType(t).label} du ${fdate(todayISO())}`, date: todayISO(), time: "", type: t, scope: fund || "inma", location: "", participants: internals().map(m => m.id), absents: [], secretaryId: me()?.id || "", visibility: "all", roles: [], status: "draft", notes: "", points: [], decisions: [], actions: [], deadlines: [], url: "", snapshot: meetingSnapshot(), createdBy: me()?.id || null, createdAt: new Date().toISOString() };
+}
+function openMeetingEditor(m) { S.mtDraft = clone(m); S.view = "meeting"; S.ui.mtTab = "edit"; saveUI(); render(); window.scrollTo?.(0, 0); }
+const liveTask = id => S.tasks.find(t => t.id === id);
+function taskStateChip(a) {
+  const t = a.taskId && liveTask(a.taskId);
+  if (!a.taskId) return '<span class="muted" style="font-size:12px">sera créée à l\'enregistrement</span>';
+  if (!t) return '<span class="muted" style="font-size:12px">tâche non visible ou supprimée</span>';
+  const st = statusById(t.status); return chip(st?.label || "—", st?.color || "#7B8794");
+}
+
+/* journal list */
+function vJournal() {
+  const f = S.ui.mj = { q: "", type: "", scope: "", year: "", ...(S.ui.mj || {}) };
+  const all = visMeetings(); const years = [...new Set(all.map(m => (m.date || "").slice(0, 4)).filter(Boolean))];
+  const q = f.q.trim().toLowerCase();
+  const list = all.filter(m => (!f.type || m.type === f.type) && (!f.scope || m.scope === f.scope) && (!f.year || (m.date || "").startsWith(f.year))
+    && (!q || [m.title, m.notes, ...(m.decisions || []).map(x => x.text), ...(m.actions || []).map(x => x.title), ...(m.points || []).map(x => x.text)].join(" ").toLowerCase().includes(q)));
+  const tb = `<div class="toolbar"><input type="search" id="mj-q" value="${h(f.q)}" placeholder="Rechercher (décision, dossier, mot-clé…)" style="max-width:280px" aria-label="Rechercher">
+    <select id="mj-type" aria-label="Type"><option value="">Tous types</option>${(S.cfg.meetingTypes || []).map(t => `<option value="${t.id}" ${f.type === t.id ? "selected" : ""}>${h(t.label)}</option>`).join("")}</select>
+    <select id="mj-scope" aria-label="Périmètre"><option value="">Tous périmètres</option>${["inma", ...(S.cfg.funds || []).map(x => x.id)].map(s => `<option value="${s}" ${f.scope === s ? "selected" : ""}>${h(scopeName(s))}</option>`).join("")}</select>
+    <select id="mj-year" aria-label="Année"><option value="">Toutes années</option>${years.map(y => `<option ${f.year === y ? "selected" : ""}>${y}</option>`).join("")}</select>
+    <span class="spacer"></span>${can("meetings") ? `<button class="btn pri" data-act5="mt-new">${ic("plus")}Nouveau compte rendu</button>` : ""}</div>`;
+  if (!all.length) return tb + `<div class="empty"><b>Aucune réunion enregistrée</b><span>Après chaque réunion, enregistrez le compte rendu : décisions, tâches dispatchées, échéances fixées et notes. Il apparaîtra ici, visible selon le niveau d'accès choisi.</span>${can("meetings") ? `<button class="btn pri" data-act5="mt-new">Créer le premier compte rendu</button>` : ""}</div>`;
+  const byMonth = {}; for (const m of list) (byMonth[(m.date || "").slice(0, 7)] ||= []).push(m);
+  return tb + (Object.entries(byMonth).map(([ym, ms]) => `<div class="eyebrow" style="margin:6px 0 -4px">${ym ? new Date(ym + "-01T12:00").toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) : "Sans date"}</div>
+    <div class="panel"><div class="body list">${ms.map(m => { const ty = mtType(m.type); const acts = (m.actions || []); const open = acts.filter(a => { const t = a.taskId && liveTask(a.taskId); return t && !isDone(t); }).length;
+      return `<div class="li mj-row" data-mtv="${m.id}" tabindex="0" role="button"><div class="mj-date"><b>${(m.date || "").slice(8, 10) || "—"}</b><span>${m.date ? new Date(m.date + "T12:00").toLocaleDateString("fr-FR", { month: "short" }) : ""}</span></div>
+        <div class="grow"><div class="t1" style="white-space:normal">${h(m.title || "Réunion")}${m.status === "draft" ? ' <span class="lock">BROUILLON</span>' : ""}</div>
+        <div class="t2">${chip(ty.label, ty.color)} · ${h(scopeName(m.scope))} · ${(m.decisions || []).length} décision(s) · ${acts.length} action(s)${open ? ` dont ${open} en cours` : ""}${(m.deadlines || []).length ? ` · ${(m.deadlines || []).length} échéance(s)` : ""}</div></div>
+        ${avs((m.participants || []).slice(0, 5))}<span class="tag" title="Visibilité">${m.visibility === "participants" ? "Participants" : m.visibility === "roles" ? "Rôles choisis" : "Équipe"}</span></div>`; }).join("")}</div></div>`).join("") || `<div class="empty"><b>Aucune réunion ne correspond</b></div>`);
+}
+
+/* read view */
+function vMeetingView(m) {
+  if (!m || !canSeeMeeting(m)) return `<div class="empty"><b>Compte rendu introuvable ou non accessible</b><button class="btn" data-act5="mt-journal">Retour au journal</button></div>`;
+  const ty = mtType(m.type), ed = canEditMeeting(m);
+  const ref = (k, id) => k === "dossier" ? (dossierById(id) ? `<button class="linkish" data-open="${id}">${h(dossierById(id).code)} · ${h(dossierById(id).name)}</button>` : (m.snapshot?.dossiers || []).find(x => x.id === id)?.name || "") : k === "project" ? ((S.projects || []).find(p => p.id === id) ? `<button class="linkish" data-prj="${id}">${h((S.projects || []).find(p => p.id === id).title)}</button>` : "") : "";
+  const sec = (title, body, n) => `<div class="panel"><header><h2>${title}</h2>${n != null ? `<span class="chip">${n}</span>` : ""}</header><div class="body">${body}</div></div>`;
+  return `<div class="toolbar"><button class="btn" data-act5="mt-journal">← Journal</button><span class="spacer"></span>
+      <button class="btn" data-act5="mt-word" data-id="${m.id}">Exporter (Word)</button>${window.INMA ? `<button class="btn" data-act5="mt-print">Imprimer / PDF</button>` : ""}
+      ${ed ? `<button class="btn pri" data-act5="mt-edit" data-id="${m.id}">Modifier</button>` : ""}</div>
+    <div class="panel mt-cr"><div class="body" style="display:flex;flex-direction:column;gap:10px">
+      <div class="row" style="gap:8px">${chip(ty.label, ty.color)}<span class="tag">${h(scopeName(m.scope))}</span>${m.status === "draft" ? '<span class="lock">BROUILLON</span>' : '<span class="chip" style="background:var(--ok-bg);color:var(--ok)">Validé</span>'}<span class="spacer"></span><span class="muted" style="font-size:12px">Visibilité : ${h(MT_VIS.find(v => v[0] === (m.visibility || "all"))[1])}${m.visibility === "roles" ? " (" + (m.roles || []).map(r => role(r)?.name).filter(Boolean).join(", ") + ")" : ""}</span></div>
+      <h2 style="margin:0;font-size:22px">${h(m.title || "Réunion")}</h2>
+      <div class="muted">${m.date ? new Date(m.date + "T12:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : ""}${m.time ? " · " + h(m.time) : ""}${m.location ? " · " + h(m.location) : ""}${m.secretaryId ? " · compte rendu par " + h(mname(m.secretaryId)) : ""}</div>
+      <div class="row" style="gap:6px"><span class="muted" style="font-size:12.5px">Présents :</span>${(m.participants || []).map(id => `<span class="row" style="gap:4px;flex-wrap:nowrap">${av(id)}<span style="font-size:12.5px">${h(mname(id))}</span></span>`).join("")}</div>
+      ${(m.absents || []).length ? `<div class="row" style="gap:6px"><span class="muted" style="font-size:12.5px">Excusés :</span><span style="font-size:12.5px">${(m.absents || []).map(id => h(mname(id))).join(", ")}</span></div>` : ""}
+      ${isURL(m.url) ? `<div>${linkBtn(m.url, "Documents de la réunion")}</div>` : ""}</div></div>
+    ${sec("Décisions prises", (m.decisions || []).map((d, i) => `<div class="li"><span class="mt-num" style="font-size:11px;padding:3px 6px">D${i + 1}</span><div class="grow"><div class="t1" style="white-space:normal;font-weight:500">${h(d.text)}</div><div class="t2">${[ref(d.refKind, d.refId), d.ownerId ? "Porteur : " + h(mname(d.ownerId)) : ""].filter(Boolean).join(" · ")}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucune décision consignée.</p>', (m.decisions || []).length)}
+    <div class="dash">${sec("Tâches dispatchées", `<div class="list">${(m.actions || []).map(a => `<div class="li" ${a.taskId && liveTask(a.taskId) ? `data-open-task="${a.taskId}" style="cursor:pointer"` : ""}>${av(a.assignee)}<div class="grow"><div class="t1" style="white-space:normal">${h(a.title)}</div><div class="t2">${h(mname(a.assignee))}${a.dossierId ? " · " + ref("dossier", a.dossierId) : ""}</div></div>${a.due ? due(a.due, liveTask(a.taskId) && isDone(liveTask(a.taskId))) : ""}${taskStateChip(a)}</div>`).join("") || '<p class="muted" style="margin:0">Aucune tâche.</p>'}</div>`, (m.actions || []).length)}
+      ${sec("Échéances fixées", `<div class="list">${(m.deadlines || []).map(x => `<div class="li">${av(x.ownerId)}<div class="grow"><div class="t1" style="white-space:normal">${h(x.title)}</div><div class="t2">${h(mname(x.ownerId))}${x.dossierId ? " · " + ref("dossier", x.dossierId) : ""}${x.asTask ? " · suivie comme tâche" : ""}</div></div>${due(x.due)}</div>`).join("") || '<p class="muted" style="margin:0">Aucune échéance.</p>'}</div>`, (m.deadlines || []).length)}</div>
+    ${(m.points || []).length ? sec("Points abordés", `<div class="list">${(m.points || []).map(p => `<div class="li" style="align-items:flex-start"><div class="grow"><div class="t1">${p.kind === "other" ? h(p.label || "Divers") : ref(p.kind, p.refId) || h(p.label || "")}${p.stage ? ` <span class="muted" style="font-weight:400;font-size:12px">· ${h(p.stage)}</span>` : ""}</div><div class="mt-text">${h(p.text || "—")}</div></div></div>`).join("")}</div>`) : ""}
+    ${m.notes ? sec("Notes", `<div class="mt-text">${h(m.notes)}</div>`) : ""}
+    ${m.snapshot?.dossiers?.length ? `<details class="panel"><summary class="body" style="cursor:pointer"><b>Instantané du portefeuille au ${fdate((m.snapshot.at || "").slice(0, 10))}</b> <span class="muted">· ${m.snapshot.dossiers.length} dossiers, ${m.snapshot.kpis?.lateTasks ?? 0} tâches en retard</span></summary><div class="body tablewrap"><table class="t"><thead><tr><th>Réf.</th><th>Dossier</th><th>Fonds</th><th>Étape à la date</th><th>Étape aujourd'hui</th></tr></thead><tbody>${m.snapshot.dossiers.map(x => { const d = dossierById(x.id); const now = d ? stageOf(d)?.name : "—"; return `<tr><td class="mono" style="font-size:12px">${h(x.code)}</td><td>${h(x.name)}</td><td>${h(x.vehicle)}</td><td>${h(x.stage)} <span class="muted">(${x.idx + 1}/${x.n})</span></td><td>${now && now !== x.stage ? `<b style="color:var(--ok)">${h(now)}</b>` : h(now || "—")}</td></tr>`; }).join("")}</tbody></table></div></details>` : ""}
+    ${ed && can("meetings") ? `<div class="row"><span class="spacer"></span><button class="btn danger" data-act5="mt-del" data-id="${m.id}">Supprimer ce compte rendu</button></div>` : ""}`;
+}
+
+/* editor */
+function vMeetingEdit() {
+  const m = S.mtDraft; if (!m) { S.ui.mtTab = "journal"; return vJournal(); }
+  const isNew = !(S.meetings || []).some(x => x.id === m.id);
+  const memOpts = (sel, blank) => `${blank ? `<option value="">${blank}</option>` : ""}${internals().map(x => `<option value="${x.id}" ${sel === x.id ? "selected" : ""}>${h(x.name)}</option>`).join("")}`;
+  const dosOpts = sel => `<option value="">— dossier —</option>${visDossiers().filter(d => !d.archived || d.id === sel).map(d => `<option value="${d.id}" ${sel === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}`;
+  const refOpts = (k, id) => `<option value="">— lié à —</option><optgroup label="Dossiers">${visDossiers().map(d => `<option value="dossier|${d.id}" ${k === "dossier" && id === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</optgroup><optgroup label="Projets">${visProjects().map(p => `<option value="project|${p.id}" ${k === "project" && id === p.id ? "selected" : ""}>${h(p.title)}</option>`).join("")}</optgroup>`;
+  const rm = (list, i) => `<button class="btn sm ghost danger" data-mtrm="${list}|${i}" aria-label="Retirer">${ic("trash")}</button>`;
+  const canDl = can("deadlines");
+  return `<div class="toolbar"><button class="btn" data-act5="mt-cancel">← ${isNew ? "Annuler" : "Retour"}</button><span class="muted" style="font-size:12.5px">${isNew ? "Nouveau compte rendu" : "Modification du compte rendu"} · les champs sont gardés pendant la saisie</span><span class="spacer"></span>
+      <button class="btn" data-act5="mt-save" data-final="0">Enregistrer le brouillon</button><button class="btn pri" data-act5="mt-save" data-final="1">Valider le compte rendu</button></div>
+    <div class="panel"><header><h2>Réunion</h2></header><div class="body" style="display:flex;flex-direction:column;gap:10px">
+      <label class="f"><span>Titre</span><input type="text" data-mf="title" value="${h(m.title)}"></label>
+      <div class="grid3"><label class="f"><span>Date</span><input type="date" data-mf="date" value="${h(m.date)}"></label>
+        <label class="f"><span>Heure</span><input type="time" data-mf="time" value="${h(m.time || "")}"></label>
+        <label class="f"><span>Lieu / Teams</span><input type="text" data-mf="location" value="${h(m.location || "")}"></label>
+        <label class="f"><span>Type</span><select data-mf="type">${(S.cfg.meetingTypes || []).map(t => `<option value="${t.id}" ${m.type === t.id ? "selected" : ""}>${h(t.label)}</option>`).join("")}</select></label>
+        <label class="f"><span>Périmètre</span><select data-mf="scope"><option value="inma" ${m.scope === "inma" ? "selected" : ""}>${h(scopeName("inma"))}</option>${(S.cfg.funds || []).map(f => `<option value="${f.id}" ${m.scope === f.id ? "selected" : ""}>${h(f.name)}</option>`).join("")}</select></label>
+        <label class="f"><span>Rédacteur du compte rendu</span><select data-mf="secretaryId">${memOpts(m.secretaryId, "—")}</select></label></div>
+      <div><div class="eyebrow" style="margin-bottom:6px">Présents</div><div class="row">${internals().map(x => `<label class="chk"><input type="checkbox" data-mfl="participants" value="${x.id}" ${(m.participants || []).includes(x.id) ? "checked" : ""}>${h(x.name.split(" ")[0])}</label>`).join("")}</div></div>
+      <div><div class="eyebrow" style="margin-bottom:6px">Excusés</div><div class="row">${internals().map(x => `<label class="chk"><input type="checkbox" data-mfl="absents" value="${x.id}" ${(m.absents || []).includes(x.id) ? "checked" : ""}>${h(x.name.split(" ")[0])}</label>`).join("")}</div></div>
+      <div class="grid2"><label class="f"><span>Qui peut consulter ce compte rendu ?</span><select data-mf="visibility" data-rerender="1">${MT_VIS.map(v => `<option value="${v[0]}" ${(m.visibility || "all") === v[0] ? "selected" : ""}>${v[1]}</option>`).join("")}</select></label>
+        <label class="f"><span>Dossier OneDrive / SharePoint de la réunion</span><input type="url" data-mf="url" value="${h(m.url || "")}" placeholder="https://…sharepoint.com/…"></label></div>
+      ${m.visibility === "roles" ? `<div><div class="eyebrow" style="margin-bottom:6px">Rôles autorisés (en plus des participants)</div><div class="row">${S.cfg.roles.filter(r => r.id !== "r_guest").map(r => `<label class="chk"><input type="checkbox" data-mfl="roles" value="${r.id}" ${(m.roles || []).includes(r.id) ? "checked" : ""}>${h(r.name)}</label>`).join("")}</div></div>` : ""}
+      <p class="muted" style="margin:0;font-size:12px">Les externes n'ont jamais accès aux comptes rendus. Les administrateurs voient tout.</p></div></div>
+
+    <div class="panel"><header><h2>Décisions prises</h2><span class="chip">${(m.decisions || []).length}</span></header><div class="body" style="display:flex;flex-direction:column;gap:8px">
+      ${(m.decisions || []).map((d, i) => `<div class="mt-line"><span class="mt-num" style="font-size:11px;padding:3px 6px">D${i + 1}</span><input type="text" data-mfi="decisions|${i}|text" value="${h(d.text)}" placeholder="Décision" class="grow"><select data-mfi="decisions|${i}|ref" style="max-width:220px">${refOpts(d.refKind, d.refId)}</select><select data-mfi="decisions|${i}|ownerId" style="max-width:170px">${memOpts(d.ownerId, "— porteur —")}</select>${rm("decisions", i)}</div>`).join("")}
+      <div><button class="btn sm" data-mtadd="decisions">${ic("plus")}Ajouter une décision</button></div></div></div>
+
+    <div class="panel"><header><h2>Tâches dispatchées</h2><span class="chip">${(m.actions || []).length}</span><span class="spacer"></span><span class="muted" style="font-size:12px">Créées dans « Tâches » à l'enregistrement, avec notification</span></header><div class="body" style="display:flex;flex-direction:column;gap:8px">
+      ${(m.actions || []).map((a, i) => `<div class="mt-line"><input type="text" data-mfi="actions|${i}|title" value="${h(a.title)}" placeholder="Tâche à réaliser" class="grow" ${a.taskId ? "disabled" : ""}><select data-mfi="actions|${i}|assignee" style="max-width:170px" ${a.taskId ? "disabled" : ""}>${memOpts(a.assignee, "— responsable —")}</select><input type="date" data-mfi="actions|${i}|due" value="${h(a.due || "")}" style="width:auto" ${a.taskId ? "disabled" : ""}><select data-mfi="actions|${i}|dossierId" style="max-width:200px" ${a.taskId ? "disabled" : ""}>${dosOpts(a.dossierId)}</select>${a.taskId ? taskStateChip(a) : rm("actions", i)}</div>`).join("")}
+      <div><button class="btn sm" data-mtadd="actions" ${can("task_create") ? "" : "disabled title=\"Votre rôle ne permet pas de créer des tâches\""}>${ic("plus")}Ajouter une tâche</button></div></div></div>
+
+    <div class="panel"><header><h2>Échéances fixées</h2><span class="chip">${(m.deadlines || []).length}</span><span class="spacer"></span><span class="muted" style="font-size:12px">${canDl ? "Ajoutées au calendrier des échéances" : "Suivies comme tâches (votre rôle ne gère pas les échéances)"}</span></header><div class="body" style="display:flex;flex-direction:column;gap:8px">
+      ${(m.deadlines || []).map((x, i) => { const lock = x.deadlineId || x.taskId; return `<div class="mt-line"><input type="text" data-mfi="deadlines|${i}|title" value="${h(x.title)}" placeholder="Ex. Remise du rapport de due diligence" class="grow" ${lock ? "disabled" : ""}><input type="date" data-mfi="deadlines|${i}|due" value="${h(x.due || "")}" style="width:auto" ${lock ? "disabled" : ""}><select data-mfi="deadlines|${i}|ownerId" style="max-width:170px" ${lock ? "disabled" : ""}>${memOpts(x.ownerId, "— responsable —")}</select><select data-mfi="deadlines|${i}|dossierId" style="max-width:200px" ${lock ? "disabled" : ""}>${dosOpts(x.dossierId)}</select>${lock ? '<span class="chip">Enregistrée</span>' : rm("deadlines", i)}</div>`; }).join("")}
+      <div><button class="btn sm" data-mtadd="deadlines">${ic("plus")}Ajouter une échéance</button></div></div></div>
+
+    <div class="panel"><header><h2>Points abordés</h2><span class="spacer"></span><button class="btn sm" data-act5="mt-add-all">Ajouter tous les dossiers actifs</button></header><div class="body" style="display:flex;flex-direction:column;gap:10px">
+      ${(m.points || []).map((p, i) => `<div class="mt-point"><div class="row" style="gap:8px;flex-wrap:nowrap">${p.kind === "other" ? `<input type="text" data-mfi="points|${i}|label" value="${h(p.label || "")}" placeholder="Sujet" class="grow">` : `<b class="grow">${p.kind === "dossier" ? h((dossierById(p.refId)?.code || "") + " · " + (dossierById(p.refId)?.name || p.label || "")) : h((S.projects || []).find(x => x.id === p.refId)?.title || p.label || "")}${p.stage ? ` <span class="muted" style="font-weight:400;font-size:12px">· ${h(p.stage)}</span>` : ""}</b>`}${rm("points", i)}</div>
+        <textarea data-mfi="points|${i}|text" rows="2" placeholder="Ce qui a été dit, état d'avancement, points de blocage…">${h(p.text || "")}</textarea></div>`).join("")}
+      <div class="row"><select id="mt-add-ref" style="max-width:320px" aria-label="Point à ajouter"><option value="other|">Sujet libre</option><optgroup label="Dossiers">${visDossiers().filter(d => !d.archived).map(d => `<option value="dossier|${d.id}">${h(d.code)} · ${h(d.name)}</option>`).join("")}</optgroup><optgroup label="Projets">${visProjects().map(p => `<option value="project|${p.id}">${h(p.title)}</option>`).join("")}</optgroup></select><button class="btn sm" data-act5="mt-add-point">${ic("plus")}Ajouter le point</button></div></div></div>
+
+    <div class="panel"><header><h2>Notes</h2></header><div class="body"><textarea data-mf="notes" rows="8" placeholder="Notes libres, tour de table, informations partagées…">${h(m.notes || "")}</textarea></div></div>
+    <div class="toolbar"><span class="spacer"></span><button class="btn" data-act5="mt-save" data-final="0">Enregistrer le brouillon</button><button class="btn pri" data-act5="mt-save" data-final="1">Valider le compte rendu</button></div>`;
+}
+function syncDraft() {
+  const m = S.mtDraft; if (!m || !$("#content")) return;
+  for (const el of $$("[data-mf]", $("#content"))) m[el.dataset.mf] = el.value;
+  const lists = {}; for (const el of $$("[data-mfl]", $("#content"))) { (lists[el.dataset.mfl] ||= []); if (el.checked) lists[el.dataset.mfl].push(el.value); }
+  Object.assign(m, lists);
+  for (const el of $$("[data-mfi]", $("#content"))) { const [l, i, k] = el.dataset.mfi.split("|"); const row = m[l]?.[+i]; if (!row || el.disabled) continue;
+    if (k === "ref") { const [rk, rid] = (el.value || "|").split("|"); row.refKind = rk || ""; row.refId = rid || ""; } else row[k] = el.value; }
+}
+async function saveMeeting(final) {
+  syncDraft(); const m = S.mtDraft; if (!m) return;
+  if (!m.title.trim()) { toast("Indiquez un titre."); return; }
+  if (m.url && !isURL(m.url)) { toast("Lien OneDrive invalide : collez un lien https://."); return; }
+  m.decisions = (m.decisions || []).filter(d => d.text?.trim()); m.points = (m.points || []).filter(p => p.text?.trim());
+  m.actions = (m.actions || []).filter(a => a.taskId || a.title?.trim()); m.deadlines = (m.deadlines || []).filter(x => x.deadlineId || x.taskId || x.title?.trim());
+  const missing = [...m.actions.filter(a => !a.taskId && !a.assignee), ...m.deadlines.filter(x => !x.deadlineId && !x.taskId && !x.due)];
+  if (missing.length) { toast("Chaque tâche doit avoir un responsable et chaque échéance une date."); render(); return; }
+  const when = fdate(m.date || todayISO());
+  for (const a of m.actions) if (!a.taskId) {
+    const t = await createTask({ title: a.title.trim(), assignees: [a.assignee], due: a.due || "", dossierId: a.dossierId || null, meetingId: m.id, description: `Action décidée lors de « ${m.title} » (${when}).` }); a.taskId = t.id;
+  }
+  for (const x of m.deadlines) if (!x.deadlineId && !x.taskId) {
+    if (can("deadlines")) {
+      const f = m.scope !== "inma" ? fundById(m.scope)?.name : (dossierById(x.dossierId)?.vehicle || "");
+      const o = { id: uid("dl"), title: x.title.trim(), type: (S.cfg.deadlineTypes || []).find(t => /interne|autre/i.test(t.label))?.id || (S.cfg.deadlineTypes || [])[0]?.id || "", fund: f || "", dossierId: x.dossierId || "", recipient: "", owners: x.ownerId ? [x.ownerId] : [], rule: { type: "once", date: x.due }, reminder: S.cfg.notify.dueSoonDays, amount: "", url: "", notes: `Fixée lors de « ${m.title} » (${when}).`, active: true, done: {}, createdAt: todayISO(), meetingId: m.id };
+      await putDoc("deadlines", o); x.deadlineId = o.id;
+    } else { const t = await createTask({ title: x.title.trim(), assignees: x.ownerId ? [x.ownerId] : [], due: x.due, dossierId: x.dossierId || null, meetingId: m.id, description: `Échéance fixée lors de « ${m.title} » (${when}).` }); x.taskId = t.id; x.asTask = true; }
+  }
+  const isNew = !(S.meetings || []).some(x => x.id === m.id);
+  m.status = final ? "final" : (m.status === "final" ? "final" : "draft"); m.updatedAt = new Date().toISOString(); m.updatedBy = me()?.id || null;
+  await putDoc("meetings", clone(m));
+  const notify = final ? [...new Set([...(m.participants || []), ...(m.absents || [])])].filter(id => id !== me()?.id) : [];
+  await log(m.visibility === "all" || !m.visibility ? `Compte rendu ${final ? "validé" : isNew ? "créé" : "mis à jour"} : « ${m.title} »` : `Compte rendu de réunion ${final ? "validé" : "enregistré"} (accès restreint)`, { notify });
+  S.ui.mtTab = "view:" + m.id; S.mtDraft = null; saveUI(); toast(final ? "Compte rendu validé et partagé" : "Brouillon enregistré"); render();
+}
+function meetingWord(m) {
+  const ty = mtType(m.type); const e = s => h(s || "");
+  const rows = (arr, cols) => `<table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:10pt"><tr>${cols.map(c => `<th style="background:#212121;color:#fff;text-align:left">${c[0]}</th>`).join("")}</tr>${arr.map(x => `<tr>${cols.map(c => `<td>${c[1](x)}</td>`).join("")}</tr>`).join("")}</table>`;
+  const dn = id => { const d = dossierById(id); return d ? e(d.code + " · " + d.name) : ""; };
+  return `<html><head><meta charset="utf-8"><title>${e(m.title)}</title></head><body style="font-family:Montserrat,Arial,sans-serif;color:#212121">
+  <p style="color:#E22529;font-weight:700;letter-spacing:2px">INMA CAPITAL · COMPTE RENDU</p><h1 style="margin:0">${e(m.title)}</h1>
+  <p>${e(ty.label)} · ${e(scopeName(m.scope))} · ${m.date ? e(new Date(m.date + "T12:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })) : ""}${m.time ? " · " + e(m.time) : ""}${m.location ? " · " + e(m.location) : ""}</p>
+  <p><b>Présents :</b> ${(m.participants || []).map(id => e(mname(id))).join(", ")}${(m.absents || []).length ? `<br><b>Excusés :</b> ${(m.absents || []).map(id => e(mname(id))).join(", ")}` : ""}${m.secretaryId ? `<br><b>Rédacteur :</b> ${e(mname(m.secretaryId))}` : ""}</p>
+  <h2>Décisions</h2>${(m.decisions || []).length ? `<ol>${m.decisions.map(d => `<li>${e(d.text)}${d.refKind === "dossier" ? " — " + dn(d.refId) : ""}${d.ownerId ? " (porteur : " + e(mname(d.ownerId)) + ")" : ""}</li>`).join("")}</ol>` : "<p>Aucune.</p>"}
+  <h2>Tâches dispatchées</h2>${(m.actions || []).length ? rows(m.actions, [["Tâche", a => e(a.title)], ["Responsable", a => e(mname(a.assignee))], ["Échéance", a => a.due ? e(fdate(a.due)) : ""], ["Dossier", a => dn(a.dossierId)], ["Statut", a => { const t = liveTask(a.taskId); return t ? e(statusById(t.status)?.label) : ""; }]]) : "<p>Aucune.</p>"}
+  <h2>Échéances fixées</h2>${(m.deadlines || []).length ? rows(m.deadlines, [["Échéance", x => e(x.title)], ["Date", x => e(fdate(x.due))], ["Responsable", x => e(mname(x.ownerId))], ["Dossier", x => dn(x.dossierId)]]) : "<p>Aucune.</p>"}
+  ${(m.points || []).length ? `<h2>Points abordés</h2>${m.points.map(p => `<p><b>${p.kind === "dossier" ? dn(p.refId) : p.kind === "project" ? e((S.projects || []).find(x => x.id === p.refId)?.title) : e(p.label)}</b><br>${e(p.text).replace(/\n/g, "<br>")}</p>`).join("")}` : ""}
+  ${m.notes ? `<h2>Notes</h2><p>${e(m.notes).replace(/\n/g, "<br>")}</p>` : ""}
+  <p style="color:#7B8794;font-size:9pt">Document interne INMA Capital — diffusion restreinte. Généré par INMA Workflow le ${e(fdate(todayISO()))}.</p></body></html>`;
+}
+function lastMeetingFollowup() {
+  const prev = visMeetings().filter(m => m.status === "final" && (m.date || "") <= todayISO() && (m.actions || []).length + (m.deadlines || []).length)[0];
+  if (!prev) return null;
+  const rows = [...(prev.actions || []).map(a => ({ title: a.title, who: a.assignee, due: a.due, t: liveTask(a.taskId), a })), ...(prev.deadlines || []).map(x => ({ title: x.title, who: x.ownerId, due: x.due, t: x.taskId ? liveTask(x.taskId) : null, dl: x }))];
+  const done = rows.filter(r => r.t && isDone(r.t)).length;
+  return { id: "followup", title: "Suivi des actions de la dernière réunion", sub: `${prev.title} · ${done}/${rows.filter(r => r.t).length} tâches terminées`, html: `<div class="panel"><div class="body list">${rows.map(r => `<div class="li" ${r.t ? `data-open-task="${r.t.id}" style="cursor:pointer"` : ""}>${av(r.who)}<div class="grow"><div class="t1" style="white-space:normal">${h(r.title)}</div><div class="t2">${h(mname(r.who))}${r.dl ? " · échéance" : ""}</div></div>${r.due ? due(r.due, r.t && isDone(r.t)) : ""}${r.t ? chip(statusById(r.t.status)?.label || "—", statusById(r.t.status)?.color || "#7B8794") : r.dl ? '<span class="chip">Calendrier</span>' : '<span class="muted" style="font-size:12px">non visible</span>'}</div>`).join("")}</div></div><div><button class="btn sm" data-mtv="${prev.id}">Ouvrir le compte rendu</button></div>` };
+}
+
+/* meeting events */
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-act5],[data-mtv],[data-mtadd],[data-mtrm]"); if (!el) return; const ds = el.dataset;
+  if (ds.mtv) { if (S.present) exitPresent(); S.view = "meeting"; S.ui.mtTab = "view:" + ds.mtv; saveUI(); render(); window.scrollTo?.(0, 0); return; }
+  if (ds.mtadd) { syncDraft(); const m = S.mtDraft; const l = ds.mtadd;
+    m[l] = [...(m[l] || []), l === "decisions" ? { id: nid("dec"), text: "", refKind: "", refId: "", ownerId: "" } : l === "actions" ? { id: nid("ac"), title: "", assignee: "", due: "", dossierId: "", taskId: "" } : { id: nid("dd"), title: "", due: "", ownerId: me()?.id || "", dossierId: "" }];
+    render(); const ins = $$(`[data-mfi^="${l}|${m[l].length - 1}|"]`)[0]; ins?.focus(); return; }
+  if (ds.mtrm) { syncDraft(); const [l, i] = ds.mtrm.split("|"); S.mtDraft[l].splice(+i, 1); render(); return; }
+  const A = ds.act5;
+  if (A === "mt-tab") { S.ui.mtTab = ds.tab; saveUI(); render(); return; }
+  if (A === "mt-new") { if (S.present) exitPresent(); openMeetingEditor(newMeeting()); return; }
+  if (A === "mt-journal") { S.ui.mtTab = "journal"; S.mtDraft = null; saveUI(); render(); return; }
+  if (A === "mt-cancel") { const id = S.mtDraft?.id; const exists = (S.meetings || []).some(x => x.id === id); S.mtDraft = null; S.ui.mtTab = exists ? "view:" + id : "journal"; saveUI(); render(); return; }
+  if (A === "mt-edit") { const m = (S.meetings || []).find(x => x.id === ds.id); if (m) openMeetingEditor(m); return; }
+  if (A === "mt-save") { el.disabled = true; try { await saveMeeting(ds.final === "1"); } finally { el.disabled = false; } return; }
+  if (A === "mt-word") { const m = (S.meetings || []).find(x => x.id === ds.id); if (m) saveFile(`CR-${(m.date || todayISO())}-${(m.title || "reunion").replace(/[^\p{L}\p{N}]+/gu, "-").slice(0, 60)}.doc`, meetingWord(m)); return; }
+  if (A === "mt-print") { try { window.print(); } catch {} return; }
+  if (A === "mt-del") { const m = (S.meetings || []).find(x => x.id === ds.id); if (!m) return; confirmBox(`Supprimer le compte rendu « ${m.title} » ? Les tâches et échéances déjà créées sont conservées.`, "Supprimer", async () => { await delDoc("meetings", m.id); S.ui.mtTab = "journal"; saveUI(); toast("Compte rendu supprimé"); render(); }); return; }
+  if (A === "mt-add-point" || A === "mt-add-all") { syncDraft(); const m = S.mtDraft; m.points ||= [];
+    const add = (k, id) => { if (k !== "other" && m.points.some(p => p.kind === k && p.refId === id)) return; const d = k === "dossier" ? dossierById(id) : null; const p = k === "project" ? (S.projects || []).find(x => x.id === id) : null;
+      m.points.push({ id: nid("pt"), kind: k, refId: id || "", label: d ? d.name : p ? p.title : "", stage: d ? stageOf(d)?.name || "" : p ? prjStatus(p.status)[1] + " · " + prjProgress(p) + " %" : "", text: "" }); };
+    if (A === "mt-add-all") visDossiers().filter(d => !d.archived && (m.scope === "inma" || d.vehicle === fundById(m.scope)?.name)).forEach(d => add("dossier", d.id));
+    else { const [k, id] = ($("#mt-add-ref")?.value || "other|").split("|"); add(k, id); }
+    render(); return; }
+});
+document.addEventListener("input", e => { if (S.mtDraft && e.target.closest?.("[data-mf],[data-mfi],[data-mfl]")) syncDraft(); });
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (S.mtDraft && t.dataset?.rerender) { syncDraft(); render(); return; }
+  if (S.mtDraft && t.closest?.("[data-mf],[data-mfi],[data-mfl]")) { syncDraft(); return; }
+  if (["mj-type", "mj-scope", "mj-year"].includes(t.id)) { S.ui.mj = { ...(S.ui.mj || {}), [t.id.slice(3)]: t.value }; saveUI(); render(); }
+});
+document.addEventListener("input", e => { if (e.target.id === "mj-q") { S.ui.mj = { ...(S.ui.mj || {}), q: e.target.value }; clearTimeout(S._mjT); S._mjT = setTimeout(() => { const pos = e.target.selectionStart; render(); const q = $("#mj-q"); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch {} } }, 250); } });
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches?.(".mj-row[data-mtv]")) e.target.click(); });
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
@@ -2221,7 +2462,7 @@ document.addEventListener("change", async e => {
   if (ds.fwf) { const [i, wid] = ds.fwf.split("|"); const f = S.cfg.customFields[+i]; f.workflows = t.checked ? [...new Set([...(f.workflows || []), wid])] : (f.workflows || []).filter(x => x !== wid); saveCfg(); return; }
   if (ds.odwf) { S.cfg.onedrive.perWorkflowRoot = S.cfg.onedrive.perWorkflowRoot || {}; S.cfg.onedrive.perWorkflowRoot[ds.odwf] = t.value.trim(); saveCfg(); return; }
   if (t.id === "logo-file" && t.files[0]) { const f = t.files[0]; const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const sc = Math.min(1, 320 / img.width, 90 / img.height); const c = document.createElement("canvas"); c.width = Math.round(img.width * sc) || 160; c.height = Math.round(img.height * sc) || 40; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); S.cfg.general.logo = c.toDataURL("image/png"); saveCfg("Logo mis à jour"); render(); }; img.onerror = () => toast("Image illisible. Essayez un PNG."); img.src = r.result; }; r.readAsDataURL(f); return; }
-  if (t.id === "import-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j.cfg || !Array.isArray(j.dossiers)) throw 0; confirmBox(`Importer ${j.dossiers.length} dossiers et ${(j.tasks || []).length} tâches ? Les paramètres seront remplacés ; les éléments existants de même identifiant aussi.`, "Importer", async () => { S.cfg = { ...DEFAULT_CFG(), ...j.cfg }; saveCfg("Paramètres importés"); for (const d of j.dossiers) await putDoc("dossiers", d); for (const x of j.tasks || []) await putDoc("tasks", x); for (const x of j.deadlines || []) await putDoc("deadlines", x); for (const x of j.projects || []) await putDoc("projects", x); toast("Import terminé"); render(); }); } catch { toast("Fichier invalide : utilisez une sauvegarde exportée depuis l'outil."); } }; r.readAsText(t.files[0]); }
+  if (t.id === "import-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j.cfg || !Array.isArray(j.dossiers)) throw 0; confirmBox(`Importer ${j.dossiers.length} dossiers et ${(j.tasks || []).length} tâches ? Les paramètres seront remplacés ; les éléments existants de même identifiant aussi.`, "Importer", async () => { S.cfg = { ...DEFAULT_CFG(), ...j.cfg }; saveCfg("Paramètres importés"); for (const d of j.dossiers) await putDoc("dossiers", d); for (const x of j.tasks || []) await putDoc("tasks", x); for (const x of j.deadlines || []) await putDoc("deadlines", x); for (const x of j.projects || []) await putDoc("projects", x); for (const x of j.meetings || []) await putDoc("meetings", x); toast("Import terminé"); render(); }); } catch { toast("Fichier invalide : utilisez une sauvegarde exportée depuis l'outil."); } }; r.readAsText(t.files[0]); }
 });
 document.addEventListener("input", e => { if (e.target.id === "f-q" || e.target.id === "tf-q") { clearTimeout(S.qT); const id = e.target.id; S.qT = setTimeout(() => { if (id === "f-q") S.ui.filters.q = e.target.value; else { S.ui.tf = S.ui.tf || {}; S.ui.tf.q = e.target.value; } saveUI(); render(); const el = $("#" + id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 250); } });
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if ($("#modal")) $("#modal").remove(); else if (S.openDossier) { S.openDossier = null; renderDrawer(); } } });
@@ -2240,7 +2481,7 @@ async function saveFile(filename, data) {
   if (!S.downloads) { toast("Téléchargement indisponible dans cette vue."); return; }
   try { await S.downloads.save({ filename, data }); } catch (e) { if (e?.code !== "declined") toast("Téléchargement impossible : " + (e?.message || "erreur")); }
 }
-function exportJSON() { saveFile(`inma-workflow-${todayISO()}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, activity: S.activity }, null, 2)); }
+function exportJSON() { saveFile(`inma-workflow-${todayISO()}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, activity: S.activity }, null, 2)); }
 function exportCSV() {
   const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const rows = [["Référence","Dossier","Workflow","Étape","Véhicule","Secteur","Responsable","Montant","Priorité","Début","Échéance","Lien OneDrive","Archivé"]].concat(visDossiers().map(d => [d.code, d.name, wfById(d.workflowId)?.name, stageOf(d)?.name, d.vehicle, d.sector, mname(d.ownerId), can("view_amounts") ? d.amount : "", prioById(d.priority)?.label, d.startDate, d.dueDate, d.oneDriveUrl, d.archived ? "oui" : "non"]));
@@ -2279,7 +2520,7 @@ function render() {
 }
 
 /* ---------- boot ---------- */
-function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.projects = d.projects || []; S.activity = d.activity || []; } }
+function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.projects = d.projects || []; S.meetings = d.meetings || []; S.activity = d.activity || []; } }
 async function boot() {
   S.view = homeView(); render();
   const use = (window.INMA && window.INMA.use) || (window.claude && window.claude.use);
@@ -2297,7 +2538,7 @@ async function boot() {
     S.cfgLoaded = true; if (snap.exists) migrateCfg(snap.data()); if (!document.querySelector("#content :focus")) render(); renderDrawer();
   }, () => {});
   const sub = (coll, sortKey) => db.collection(coll).onSnapshot(q => { S[coll] = q.docs.map(d => ({ ...d.data(), id: d.id })); if (sortKey) S[coll].sort((a, b) => String(b[sortKey]).localeCompare(String(a[sortKey]))); if (!document.querySelector("#content :focus") && !$("#modal")) render(); if (S.openDossier && !document.querySelector("#layer :focus")) renderDrawer(); }, () => {});
-  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null); sub("projects", null);
+  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null); sub("projects", null); sub("meetings", null);
   db.collection("activity").orderBy("at", "desc").limit(300).onSnapshot(q => { S.activity = q.docs.map(d => ({ ...d.data(), id: d.id })); if (!document.querySelector("#content :focus") && !$("#modal")) { renderTop(); if (S.view === "dashboard") render(); } }, () => {});
 }
 boot();
