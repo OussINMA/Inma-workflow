@@ -85,6 +85,21 @@ function sanitizeConfig(c) {
   return cfg;
 }
 
+// Échéanciers : les montants (capital, intérêts, conditions du prêt, montants payés) suivent le droit « view_amounts ».
+function stripDeadlineAmounts(o) {
+  const { amount, ...rest } = o;
+  if (rest.rule?.type === "schedule") rest.rule = { ...rest.rule, items: (rest.rule.items || []).map(({ p, i, ...it }) => it), loan: {} };
+  if (rest.done) rest.done = Object.fromEntries(Object.entries(rest.done).map(([k, v]) => [k, (({ paid, ...r }) => r)(v || {})]));
+  return rest;
+}
+function keepDeadlineAmounts(data, existing) {
+  if (!existing) return data;
+  const out = { ...data, amount: existing.amount };
+  if (existing.rule?.type === "schedule") out.rule = existing.rule;
+  const done = { ...(out.done || {}) };
+  for (const [k, v] of Object.entries(existing.done || {})) if (v && v.paid !== undefined) done[k] = { ...(done[k] || {}), paid: v.paid };
+  out.done = done; return out;
+}
 export function snapshot(c, all, version) {
   const dmap = Object.fromEntries(all.dossiers.map(d => [d.id, d]));
   const dossiers = all.dossiers.filter(d => canSeeDossier(c, d)).map(d => hideAmounts(c, d));
@@ -99,7 +114,7 @@ export function snapshot(c, all, version) {
     dossiers, tasks, activity,
     projects: c.isExt ? [] : (all.projects || []),
     meetings: (all.meetings || []).filter(m => canSeeMeeting(c, m)),
-    deadlines: c.isExt ? [] : (all.deadlines || []).map(o => c.can("view_amounts") ? o : (({ amount, ...rest }) => rest)(o)),
+    deadlines: c.isExt ? [] : (all.deadlines || []).map(o => c.can("view_amounts") ? o : stripDeadlineAmounts(o)),
     claims: c.member ? [{ id: c.user.id, memberId: c.member.id, code: seesCodes ? (c.member.code || "") : "" }] : [],
     me: { userId: c.user.id, email: c.user.email, name: c.user.name, isAdmin: c.isAdmin, memberId: c.member?.id || null, external: c.isExt },
   };
@@ -172,9 +187,9 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
   }
   if (coll === "deadlines") {
     if (c.isExt) throw new Denied();
-    if (c.isAdmin || c.can("deadlines")) { const out = { ...data }; if (!c.can("view_amounts") && existing) out.amount = existing.amount; return out; }
+    if (c.isAdmin || c.can("deadlines")) { if (c.isAdmin || c.can("view_amounts")) return { ...data }; if (!existing && data.rule?.type === "schedule" && (data.rule.items || []).some(it => it.p || it.i)) throw new Denied("Votre rôle ne gère pas les montants."); return keepDeadlineAmounts({ ...data }, existing); }
     if (!existing) throw new Denied("Votre rôle ne permet pas de créer des échéances.");
-    if ((existing.owners || []).includes(c.member?.id)) return { ...existing, done: data.done || existing.done };
+    if ((existing.owners || []).includes(c.member?.id)) { const out = { ...existing, done: data.done || existing.done }; return c.can("view_amounts") ? out : keepDeadlineAmounts(out, existing); }
     throw new Denied("Seuls les responsables de cette échéance peuvent la mettre à jour.");
   }
   if (coll === "meetings") {
