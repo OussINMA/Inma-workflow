@@ -1950,5 +1950,12 @@
    "label": "Autre réunion",
    "color": "#7B8794"
   }
- ]
+ ],
+ "copilot": {
+  "enabled": true,
+  "url": "https://m365.cloud.microsoft/chat",
+  "amounts": true,
+  "intro": "",
+  "promptsText": ""
+ }
 }
