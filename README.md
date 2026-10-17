@@ -44,9 +44,12 @@ L'outil est déjà utilisable. Sans la configuration Microsoft, « Inviter » af
    - **Application** : `Mail.Send`.
    Puis **Accorder un consentement d'administrateur**.
 4. *Certificats et secrets* › **Nouveau secret client** : copiez la valeur.
-5. Choisissez la boîte d'envoi des invitations, par exemple une boîte partagée `workflow@votre-domaine` (sans licence).
+5. Choisissez la boîte d'envoi des invitations : c'est l'adresse qui apparaîtra comme expéditeur.
+   - **Le plus simple** : une adresse INMA qui existe déjà, par exemple la vôtre. Les invitations partiront de votre nom et une copie restera dans vos *Éléments envoyés*.
+   - **Le plus propre** : une boîte partagée dédiée, gratuite et sans licence. Votre administrateur la crée dans le **centre d'administration Microsoft 365** (https://admin.microsoft.com) › *Équipes et groupes* › **Boîtes aux lettres partagées** › *Ajouter une boîte aux lettres partagée*, avec par exemple le nom « INMA Workflow » et l'adresse `workflow@votre-domaine`.
+   Cette adresse est la valeur de `MAIL_FROM` à l'étape 6.
 6. Dans Cloudflare : *Workers et Pages* › `inma-workflow` › *Paramètres* › **Variables et secrets** :
-   - renseignez `AZURE_TENANT_ID`, `AZURE_CLIENT_ID` et `MAIL_FROM` ;
+   - renseignez `AZURE_TENANT_ID`, `AZURE_CLIENT_ID` et `MAIL_FROM`. Les deux identifiants sont sur la page **Vue d'ensemble** de l'application dans Entra : *ID de l'annuaire (locataire)* = `AZURE_TENANT_ID`, *ID d'application (client)* = `AZURE_CLIENT_ID` ;
    - remplacez le secret `AZURE_CLIENT_SECRET` par le secret client ;
    - cliquez **Déployer**.
 
@@ -77,3 +80,12 @@ L'outil reste très en dessous pour une équipe comme INMA. Si une limite était
   - connexion par e-mail : 6 chiffres, valable 10 minutes.
 - **Mot de passe administrateur** : réservé aux adresses de `ADMIN_EMAILS`, bloqué 15 minutes après 8 erreurs.
 - **Documents** : ils restent dans OneDrive / SharePoint, l'outil ne garde que les liens.
+
+## Assistant IA intégré
+
+L'assistant (bouton en haut de chaque écran) répond aux questions sur les dossiers, fonds, participations, tâches, échéances, projets et réunions, en ne voyant que ce que la personne connectée a le droit de voir. Il peut aussi proposer des tâches, créées après confirmation.
+
+- **Par défaut** : Cloudflare Workers AI (inclus dans l'offre gratuite, quota quotidien partagé). Rien à configurer : la liaison `AI` est déclarée dans `wrangler.toml`.
+- **Limite par personne** : variable `AI_DAILY_LIMIT` (60 questions par jour par défaut).
+- **Moteur Microsoft (Azure OpenAI)**, si INMA dispose d'un abonnement Azure : ajoutez `AZURE_OPENAI_ENDPOINT` et `AZURE_OPENAI_DEPLOYMENT` (Texte) et `AZURE_OPENAI_API_KEY` (Secret). L'assistant bascule automatiquement dessus.
+- **Désactiver** : `AI_PROVIDER = off`, ou décocher l'assistant dans Paramètres › Général.

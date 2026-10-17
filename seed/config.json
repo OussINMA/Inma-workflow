@@ -271,7 +271,8 @@
     "externals": true,
     "deadlines": true,
     "projects": true,
-    "meetings": true
+    "meetings": true,
+    "ai": true
    }
   },
   {
@@ -299,7 +300,8 @@
     "externals": true,
     "deadlines": true,
     "projects": true,
-    "meetings": true
+    "meetings": true,
+    "ai": true
    }
   },
   {
@@ -327,7 +329,8 @@
     "externals": true,
     "deadlines": true,
     "projects": true,
-    "meetings": true
+    "meetings": true,
+    "ai": true
    }
   },
   {
@@ -355,7 +358,8 @@
     "externals": false,
     "deadlines": true,
     "projects": true,
-    "meetings": true
+    "meetings": true,
+    "ai": true
    }
   },
   {
@@ -383,7 +387,8 @@
     "externals": false,
     "deadlines": false,
     "projects": false,
-    "meetings": false
+    "meetings": false,
+    "ai": true
    }
   },
   {
@@ -411,7 +416,8 @@
     "externals": false,
     "deadlines": true,
     "projects": true,
-    "meetings": true
+    "meetings": true,
+    "ai": true
    }
   },
   {
@@ -439,7 +445,8 @@
     "externals": false,
     "deadlines": false,
     "projects": false,
-    "meetings": false
+    "meetings": false,
+    "ai": false
    }
   }
  ],
@@ -1956,6 +1963,7 @@
   "url": "https://m365.cloud.microsoft/chat",
   "amounts": true,
   "intro": "",
-  "promptsText": ""
+  "promptsText": "",
+  "assistantName": ""
  }
 }

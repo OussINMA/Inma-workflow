@@ -2,6 +2,7 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { context, snapshot, checkWrite, checkDelete, Denied, activeGrants } from "./acl.js";
 import { sendMail, inviteEmail, otpEmail, mailMode, mailMissing } from "./mail.js";
+import { aiStatus, aiChat } from "./ai.js";
 import seedConfig from "../seed/config.json";
 import seedDemo from "../seed/demo.json";
 
@@ -232,6 +233,11 @@ async function api(req, env, url) {
   const c = context(user, all.cfg, adminList(env));
   if (p === "/api/me") return json(snapshot(c, { dossiers: [], tasks: [], activity: [], deadlines: [], projects: [], meetings: [] }, v).me);
   if (p === "/api/snapshot") return json(snapshot(c, all, v));
+  if (p === "/api/ai/status") { if (c.isExt) return fail(403, "Accès réservé à l'équipe."); return json({ ...(await aiStatus(env, user)), allowed: c.isAdmin || c.can("ai") }); }
+  if (p === "/api/ai/chat" && method === "POST") {
+    if (c.isExt || !(c.isAdmin || c.can("ai"))) return fail(403, "Votre rôle ne permet pas d'utiliser l'assistant.");
+    try { return json(await aiChat(env, user, await readJson(req))); } catch (e) { return fail(e.status || 502, e.message || "Erreur de l'assistant."); }
+  }
 
   const doc = p.match(/^\/api\/docs\/([\w-]+)\/([\w.:@+~-]{1,200})$/);
   if (doc && (method === "PUT" || method === "DELETE")) {
