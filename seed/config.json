@@ -270,7 +270,8 @@
     "funds": true,
     "externals": true,
     "deadlines": true,
-    "projects": true
+    "projects": true,
+    "meetings": true
    }
   },
   {
@@ -297,7 +298,8 @@
     "funds": true,
     "externals": true,
     "deadlines": true,
-    "projects": true
+    "projects": true,
+    "meetings": true
    }
   },
   {
@@ -324,7 +326,8 @@
     "funds": true,
     "externals": true,
     "deadlines": true,
-    "projects": true
+    "projects": true,
+    "meetings": true
    }
   },
   {
@@ -351,7 +354,8 @@
     "funds": false,
     "externals": false,
     "deadlines": true,
-    "projects": true
+    "projects": true,
+    "meetings": true
    }
   },
   {
@@ -378,7 +382,8 @@
     "funds": false,
     "externals": false,
     "deadlines": false,
-    "projects": false
+    "projects": false,
+    "meetings": false
    }
   },
   {
@@ -405,7 +410,8 @@
     "funds": false,
     "externals": false,
     "deadlines": true,
-    "projects": true
+    "projects": true,
+    "meetings": true
    }
   },
   {
@@ -432,7 +438,8 @@
     "funds": false,
     "externals": false,
     "deadlines": false,
-    "projects": false
+    "projects": false,
+    "meetings": false
    }
   }
  ],
@@ -1916,5 +1923,32 @@
   "Conformité",
   "Communication",
   "Ressources humaines"
+ ],
+ "meetingTypes": [
+  {
+   "id": "mt_weekly",
+   "label": "Réunion d'équipe",
+   "color": "#E22529"
+  },
+  {
+   "id": "mt_ic",
+   "label": "Comité d'investissement",
+   "color": "#212121"
+  },
+  {
+   "id": "mt_credit",
+   "label": "Comité de crédit",
+   "color": "#2F6FB0"
+  },
+  {
+   "id": "mt_board",
+   "label": "Conseil / AG",
+   "color": "#8A6D3B"
+  },
+  {
+   "id": "mt_other",
+   "label": "Autre réunion",
+   "color": "#7B8794"
+  }
  ]
 }
