@@ -15,6 +15,10 @@ binding = "ASSETS"
 binding = "DB"
 database_name = "inma-workflow"
 
+[ai]
+# Assistant IA intégré (Cloudflare Workers AI, inclus dans l'offre gratuite : quota quotidien).
+binding = "AI"
+
 [vars]
 APP_NAME = "INMA Workflow"
 MAIL_MODE = "graph"
@@ -22,3 +26,5 @@ SEED_DEMO = "true"
 # Les autres réglages se saisissent dans Cloudflare › inma-workflow › Paramètres › Variables et secrets :
 #   ADMIN_EMAILS, AZURE_TENANT_ID, AZURE_CLIENT_ID, MAIL_FROM (type Texte)
 #   ADMIN_PASSWORD, AZURE_CLIENT_SECRET (type Secret)
+# Assistant IA (facultatif) : AI_DAILY_LIMIT (questions par personne et par jour, 60 par défaut), AI_MODEL.
+#   Pour utiliser Azure OpenAI (Microsoft) à la place : AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT (Texte), AZURE_OPENAI_API_KEY (Secret).
