@@ -88,7 +88,7 @@ function sanitizeConfig(c) {
 // Échéanciers : les montants (capital, intérêts, conditions du prêt, montants payés) suivent le droit « view_amounts ».
 function stripDeadlineAmounts(o) {
   const { amount, ...rest } = o;
-  if (rest.rule?.type === "schedule") rest.rule = { ...rest.rule, items: (rest.rule.items || []).map(({ p, i, ...it }) => it), loan: {} };
+  if (rest.rule?.type === "schedule") rest.rule = { ...rest.rule, items: (rest.rule.items || []).map(({ p, i, v, ...it }) => it), loan: {}, ca: [] };
   if (rest.done) rest.done = Object.fromEntries(Object.entries(rest.done).map(([k, v]) => [k, (({ paid, ...r }) => r)(v || {})]));
   return rest;
 }
@@ -125,7 +125,15 @@ export function snapshot(c, all, version) {
 export function checkWrite(c, coll, id, data, existing, dossierOf) {
   if (coll === "ws") {
     if (id !== "config") throw new Denied();
-    if (!c.isAdmin && !CONFIG_PERMS.some(p => c.can(p))) throw new Denied("Seuls les administrateurs peuvent modifier les paramètres.");
+    if (!c.isAdmin && !CONFIG_PERMS.some(p => c.can(p))) {
+      // Les gestionnaires d'échéances peuvent seulement mettre à jour l'historique du TMM.
+      // Exceptions ciblées : historique du TMM (gestion des échéances) et modèles de réunion (comptes rendus).
+      const out = { ...c.cfg }; let ok = false;
+      if (c.can("deadlines") && Array.isArray(data.tmm)) { out.tmm = data.tmm.filter(x => x && /^\d{4}-\d{2}$/.test(x.m)).map(x => ({ m: x.m, v: +x.v })); ok = true; }
+      if (c.can("meetings") && Array.isArray(data.meetingBoards)) { out.meetingBoards = data.meetingBoards; ok = true; }
+      if (ok) return out;
+      throw new Denied("Seuls les administrateurs peuvent modifier les paramètres.");
+    }
     const stored = c.cfg, inc = { ...data };
     if (!c.isAdmin && !c.can("roles")) inc.roles = stored.roles;
     const canInt = c.isAdmin || c.can("members"), canExt = c.isAdmin || c.can("externals");
