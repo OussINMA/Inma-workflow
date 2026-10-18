@@ -126,6 +126,8 @@ label.f>span{letter-spacing:.02em}
 .kpi .v{font-family:var(--f-mono);font-size:26px;font-weight:500;letter-spacing:-.02em}
 .kpi .l{font-size:12px;color:var(--muted)}
 .kpi.alert .v{color:var(--bad)}
+.kpi-add{border:1px dashed var(--line);background:transparent;color:var(--muted);cursor:pointer;display:flex;flex-direction:row!important;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:13px;min-height:84px}.kpi-add:hover{color:var(--accent);border-color:var(--accent)}
+.ck-preview{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface-2)}.ck-pv{display:inline-flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:12px}.ck-pv b{font-size:15px}
 .dash{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
 /* bars */
 .bars{display:flex;flex-direction:column;gap:8px}
@@ -462,7 +464,7 @@ const PERMS = [
   ["workflows","Workflows, champs & statuts"],["automations","Automatisations"],["view_all","Voir tous les dossiers"],
   ["view_amounts","Voir les montants"],["dossier_create","Créer des dossiers"],["dossier_edit_all","Modifier tous les dossiers"],
   ["dossier_delete","Supprimer / archiver"],["stage_advance","Faire avancer les étapes"],["stage_approve","Valider les étapes soumises à approbation"],
-  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["meetings","Rédiger les comptes rendus de réunion"],["ai","Utiliser l'assistant IA"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"]
+  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["meetings","Rédiger les comptes rendus de réunion"],["ai","Utiliser l'assistant IA"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"],["kpis","Créer des indicateurs personnalisés"]
 ];
 const ALL = Object.fromEntries(PERMS.map(p => [p[0], true]));
 const pset = keys => Object.fromEntries(PERMS.map(p => [p[0], keys.includes(p[0])]));
@@ -476,10 +478,10 @@ const DEFAULT_CFG = () => fixIds({
     modules: { dashboard: true, meeting: true, funds: true, projects: true, deadlines: true, dossiers: true, tasks: true, calendar: true, team: true, onedrive: true } },
   roles: [
     { id: "r_partner", name: "Associé", color: "#E22529", perms: { ...ALL } },
-    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","onedrive","export","workflows","automations","funds","externals","deadlines","projects","meetings","ai"]) },
-    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","onedrive","export","deadlines","projects","meetings","ai"]) },
+    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","kpis","onedrive","export","workflows","automations","funds","externals","deadlines","projects","meetings","ai"]) },
+    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","kpis","onedrive","export","deadlines","projects","meetings","ai"]) },
     { id: "r_junior", name: "Analyste junior", color: "#7A5BB0", perms: pset(["view_all","task_create","onedrive","ai"]) },
-    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","onedrive","export","members","deadlines","projects","meetings","ai"]) },
+    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","kpis","onedrive","export","members","deadlines","projects","meetings","ai"]) },
     { id: "r_guest", name: "Invité externe", color: "#7B8794", perms: pset([]) }
   ],
   teams: ["Direction Générale","Investissement","Financement (dette privée)","Finance & Comptabilité","Juridique","Ressources Humaines","Informatique","Support"],
@@ -703,7 +705,7 @@ function applyPrefs() {
 }
 function migrateCfg(raw) {
   if (S._migrated || !raw) return; S._migrated = true; let ch = !raw.funds || !raw.projectCategories || !raw.meetingTypes; const D = DEFAULT_CFG();
-  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects", "meetings", "ai"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : k === "ai" ? r.id !== "r_guest" : !!(r.perms.settings && r.perms.roles); ch = true; } }
+  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects", "meetings", "ai", "kpis"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : k === "ai" ? r.id !== "r_guest" : !!(r.perms.settings && r.perms.roles); ch = true; } }
   for (const f of S.cfg.funds || []) if (!Array.isArray(f.positions)) { f.positions = DEF_POS(f.id); ch = true; }
   if (!window.INMA) for (const m of S.cfg.members) if (!m.code) { m.code = genCode(); ch = true; }
   if (ch && (S.isOwner || can("settings") || can("members"))) saveCfg("Espace mis à jour : fonds, accès externes et codes d'accès");
@@ -885,12 +887,7 @@ function vDashboard() {
   const mine = m ? open.filter(t => (t.assignees || []).includes(m.id)).sort((a, b) => (a.due || "9") < (b.due || "9") ? -1 : 1).slice(0, 8) : [];
   const byVeh = vehicles().map(v => [v, curAmount(ds.filter(d => d.vehicle === v)), ds.filter(d => d.vehicle === v).length]);
   return `
-  <div class="kpis">
-    <div class="kpi"><span class="l">Dossiers actifs</span><span class="v">${ds.length}</span><span class="l">${S.cfg.workflows.filter(w => ds.some(d => d.workflowId === w.id)).length} workflows en cours</span></div>
-    <div class="kpi"><span class="l">Montants en cours</span><span class="v" style="font-size:20px">${can("view_amounts") ? `${pipe.toLocaleString("fr-FR")} <small>${h(S.cfg.general.currency)}</small>` : "Masqué"}</span><span class="l">Dossiers en suivi · tous fonds</span></div>
-    <div class="kpi ${late.length ? "alert" : ""}"><span class="l">Tâches en retard</span><span class="v">${late.length}</span><span class="l">sur ${open.length} tâches ouvertes</span></div>
-    <div class="kpi"><span class="l">Validations en attente</span><span class="v">${pending.length}</span><span class="l">${can("stage_approve") ? "À traiter par vous" : "Chez les valideurs"}</span></div>
-  </div>
+  ${dashKpiRow()}
   ${pending.length && can("stage_approve") ? `<div class="panel"><header><h2>À valider</h2><span class="chip" style="background:var(--warn-bg)">${pending.length}</span></header><div class="body list">${pending.map(d => { const w2 = wfById(d.workflowId); const to = w2?.stages.find(s => s.id === d.pendingApproval.to); return `<div class="li"><div class="grow"><div class="t1">${h(d.code)} · ${h(d.name)}</div><div class="t2">« ${h(stageOf(d)?.name)} » → « ${h(to?.name)} » · demandé par ${h(mname(d.pendingApproval.by))}</div></div><button class="btn sm pri" data-approve="${d.id}">Valider</button><button class="btn sm" data-reject="${d.id}">Refuser</button></div>`; }).join("")}</div></div>` : ""}
   <div class="dash">
     <div class="panel"><header><h2>Dossiers par étape</h2><span class="spacer"></span><select id="dash-wf" style="width:auto">${S.cfg.workflows.map(x => `<option value="${x.id}" ${x.id === w?.id ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select></header>
@@ -1038,7 +1035,7 @@ const STABS = [["general","Général & charte","settings"],["roles","Rôles & pe
 function vSettings() {
   const tabs = STABS.filter(t => can(t[2])); if (!tabs.length) return `<div class="empty"><b>Accès réservé</b></div>`;
   if (!tabs.some(t => t[0] === S.ui.stab)) S.ui.stab = tabs[0][0];
-  const body = { externals: sExternals, funds: sFunds, general: () => sGeneral() + sTmm() + sCopilot(), roles: sRoles, members: sMembers, workflows: sWorkflows, fields: sFields, lists: sLists, automations: sAutomations, onedrive: sOneDrive, notify: sNotify, data: sData }[S.ui.stab]();
+  const body = { externals: sExternals, funds: sFunds, general: () => sGeneral() + sTmm() + sCopilot(), roles: sRoles, members: sMembers, workflows: sWorkflows, fields: () => sFields() + sKpis(), lists: sLists, automations: sAutomations, onedrive: sOneDrive, notify: sNotify, data: sData }[S.ui.stab]();
   return `<div class="settings"><nav class="stabs">${tabs.map(t => `<button class="stab ${S.ui.stab === t[0] ? "on" : ""}" data-stab="${t[0]}">${t[1]}</button>`).join("")}</nav><div style="display:flex;flex-direction:column;gap:16px;min-width:0">${body}</div></div>`;
 }
 const inp = (path, val, type = "text", attrs = "") => `<input type="${type}" data-cfg="${path}" value="${h(val)}" ${attrs}>`;
@@ -1332,6 +1329,9 @@ const fstatus = id => (S.cfg.fundStatuses || []).find(s => s.id === id) || { lab
 const isPortfolioStage = st => !!st && (st.portfolio ?? /^suivi (de participation|des remboursements)/i.test(st.name || ""));
 const inPortfolio = d => isPortfolioStage(stageOf(d));
 const curAmount = ds => ds.filter(inPortfolio).reduce((s, d) => s + (+d.amount || 0), 0);
+// En étude : dossiers d'un workflow qui comporte une étape de portefeuille, encore avant cette étape.
+const inStudy = d => { const w = wfById(d.workflowId); if (!w) return false; const pi = w.stages.findIndex(isPortfolioStage); if (pi < 0) return false; const i = w.stages.findIndex(x => x.id === d.stageId); return i >= 0 && i < pi; };
+const studyAmount = ds => ds.filter(inStudy).reduce((s, d) => s + (+d.amount || 0), 0);
 function fundStats(f) { const ds = S.dossiers.filter(d => !d.archived && d.vehicle === f.name && canSeeDossier(d)); return { ds, amount: curAmount(ds), nodes: countNodes(f.tree), linked: countNodes(f.tree, true) }; }
 function msBar(f) { const ms = f.milestones || []; if (!ms.length) return ""; const d = ms.filter(x => x.done).length; return `<span class="row" style="flex-wrap:nowrap;gap:8px;width:100%"><span class="msbar"><span style="width:${d / ms.length * 100}%"></span></span><span class="muted num" style="font-size:11.5px;white-space:nowrap">${d}/${ms.length} jalons</span></span>`; }
 function fieldVal(f, x, plain) {
@@ -1349,7 +1349,7 @@ function fundFieldInput(x, v) {
 
 /* ---------- onglet Fonds : hub par fonds, relié au reste de l'outil ---------- */
 const FH_TABS = { overview: "Vue d'ensemble", dossiers: "Dossiers", portfolio: "Portefeuille", tree: "Arborescence & documents", projects: "Projets & jalons", deadlines: "Échéances", info: "Fiche du fonds" };
-const FH_KPIS_DEFAULT = ["dossiers", "amount", "positions", "crd", "unpaid", "dl30", "lateTasks", "projects"];
+const FH_KPIS_DEFAULT = ["dossiers", "amount", "study", "positions", "crd", "unpaid", "dl30", "lateTasks", "projects"];
 const fhView = () => ({ tabs: Object.keys(FH_TABS).map(k => ({ id: k, on: true })), kpis: FH_KPIS_DEFAULT, home: "overview", ...(S.cfg.fundView || {}) });
 const fhTabs = () => { const v = fhView(); const known = (v.tabs || []).filter(t => FH_TABS[t.id]); const missing = Object.keys(FH_TABS).filter(k => !known.some(t => t.id === k)).map(id => ({ id, on: true })); return [...known, ...missing]; };
 const dOwners = d => [...new Set([d.ownerId, ...(d.coOwners || [])].filter(Boolean))];
@@ -1376,8 +1376,8 @@ function fhGroup(funds) {
         ${ffs.map(x => `<span class="kv"><span>${h(x.label)}</span><span>${fieldVal(f, x, true)}</span></span>`).join("")}
         <span class="kv"><span>Dossiers en cours</span><span class="num">${st.ds.length}</span></span><span class="kv"><span>Montant en cours</span><span>${money(st.amount)}</span></span><span class="kv"><span>En portefeuille</span><span>${livePositions(f).length}</span></span>
         ${msBar(f)}</button>`; }).join("")}</div></div></div></div></div>`;
-  const kp = ["dossiers", "amount", "positions", "crd", "unpaid", "dl30", "lateTasks", "projects"];
-  const table = `<div class="panel tablewrap"><table class="t"><thead><tr><th>Fonds</th>${kp.map(k => `<th class="r">${h(MB_KPIS[k])}</th>`).join("")}</tr></thead><tbody>${funds.map(f => `<tr class="click" data-fund="${f.id}"><td><span class="row" style="flex-wrap:nowrap"><span class="fdot" style="--fc:${h(f.color)}"></span><b>${h(f.name)}</b></span></td>${kp.map(k => { const [v, a] = mbKpiValue(k, { since: addDays(t, -7) }, f.id); return `<td class="r num" style="${a ? "color:var(--bad);font-weight:600" : ""}">${v}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const kp = [...FH_KPIS_DEFAULT, ...(fhView().kpis || []).filter(k => k.startsWith("ck_") && kpiCatalog()[k])];
+  const table = `<div class="panel tablewrap"><table class="t"><thead><tr><th>Fonds</th>${kp.map(k => `<th class="r">${h(kpiCatalog()[k])}</th>`).join("")}</tr></thead><tbody>${funds.map(f => `<tr class="click" data-fund="${f.id}"><td><span class="row" style="flex-wrap:nowrap"><span class="fdot" style="--fc:${h(f.color)}"></span><b>${h(f.name)}</b></span></td>${kp.map(k => { const [v, a] = mbKpiValue(k, { since: addDays(t, -7) }, f.id); return `<td class="r num" style="${a ? "color:var(--bad);font-weight:600" : ""}">${v}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`;
   return org + table;
 }
 function fhHub(f) {
@@ -1392,8 +1392,8 @@ function fhHub(f) {
   return head + body;
 }
 function fhOverview(f) {
-  const t = todayISO(), mt = { since: addDays(t, -7) }; const ks = (fhView().kpis || FH_KPIS_DEFAULT).filter(k => MB_KPIS[k]);
-  const kpis = `<div class="kpis">${ks.map(k => { const [v, a] = mbKpiValue(k, mt, f.id); return `<div class="kpi ${a ? "alert" : ""}"><span class="l">${h(MB_KPIS[k])}</span><span class="v" style="font-size:22px">${v}</span></div>`; }).join("")}</div>`;
+  const t = todayISO(), mt = { since: addDays(t, -7) }; const ks = (fhView().kpis || FH_KPIS_DEFAULT).filter(k => kpiCatalog()[k]);
+  const kpis = `<div class="kpis">${ks.map(k => { const [v, a] = mbKpiValue(k, mt, f.id); return `<div class="kpi ${a ? "alert" : ""}"><span class="l">${h(kpiCatalog()[k])}</span><span class="v" style="font-size:22px">${v}</span></div>`; }).join("")}</div>`;
   const ds = fundDossiers(f); const wfs = S.cfg.workflows.filter(w => ds.some(d => d.workflowId === w.id));
   const pipe = wfs.map(w => { const max = Math.max(1, ...w.stages.map(s => ds.filter(d => d.workflowId === w.id && d.stageId === s.id).length)); return `<div class="eyebrow" style="margin:6px 0">${h(w.name)}</div><div class="bars">${w.stages.map(s => { const n = ds.filter(d => d.workflowId === w.id && d.stageId === s.id).length; return n ? `<button class="bar linkish" style="text-decoration:none" data-fh-stage="${w.id}|${s.id}"><span class="lbl">${h(s.name)}</span><span class="track"><span class="fill" style="width:${n / max * 100}%;background:${h(f.color || "var(--brand)")}"></span></span><span class="num r">${n}</span></button>` : ""; }).join("")}</div>`; }).join("") || '<p class="muted" style="margin:0">Aucun dossier en cours dans ce fonds.</p>';
   const occ = dlOccAll(addDays(t, -200), addDays(t, 45)).filter(x => x.o.fund === f.name && x.status !== "sent" && (x.late || x.due <= addDays(t, 45))).slice(0, 8);
@@ -1510,7 +1510,7 @@ function fhCustomModal() {
   const v = fhView(); let tabs = clone(fhTabs()); let kpis = [...(v.kpis || FH_KPIS_DEFAULT)];
   const draw = L => { $("#fhc-tabs", L).innerHTML = tabs.map((t, k) => `<div class="mb-row"><div class="row" style="gap:8px;flex-wrap:nowrap"><input type="checkbox" class="cb" data-fhc-on="${k}" ${t.on !== false ? "checked" : ""}><span class="grow">${h(FH_TABS[t.id])}</span><label class="chk" style="font-size:12px"><input type="radio" name="fhc-home" value="${t.id}" ${v.home === t.id ? "checked" : ""}>Ouvrir par défaut</label><button class="btn sm ghost" type="button" data-fhc-up="${k}" ${k ? "" : "disabled"}>▲</button><button class="btn sm ghost" type="button" data-fhc-down="${k}" ${k < tabs.length - 1 ? "" : "disabled"}>▼</button></div></div>`).join(""); };
   modal("Personnaliser l'onglet Fonds", `<div><div class="eyebrow" style="margin-bottom:6px">Onglets de chaque fonds (ordre et affichage)</div><div class="mb-list" id="fhc-tabs"></div></div>
-    <div><div class="eyebrow" style="margin-bottom:6px">Indicateurs de la vue d'ensemble</div><div class="row">${Object.entries(MB_KPIS).map(([k, l]) => `<label class="chk"><input type="checkbox" data-fhc-k="${k}" ${kpis.includes(k) ? "checked" : ""}>${h(l)}</label>`).join("")}</div></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Indicateurs de la vue d'ensemble</div><div class="row">${Object.entries(kpiCatalog()).map(([k, l]) => `<label class="chk"><input type="checkbox" data-fhc-k="${k}" ${kpis.includes(k) ? "checked" : ""}>${h(l)}${k.startsWith("ck_") ? ' <span class="tag">perso</span>' : ""}</label>`).join("")}</div>${ckCanEdit() ? `<button class="btn sm" type="button" data-act10="ck-new" data-mclose="1" style="margin-top:8px">${ic("plus")}Créer un indicateur personnalisé</button>` : ""}</div>
     <p class="muted" style="margin:0;font-size:12px">Statuts, types, champs des fiches et arborescence type d'un nouveau fonds : Paramètres › Fonds & architecture.</p>`,
     `<button class="btn" data-stab-go="funds" data-mclose="1">Paramètres des fonds</button><span class="spacer"></span><button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="fhc-ok">Enregistrer</button>`, L => {
       draw(L);
@@ -2250,7 +2250,7 @@ function meetingSlides(mt) {
     const moves = ev.filter(e => /passe à l'étape|validée|Dossier créé|remis|Projet .* : terminé/i.test(e.text)).slice(0, 8);
     const doneT = visTasks().filter(x => isDone(x) && (x.completedAt || "") >= since).length;
     slides.push({ id: "summary", title: `${S.cfg.fundRoot?.name || "INMA Capital"} · synthèse`, sub: `Réunion du ${fdate(t)} · évolutions depuis le ${fdate(since)}`, html: `
-      <div class="kpis">${[["Dossiers actifs", dsAll.length, `${funds.length} fonds`], ["Montants en cours", can("view_amounts") ? `${curAmount(dsAll).toLocaleString("fr-FR")} <small>${h(S.cfg.general.currency)}</small>` : "Masqué", "pipeline et portefeuille"], ["Validations en attente", dsAll.filter(d => d.pendingApproval).length, "étapes à valider"], ["Tâches en retard", lateT.length, `sur ${open.length} ouvertes`, lateT.length], ["Échéances ≤ 30 j", occ.length, `${occ.filter(x => x.late).length} en retard`, occ.filter(x => x.late).length], ["Projets en cours", prj.length, `${prj.filter(p => p.health === "red").length} en difficulté`, prj.filter(p => p.health === "red").length]].map(([l, v, s, a]) => `<div class="kpi ${a ? "alert" : ""}"><span class="l">${l}</span><span class="v" style="font-size:24px">${v}</span><span class="l">${s}</span></div>`).join("")}</div>
+      <div class="kpis">${[["Dossiers actifs", dsAll.length, `${funds.length} fonds`], ["Montants en cours", can("view_amounts") ? `${curAmount(dsAll).toLocaleString("fr-FR")} <small>${h(S.cfg.general.currency)}</small>` : "Masqué", "pipeline et portefeuille"], ["Montant des dossiers en étude", can("view_amounts") ? `${studyAmount(dsAll).toLocaleString("fr-FR")} <small>${h(S.cfg.general.currency)}</small>` : "Masqué", `${dsAll.filter(inStudy).length} dossier(s) en étude`], ["Validations en attente", dsAll.filter(d => d.pendingApproval).length, "étapes à valider"], ["Tâches en retard", lateT.length, `sur ${open.length} ouvertes`, lateT.length], ["Échéances ≤ 30 j", occ.length, `${occ.filter(x => x.late).length} en retard`, occ.filter(x => x.late).length], ["Projets en cours", prj.length, `${prj.filter(p => p.health === "red").length} en difficulté`, prj.filter(p => p.health === "red").length]].map(([l, v, s, a]) => `<div class="kpi ${a ? "alert" : ""}"><span class="l">${l}</span><span class="v" style="font-size:24px">${v}</span><span class="l">${s}</span></div>`).join("")}</div>
       <div class="dash"><div class="panel"><header><h2>Depuis la dernière réunion</h2></header><div class="body"><div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div class="kpi"><span class="l">Étapes franchies</span><span class="v">${ev.filter(e => /passe à l'étape/.test(e.text)).length}</span></div><div class="kpi"><span class="l">Tâches terminées</span><span class="v">${doneT}</span></div><div class="kpi"><span class="l">Reportings remis</span><span class="v">${ev.filter(e => /: remis/.test(e.text)).length}</span></div></div></div></div>
       <div class="panel"><header><h2>Faits marquants</h2></header><div class="body list">${moves.map(e => `<div class="li">${av(e.by)}<div class="grow"><div class="t1" style="white-space:normal;font-weight:500">${h(e.text)}</div><div class="t2">${new Date(e.at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun fait marquant sur la période.</p>'}</div></div></div>` });
   }
@@ -2269,7 +2269,7 @@ function meetingSlides(mt) {
     const maxC = Math.max(1, ...Object.values(stageCounts));
     const order = [...new Set(S.cfg.workflows.flatMap(w => w.stages.map(s => s.name)))].filter(n => stageCounts[n]);
     slides.push({ id: "fund-" + f.id, title: f.name, sub: `${fstatus(f.status).label}${f.type ? " · " + f.type : ""}${f.year ? " · depuis " + f.year : ""}`, color: f.color, html: `
-      <div class="kpis">${[["Dossiers en cours", ds.length, can("view_amounts") ? "en cours : " + money(curAmount(ds)) : ""], ["Participations / financements", act.length, [eqT ? "investi " + money(eqT) : "", dbT ? "encours " + money(dbT) : ""].filter(Boolean).join(" · ") || "montants à renseigner"], ["Projets corporate", prj.length, `${prj.filter(p => p.health !== "green").length} sous vigilance`], ["Échéances ≤ 30 j", occ.length, `${occ.filter(x => x.late).length} en retard`, occ.filter(x => x.late).length]].map(([l, v, s, a]) => `<div class="kpi ${a ? "alert" : ""}"><span class="l">${l}</span><span class="v" style="font-size:24px">${v}</span><span class="l">${s}</span></div>`).join("")}</div>
+      <div class="kpis">${[["Dossiers en cours", ds.length, can("view_amounts") ? "en cours : " + money(curAmount(ds)) + " · en étude : " + money(studyAmount(ds)) : ""], ["Participations / financements", act.length, [eqT ? "investi " + money(eqT) : "", dbT ? "encours " + money(dbT) : ""].filter(Boolean).join(" · ") || "montants à renseigner"], ["Projets corporate", prj.length, `${prj.filter(p => p.health !== "green").length} sous vigilance`], ["Échéances ≤ 30 j", occ.length, `${occ.filter(x => x.late).length} en retard`, occ.filter(x => x.late).length]].map(([l, v, s, a]) => `<div class="kpi ${a ? "alert" : ""}"><span class="l">${l}</span><span class="v" style="font-size:24px">${v}</span><span class="l">${s}</span></div>`).join("")}</div>
       <div class="dash"><div class="panel"><header><h2>Pipeline par étape</h2></header><div class="body bars">${order.map(n => `<div class="bar"><span class="lbl">${h(n)}</span><span class="track"><span class="fill" style="width:${stageCounts[n] / maxC * 100}%;background:${h(f.color)}"></span></span><span class="num r">${stageCounts[n]}</span></div>`).join("") || '<p class="muted" style="margin:0">Aucun dossier en cours.</p>'}</div></div>
       <div class="panel"><header><h2>Projets corporate</h2></header><div class="body list">${prj.map(p => `<div class="li" data-prj="${p.id}" style="cursor:pointer">${hdot(p.health)}<div class="grow"><div class="t1">${h(p.title)}</div><div class="t2">${h(p.nextStep || (p.milestones || []).find(m => !m.done)?.text || "")}</div></div><span class="msbar" style="max-width:90px"><span style="width:${prjProgress(p)}%"></span></span><span class="num" style="font-size:12px">${prjProgress(p)} %</span></div>`).join("") || '<p class="muted" style="margin:0">Aucun projet corporate en cours.</p>'}</div></div></div>
       ${positionsPanel(f)}` });
@@ -2815,6 +2815,7 @@ function kbBuild(question, ctxId, budget, o) {
   const q = aiNorm(question); const parts = []; let used = 0; const seen = new Set();
   const add = (title, txt, must) => { if (!txt || !txt.trim()) return; const block = `\n\n===== ${title} =====\n${txt.trim()}`; if (!must && used + block.length > budget) { const room = budget - used; if (room > 1500) { parts.push(block.slice(0, room) + "\n[… tronqué]"); used = budget; } return; } parts.push(block); used += block.length; };
   const meM = me(), r = myRole();
+  try { if (ckList().length) add("INDICATEURS PERSONNALISÉS", ckList().map(k => `- ${k.label} : ${ckValue(k.id, {})[0].replace(/<[^>]+>/g, "")}` + (S.cfg.funds || []).map(f => ` | ${f.name} : ${ckValue(k.id, { fundId: f.id })[0].replace(/<[^>]+>/g, "")}`).join("")).join("\n"), true); } catch {}
   add("CONTEXTE", [`Date du jour : ${new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} (${todayISO()})`, `Utilisateur : ${meM ? meM.name + (meM.title ? ", " + meM.title : "") : "propriétaire de l'espace"} — rôle ${r?.name || ""}`, `Devise : ${S.cfg.general.currency}`, o.amounts && can("view_amounts") ? "Montants : inclus" : "Montants : NON communiqués (ne pas en inventer)",
     `Organisation : ${S.cfg.fundRoot?.name || "INMA Capital"} — fonds : ${(S.cfg.funds || []).map(f => `${f.name} (${fstatus(f.status).label}${f.type ? ", " + f.type : ""})`).join(" ; ")}`,
     `Équipe : ${internals().map(m => `${m.name}${m.title ? " (" + m.title + ")" : ""}`).join(" ; ")}`,
@@ -3433,20 +3434,21 @@ document.addEventListener("click", async e => {
 /* ---------- réunion d'équipe personnalisable (modèles de réunion) ---------- */
 const MB_BUILTIN = { summary: "Synthèse INMA Capital", followup: "Suivi des actions de la dernière réunion", dossiers: "Avancement des dossiers (une diapositive par workflow)", funds: "Vue par fonds (portefeuille, pipeline, projets)", projects: "Projets transverses", deadlines: "Échéances et reportings", decisions: "Points de décision et d'attention" };
 const MB_TYPES = { text: "Texte libre (ordre du jour, message, consignes…)", kpis: "Indicateurs choisis", dossiers: "Liste de dossiers filtrée", tasks: "Liste de tâches filtrée", deadlines: "Échéances filtrées", projects: "Projets filtrés", schedules: "Remboursements et impayés (échéanciers)", link: "Lien vers un document (OneDrive, SharePoint, PowerPoint…)", ai: "Analyse de l'assistant IA (question préparée)" };
-const MB_KPIS = { dossiers: "Dossiers actifs", amount: "Montants en cours (dossiers en suivi)", pending: "Validations en attente", openTasks: "Tâches ouvertes", lateTasks: "Tâches en retard", doneSince: "Tâches terminées depuis la date", stagesSince: "Étapes franchies depuis la date", dl30: "Échéances à 30 jours", dlLate: "Échéances en retard", projects: "Projets en cours", projRed: "Projets en difficulté", positions: "Lignes en portefeuille", crd: "Capital restant dû (échéanciers)", cash30: "À encaisser sous 30 jours", unpaid: "Impayés (échéanciers)" };
+const MB_KPIS = { dossiers: "Dossiers actifs", amount: "Montants en cours (dossiers en suivi)", study: "Montant total des dossiers en étude", pending: "Validations en attente", openTasks: "Tâches ouvertes", lateTasks: "Tâches en retard", doneSince: "Tâches terminées depuis la date", stagesSince: "Étapes franchies depuis la date", dl30: "Échéances à 30 jours", dlLate: "Échéances en retard", projects: "Projets en cours", projRed: "Projets en difficulté", positions: "Lignes en portefeuille", crd: "Capital restant dû (échéanciers)", cash30: "À encaisser sous 30 jours", unpaid: "Impayés (échéanciers)" };
 const mbDefault = () => ({ id: "mb_default", name: "Réunion d'équipe", slides: Object.keys(MB_BUILTIN).map(k => ({ id: "b_" + k, type: "b:" + k, on: true, title: "" })) });
 const mbBoards = () => (S.cfg.meetingBoards && S.cfg.meetingBoards.length) ? S.cfg.meetingBoards : [mbDefault()];
 const mbCurrent = () => { const l = mbBoards(); return l.find(b => b.id === S.ui.mt?.board) || l[0]; };
 const mbCanEdit = () => can("meetings") || can("settings");
 const mbFund = (mt, def) => def.fund || mt.fund || "";
 function mbKpiValue(k, mt, fundId) {
+  if (String(k).startsWith("ck_")) return ckValue(k, { fundId });
   const t = todayISO(), since = mt.since || addDays(t, -7), fn = fundId ? fundById(fundId)?.name : "";
   const ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn)); const tk = visTasks().filter(x => !fn || dossierById(x.dossierId)?.vehicle === fn);
   const occ = () => dlOccAll(addDays(t, -200), addDays(t, 31)).filter(x => x.status !== "sent" && (!fn || x.o.fund === fn));
   const sch = visDeadlines().filter(o => isSched(o) && (!fn || o.fund === fn)).map(schSummary);
   const cur = S.cfg.general.currency, m = v => can("view_amounts") ? `${fmtN(v)} <small>${h(cur)}</small>` : "Masqué";
   switch (k) {
-    case "dossiers": return [ds.length]; case "amount": return [m(curAmount(ds))]; case "pending": return [ds.filter(d => d.pendingApproval).length, ds.some(d => d.pendingApproval)];
+    case "dossiers": return [ds.length]; case "amount": return [m(curAmount(ds))]; case "study": return [m(studyAmount(ds))]; case "pending": return [ds.filter(d => d.pendingApproval).length, ds.some(d => d.pendingApproval)];
     case "openTasks": return [tk.filter(x => !isDone(x)).length]; case "lateTasks": { const n = tk.filter(x => !isDone(x) && x.due && x.due < t).length; return [n, n > 0]; }
     case "doneSince": return [tk.filter(x => isDone(x) && (x.completedAt || "") >= since).length]; case "stagesSince": return [S.activity.filter(e => e.at >= since && /passe à l'étape/.test(e.text) && (!fn || dossierById(e.dossierId)?.vehicle === fn)).length];
     case "dl30": return [occ().filter(x => !x.late && x.due <= addDays(t, 30)).length]; case "dlLate": { const n = occ().filter(x => x.late).length; return [n, n > 0]; }
@@ -3461,8 +3463,8 @@ function mbCustomSlide(def, mt) {
   const T = def.type, title = def.title || MB_TYPES[T] || "Diapositive", fid = mbFund(mt, def), fn = fid ? fundById(fid)?.name : "", t = todayISO();
   const empty = msg => `<div class="panel"><div class="body"><p class="muted" style="margin:0">${msg}</p></div></div>`;
   if (T === "text") return { title, sub: def.sub || "", html: `<div class="panel"><div class="body ai-a mb-text" style="border:0">${mdLite(def.body || "") || '<p class="muted">Texte vide : modifiez cette diapositive dans « Personnaliser ».</p>'}</div></div>` };
-  if (T === "kpis") { const ks = (def.kpis && def.kpis.length ? def.kpis : ["dossiers", "lateTasks", "dl30", "projects"]).filter(k => MB_KPIS[k]);
-    return { title, sub: fn || "", html: `<div class="kpis">${ks.map(k => { const [v, alert] = mbKpiValue(k, mt, fid); return `<div class="kpi ${alert ? "alert" : ""}"><span class="l">${h(MB_KPIS[k])}</span><span class="v" style="font-size:26px">${v}</span></div>`; }).join("")}</div>` }; }
+  if (T === "kpis") { const ks = (def.kpis && def.kpis.length ? def.kpis : ["dossiers", "lateTasks", "dl30", "projects"]).filter(k => kpiCatalog()[k]);
+    return { title, sub: fn || "", html: `<div class="kpis">${ks.map(k => { const [v, alert] = mbKpiValue(k, mt, fid); return `<div class="kpi ${alert ? "alert" : ""}"><span class="l">${h(kpiCatalog()[k])}</span><span class="v" style="font-size:26px">${v}</span></div>`; }).join("")}</div>` }; }
   if (T === "dossiers") { let ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn) && (!def.workflow || d.workflowId === def.workflow) && (!def.owner || dOwners(d).includes(def.owner)) && (!def.stage || aiNorm(stageOf(d)?.name).includes(aiNorm(def.stage))) && (!def.pending || d.pendingApproval) && (!def.late || S.tasks.some(x => x.dossierId === d.id && !isDone(x) && x.due && x.due < t)));
     ds.sort(def.sort === "amount" ? (a, b) => num(b.amount) - num(a.amount) : def.sort === "recent" ? (a, b) => String(b.createdAt).localeCompare(String(a.createdAt)) : (a, b) => (wfById(b.workflowId)?.stages.findIndex(s => s.id === b.stageId) ?? 0) - (wfById(a.workflowId)?.stages.findIndex(s => s.id === a.stageId) ?? 0));
     return { title, sub: `${ds.length} dossier(s)${fn ? " · " + fn : ""}`, html: ds.length ? `<div class="panel tablewrap"><table class="t mt-table"><thead><tr><th>Réf.</th><th>Dossier</th><th>Responsable</th><th style="min-width:180px">Avancement</th><th>Dans l'étape</th><th>Tâches</th><th>Prochaine action</th><th class="r">Montant</th></tr></thead><tbody>${ds.slice(0, 40).map(mtDossierRow).join("")}</tbody></table></div>` : empty("Aucun dossier ne correspond aux filtres de cette diapositive.") }; }
@@ -3514,7 +3516,7 @@ function mbParamsForm(d) {
   const memSel = (k, extra) => `<select data-mbp="${k}"><option value="">Tous</option>${extra || ""}${internals().map(m => `<option value="${m.id}" ${d[k] === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select>`;
   if (T.startsWith("b:")) return `<p class="muted" style="margin:0;font-size:12px">Section standard : seul le titre se modifie (pour les sections à une diapositive).</p>`;
   if (T === "text") return `${f("sub", "Sous-titre", `<input type="text" data-mbp="sub" value="${val("sub")}">`)}${f("body", "Contenu (titres ##, listes -, **gras**)", `<textarea data-mbp="body" rows="6">${val("body")}</textarea>`)}`;
-  if (T === "kpis") return `<div class="row">${Object.entries(MB_KPIS).map(([k, l]) => `<label class="chk"><input type="checkbox" data-mbk="${k}" ${(d.kpis || []).includes(k) ? "checked" : ""}>${h(l)}</label>`).join("")}</div>${f("fund", "Fonds", fundSel)}`;
+  if (T === "kpis") return `<div class="row">${Object.entries(kpiCatalog()).map(([k, l]) => `<label class="chk"><input type="checkbox" data-mbk="${k}" ${(d.kpis || []).includes(k) ? "checked" : ""}>${h(l)}</label>`).join("")}</div>${ckCanEdit() ? `<p class="muted" style="margin:0;font-size:12px">Besoin d'un autre calcul ? <a href="#" data-act10="ck-new">Créer un indicateur personnalisé</a> (il apparaîtra ensuite dans cette liste).</p>` : ""}${f("fund", "Fonds", fundSel)}`;
   if (T === "dossiers") return `<div class="grid3">${f("workflow", "Workflow", `<select data-mbp="workflow"><option value="">Tous</option>${S.cfg.workflows.map(w => `<option value="${w.id}" ${d.workflow === w.id ? "selected" : ""}>${h(w.name)}</option>`).join("")}</select>`)}${f("fund", "Fonds", fundSel)}${f("owner", "Responsable", memSel("owner"))}${f("stage", "Étape (contient)", `<input type="text" data-mbp="stage" value="${val("stage")}" placeholder="Ex. Due diligence">`)}${f("sort", "Tri", `<select data-mbp="sort">${[["", "Du plus avancé au plus récent"], ["amount", "Montant décroissant"], ["recent", "Plus récents d'abord"]].map(([k, l]) => `<option value="${k}" ${(d.sort || "") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}</div><div class="row"><label class="chk"><input type="checkbox" data-mbb="pending" ${d.pending ? "checked" : ""}>Seulement en attente de validation</label><label class="chk"><input type="checkbox" data-mbb="late" ${d.late ? "checked" : ""}>Seulement avec des tâches en retard</label></div>`;
   if (T === "tasks") return `<div class="grid3">${f("assignee", "Assignées à", memSel("assignee", `<option value="_me" ${d.assignee === "_me" ? "selected" : ""}>La personne qui présente</option>`))}${f("status", "Lesquelles", `<select data-mbp="status">${[["open", "Toutes les tâches ouvertes"], ["late", "En retard"], ["week", "À échéance sous 7 jours (et retards)"], ["done", "Terminées depuis la date"]].map(([k, l]) => `<option value="${k}" ${(d.status || "open") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("fund", "Fonds", fundSel)}</div>`;
   if (T === "deadlines") return `<div class="grid3">${f("days", "Horizon (jours)", `<input type="number" data-mbp="days" value="${val("days") || 30}">`)}${f("dtype", "Type", `<select data-mbp="dtype"><option value="">Tous</option>${(S.cfg.deadlineTypes || []).map(x => `<option value="${x.id}" ${d.dtype === x.id ? "selected" : ""}>${h(x.label)}</option>`).join("")}</select>`)}${f("fund", "Fonds", fundSel)}</div><label class="chk"><input type="checkbox" data-mbb="noLate" ${d.noLate ? "checked" : ""}>Masquer les retards</label>`;
@@ -3565,6 +3567,150 @@ document.addEventListener("click", e => {
   if (el.dataset.act8 === "mb-edit") mbEditor();
 });
 document.addEventListener("change", e => { if (e.target.id === "mt-board") { S.ui.mt = { ...(S.ui.mt || {}), board: e.target.value }; saveUI(); render(); } });
+
+/* ---------- indicateurs personnalisés (sans code) ---------- */
+const CK_SOURCES = { dossiers: "Dossiers", tasks: "Tâches", deadlines: "Échéances et reportings", installments: "Échéances de remboursement (échéanciers)", positions: "Participations et financements", projects: "Projets" };
+const CK_FIELDS = () => ({
+  dossiers: { amount: "Montant du dossier", daysInStage: "Jours dans l'étape actuelle", ...Object.fromEntries((S.cfg.customFields || []).filter(f => f.type === "number" || f.type === "currency").map(f => ["cf:" + f.id, f.label])) },
+  tasks: { lateDays: "Jours de retard" },
+  deadlines: { amount: "Montant" },
+  installments: { total: "Montant de l'échéance", p: "Capital", i: "Intérêts", v: "Part variable (CA)", paid: "Montant reçu" },
+  positions: { amount: "Montant investi / financé", outstanding: "Encours", stake: "Participation (%)" },
+  projects: { progress: "Avancement (%)" },
+});
+const CK_MEASURES = { count: "Nombre", sum: "Somme", avg: "Moyenne", min: "Minimum", max: "Maximum", ratio: "Ratio entre deux indicateurs (%)" };
+const ckList = () => S.cfg.customKpis || [];
+const kpiCatalog = () => ({ ...MB_KPIS, ...Object.fromEntries(ckList().map(k => [k.id, k.label])) });
+const ckCanEdit = () => can("kpis") || can("settings");
+const ckIsMoneyField = (src, fld) => (src === "dossiers" && (fld === "amount" || (fld?.startsWith("cf:") && (S.cfg.customFields || []).find(f => "cf:" + f.id === fld)?.type === "currency"))) || (src === "deadlines" && fld === "amount") || (src === "installments") || (src === "positions" && (fld === "amount" || fld === "outstanding"));
+const ckIn = (arr, v) => !arr || !arr.length || arr.includes(v);
+function ckItems(def, ctx) {
+  const F = def.f || {}, t = todayISO(); const fid = F.fund === "_ctx" ? (ctx.fundId || "") : (F.fund || ""); const fn = fid ? fundById(fid)?.name : "";
+  const within = (d, n) => d && d >= t && d <= addDays(t, n);
+  switch (def.source) {
+    case "dossiers": return visDossiers().filter(d => (F.archived || !d.archived) && (!fn || d.vehicle === fn) && ckIn(F.workflows, d.workflowId) && ckIn(F.stages, d.stageId)
+      && (!F.phase || (F.phase === "study" ? inStudy(d) : F.phase === "portfolio" ? inPortfolio(d) : true)) && (!F.owners?.length || dOwners(d).some(o => F.owners.includes(o)))
+      && (!F.sector || d.sector === F.sector) && (!F.priority || d.priority === F.priority) && (!F.tag || (d.tags || []).includes(F.tag)) && (!F.pending || d.pendingApproval)
+      && (!F.late || S.tasks.some(x => x.dossierId === d.id && !isDone(x) && x.due && x.due < t)) && (!num(F.createdDays) || String(d.createdAt || "") >= addDays(t, -num(F.createdDays))))
+      .map(d => ({ amount: num(d.amount), daysInStage: d.stageSince ? daysBetween(d.stageSince, t) : 0, ...Object.fromEntries(Object.entries(d.custom || {}).map(([k, v]) => ["cf:" + k, num(v)])) }));
+    case "tasks": return visTasks().filter(x => { const dn = dossierById(x.dossierId); const st = F.status || "open";
+      return (!fn || dn?.vehicle === fn) && (!F.assignees?.length || (x.assignees || []).some(a => F.assignees.includes(a))) && (!F.priority || x.priority === F.priority)
+        && (st === "all" || (st === "open" ? !isDone(x) : st === "late" ? !isDone(x) && x.due && x.due < t : st === "soon" ? !isDone(x) && within(x.due, num(F.days) || 7) : st === "done" ? isDone(x) && (!num(F.days) || String(x.completedAt || "") >= addDays(t, -num(F.days))) : true)); })
+      .map(x => ({ lateDays: x.due && x.due < t && !isDone(x) ? daysBetween(x.due, t) : 0 }));
+    case "deadlines": { const h_ = num(F.days) || 30; return dlOccAll(addDays(t, -400), addDays(t, h_)).filter(x => (!fn || x.o.fund === fn) && (!F.dtype || x.o.type === F.dtype) && (!F.noSched || !isSched(x.o))
+      && ((F.status || "open") === "all" ? true : F.status === "late" ? x.late : F.status === "sent" ? x.status === "sent" : x.status !== "sent" && (x.late || x.due <= addDays(t, h_)))).map(x => ({ amount: num(x.amt ?? x.o.amount) })); }
+    case "installments": { const out = []; for (const o of visDeadlines().filter(o => isSched(o) && o.active !== false && (!fn || o.fund === fn))) for (const it of schItems(o)) { const st = o.done?.[schKey(o, it)] || {}; const paid = (st.status || "todo") === "sent"; const late = !paid && it.d < t;
+        const s_ = F.status || "todo"; if (s_ === "todo" && paid) continue; if (s_ === "late" && !late) continue; if (s_ === "paid" && !paid) continue; if (s_ === "upcoming" && (paid || it.d < t)) continue;
+        if (num(F.days) && (F.status === "paid" ? !(String(st.paidDate || it.d) >= addDays(t, -num(F.days))) : s_ === "late" ? false : !(it.d <= addDays(t, num(F.days))))) continue;
+        out.push({ total: schAmt(it), p: num(it.p), i: num(it.i), v: num(it.v), paid: num(st.paid || (paid ? schAmt(it) : 0)) }); } return out; }
+    case "positions": return (S.cfg.funds || []).filter(f => !fid || f.id === fid).flatMap(f => (f.positions || []).filter(p => (!F.kind || p.kind === F.kind) && (F.status ? p.status === F.status : (p.status !== "exited" && p.status !== "repaid")) && (!F.health || p.health === F.health))
+      .map(p => { const sc = !num(p.outstanding) && p.kind === "debt" ? visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`) : null; return { amount: num(p.amount), outstanding: num(p.outstanding) || (sc ? schSummary(sc).crd : 0), stake: num(p.stake) }; }));
+    case "projects": return visProjects().filter(p => (!F.scope || F.scope === "_ctx" ? (!ctx.fundId || F.scope !== "_ctx" || p.scope === ctx.fundId) : p.scope === F.scope) && (F.status === "all" ? true : F.status ? p.status === F.status : p.status !== "done") && (!F.health || p.health === F.health) && (!F.category || p.category === F.category)).map(p => ({ progress: prjProgress(p) }));
+  }
+  return [];
+}
+function ckEval(def, ctx = {}, depth = 0) {
+  if (def.measure === "ratio") {
+    if (depth > 3) return { v: NaN };
+    const a = ckRaw(def.num, ctx, depth + 1), b = ckRaw(def.den, ctx, depth + 1);
+    return { v: b ? a / b * 100 : NaN, fmt: "percent" };
+  }
+  const items = ckItems(def, ctx); const fld = def.field; const vals = def.measure === "count" ? [] : items.map(x => num(x[fld]));
+  const v = def.measure === "count" ? items.length : !vals.length ? (def.measure === "sum" ? 0 : NaN) : def.measure === "sum" ? vals.reduce((s, x) => s + x, 0) : def.measure === "avg" ? vals.reduce((s, x) => s + x, 0) / vals.length : def.measure === "min" ? Math.min(...vals) : Math.max(...vals);
+  const fmt = def.format && def.format !== "auto" ? def.format : def.measure === "count" ? "number" : ckIsMoneyField(def.source, fld) ? "money" : (fld === "stake" || fld === "progress") ? "percent" : "number";
+  return { v, fmt, n: items.length };
+}
+function ckRaw(id, ctx, depth) { const c = ckList().find(k => k.id === id); if (c) return ckEval(c, ctx, depth).v; const r = mbKpiValue(id, { since: addDays(todayISO(), -7) }, ctx.fundId || "")[0]; return num(String(r).replace(/<[^>]+>/g, "").replace(/[^\d,.-]/g, "")); }
+function ckFormat(r) {
+  if (r.v == null || isNaN(r.v)) return "—";
+  if (r.fmt === "money") return can("view_amounts") ? `${fmtN(Math.round(r.v))} <small>${h(S.cfg.general.currency)}</small>` : "Masqué";
+  if (r.fmt === "percent") return `${(Math.round(r.v * 10) / 10).toLocaleString("fr-FR")} %`;
+  if (r.fmt === "days") return `${Math.round(r.v)} j`;
+  return (Math.round(r.v * 100) / 100).toLocaleString("fr-FR");
+}
+function ckValue(id, ctx) { const def = ckList().find(k => k.id === id); if (!def) return ["—"]; const r = ckEval(def, ctx); const al = def.alertOp && def.alertVal !== "" && def.alertVal != null && !isNaN(r.v) && (def.alertOp === ">" ? r.v > num(def.alertVal) : r.v < num(def.alertVal)); return [ckFormat(r), al, def.sub || ""]; }
+/* ---- éditeur ---- */
+function ckFiltersForm(src, F) {
+  const f = (lab, inner) => `<label class="f"><span>${lab}</span>${inner}</label>`; const v = k => h(F[k] ?? "");
+  const fund = f("Fonds", `<select data-ckf="fund"><option value="">Tous les fonds</option><option value="_ctx" ${F.fund === "_ctx" ? "selected" : ""}>Le fonds affiché (sinon tous)</option>${(S.cfg.funds || []).map(x => `<option value="${x.id}" ${F.fund === x.id ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select>`);
+  const multi = (key, opts) => `<div class="row" style="gap:4px 10px">${opts.map(([id, l]) => `<label class="chk"><input type="checkbox" data-ckm="${key}" value="${h(id)}" ${(F[key] || []).includes(id) ? "checked" : ""}>${h(l)}</label>`).join("")}</div>`;
+  const prio = f("Priorité", `<select data-ckf="priority"><option value="">Toutes</option>${S.cfg.priorities.map(p => `<option value="${p.id}" ${F.priority === p.id ? "selected" : ""}>${h(p.label)}</option>`).join("")}</select>`);
+  if (src === "dossiers") return `<div class="grid3">${fund}${f("Phase", `<select data-ckf="phase"><option value="">Toutes</option><option value="study" ${F.phase === "study" ? "selected" : ""}>En étude (avant le suivi)</option><option value="portfolio" ${F.phase === "portfolio" ? "selected" : ""}>En portefeuille (étapes de suivi)</option></select>`)}${f("Secteur", `<select data-ckf="sector"><option value="">Tous</option>${S.cfg.sectors.map(x => `<option ${F.sector === x ? "selected" : ""}>${h(x)}</option>`).join("")}</select>`)}${prio}${f("Étiquette", `<select data-ckf="tag"><option value="">Toutes</option>${S.cfg.tags.map(x => `<option ${F.tag === x ? "selected" : ""}>${h(x)}</option>`).join("")}</select>`)}${f("Créés depuis (jours, facultatif)", `<input type="number" data-ckf="createdDays" value="${v("createdDays")}">`)}</div>
+    <div><div class="eyebrow">Workflows</div>${multi("workflows", S.cfg.workflows.map(w => [w.id, w.name]))}</div>
+    <div><div class="eyebrow">Étapes (vide = toutes)</div>${S.cfg.workflows.filter(w => !(F.workflows || []).length || F.workflows.includes(w.id)).map(w => `<div style="margin:4px 0"><span class="muted" style="font-size:11.5px">${h(w.name)}</span>${multi("stages", w.stages.map(s => [s.id, s.name]))}</div>`).join("")}</div>
+    <div><div class="eyebrow">Responsables (vide = tous)</div>${multi("owners", internals().map(m => [m.id, m.name.split(" ")[0]]))}</div>
+    <div class="row"><label class="chk"><input type="checkbox" data-ckb="pending" ${F.pending ? "checked" : ""}>En attente de validation</label><label class="chk"><input type="checkbox" data-ckb="late" ${F.late ? "checked" : ""}>Avec des tâches en retard</label><label class="chk"><input type="checkbox" data-ckb="archived" ${F.archived ? "checked" : ""}>Inclure les archivés</label></div>`;
+  if (src === "tasks") return `<div class="grid3">${fund}${f("Lesquelles", `<select data-ckf="status">${[["open", "Ouvertes"], ["late", "En retard"], ["soon", "À échéance sous N jours"], ["done", "Terminées (sur N jours)"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${(F.status || "open") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("N jours", `<input type="number" data-ckf="days" value="${v("days")}" placeholder="7">`)}${prio}</div><div><div class="eyebrow">Responsables (vide = tous)</div>${multi("assignees", internals().map(m => [m.id, m.name.split(" ")[0]]))}</div>`;
+  if (src === "deadlines") return `<div class="grid3">${fund}${f("Lesquelles", `<select data-ckf="status">${[["open", "À traiter (retards + horizon)"], ["late", "En retard"], ["sent", "Remises"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${(F.status || "open") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("Horizon (jours)", `<input type="number" data-ckf="days" value="${v("days")}" placeholder="30">`)}${f("Type", `<select data-ckf="dtype"><option value="">Tous</option>${(S.cfg.deadlineTypes || []).map(x => `<option value="${x.id}" ${F.dtype === x.id ? "selected" : ""}>${h(x.label)}</option>`).join("")}</select>`)}</div><label class="chk"><input type="checkbox" data-ckb="noSched" ${F.noSched ? "checked" : ""}>Exclure les remboursements des échéanciers</label>`;
+  if (src === "installments") return `<div class="grid3">${fund}${f("Lesquelles", `<select data-ckf="status">${[["todo", "Non payées"], ["upcoming", "À échoir"], ["late", "Impayées (en retard)"], ["paid", "Payées"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${(F.status || "todo") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("Sur N jours (à venir, ou passés pour « payées »)", `<input type="number" data-ckf="days" value="${v("days")}" placeholder="toutes">`)}</div>`;
+  if (src === "positions") return `<div class="grid3">${fund}${f("Nature", `<select data-ckf="kind"><option value="">Toutes</option><option value="equity" ${F.kind === "equity" ? "selected" : ""}>Participations</option><option value="debt" ${F.kind === "debt" ? "selected" : ""}>Financements</option></select>`)}${f("Statut", `<select data-ckf="status"><option value="">En portefeuille / sous surveillance</option>${POS_STATUS.map(x => `<option value="${x[0]}" ${F.status === x[0] ? "selected" : ""}>${x[1]}</option>`).join("")}</select>`)}${f("Santé", `<select data-ckf="health"><option value="">Toutes</option>${Object.entries(HEALTH).map(([k, x]) => `<option value="${k}" ${F.health === k ? "selected" : ""}>${x[0]}</option>`).join("")}</select>`)}</div>`;
+  if (src === "projects") return `<div class="grid3">${f("Périmètre", `<select data-ckf="scope"><option value="">Tous</option><option value="_ctx" ${F.scope === "_ctx" ? "selected" : ""}>Le fonds affiché (sinon tous)</option><option value="inma" ${F.scope === "inma" ? "selected" : ""}>${h(scopeName("inma"))}</option>${(S.cfg.funds || []).map(x => `<option value="${x.id}" ${F.scope === x.id ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select>`)}${f("Statut", `<select data-ckf="status"><option value="">Non terminés</option>${PRJ_STATUS.map(x => `<option value="${x[0]}" ${F.status === x[0] ? "selected" : ""}>${x[1]}</option>`).join("")}<option value="all" ${F.status === "all" ? "selected" : ""}>Tous</option></select>`)}${f("Santé", `<select data-ckf="health"><option value="">Toutes</option>${Object.entries(HEALTH).map(([k, x]) => `<option value="${k}" ${F.health === k ? "selected" : ""}>${x[0]}</option>`).join("")}</select>`)}${f("Catégorie", `<select data-ckf="category"><option value="">Toutes</option>${(S.cfg.projectCategories || []).map(c => `<option ${F.category === c ? "selected" : ""}>${h(c)}</option>`).join("")}</select>`)}</div>`;
+  return "";
+}
+function ckEditor(k0, onSaved) {
+  if (!ckCanEdit()) { toast("Votre rôle ne permet pas de créer des indicateurs."); return; }
+  const isNew = !k0; const k = k0 ? clone(k0) : { id: "ck_" + uid("k").slice(-8), label: "", source: "dossiers", measure: "sum", field: "amount", f: { fund: "_ctx" }, format: "auto", sub: "", alertOp: "", alertVal: "" };
+  const cat = () => Object.entries(kpiCatalog()).filter(([id]) => id !== k.id);
+  const read = L => { k.label = $("#ck-label", L).value.trim(); k.sub = $("#ck-sub", L).value; k.source = $("#ck-src", L)?.value || k.source; k.measure = $("#ck-meas", L).value; k.field = $("#ck-field", L)?.value || ""; k.format = $("#ck-fmt", L).value; k.alertOp = $("#ck-aop", L).value; k.alertVal = $("#ck-aval", L).value;
+    if (k.measure === "ratio") { k.num = $("#ck-num", L)?.value; k.den = $("#ck-den", L)?.value; }
+    const F = {}; $$("[data-ckf]", L).forEach(i => { if (i.value !== "") F[i.dataset.ckf] = i.value; }); $$("[data-ckb]", L).forEach(i => { if (i.checked) F[i.dataset.ckb] = true; }); const m = {}; $$("[data-ckm]", L).forEach(i => { (m[i.dataset.ckm] ||= []); if (i.checked) m[i.dataset.ckm].push(i.value); }); Object.entries(m).forEach(([a, b]) => { if (b.length) F[a] = b; }); k.f = F; };
+  const draw = L => { const flds = CK_FIELDS()[k.source] || {}; if (k.measure !== "count" && k.measure !== "ratio" && !flds[k.field]) k.field = Object.keys(flds)[0] || "";
+    $("#ck-body", L).innerHTML = `<div class="grid3"><label class="f"><span>Mesure</span><select id="ck-meas">${Object.entries(CK_MEASURES).map(([a, b]) => `<option value="${a}" ${k.measure === a ? "selected" : ""}>${b}</option>`).join("")}</select></label>
+        ${k.measure === "ratio" ? `<label class="f"><span>Numérateur</span><select id="ck-num">${cat().map(([a, b]) => `<option value="${a}" ${k.num === a ? "selected" : ""}>${h(b)}</option>`).join("")}</select></label><label class="f"><span>Dénominateur</span><select id="ck-den">${cat().map(([a, b]) => `<option value="${a}" ${k.den === a ? "selected" : ""}>${h(b)}</option>`).join("")}</select></label>`
+        : `<label class="f"><span>Sur</span><select id="ck-src">${Object.entries(CK_SOURCES).map(([a, b]) => `<option value="${a}" ${k.source === a ? "selected" : ""}>${b}</option>`).join("")}</select></label>${k.measure !== "count" ? `<label class="f"><span>Champ</span><select id="ck-field">${Object.entries(flds).map(([a, b]) => `<option value="${a}" ${k.field === a ? "selected" : ""}>${h(b)}</option>`).join("")}</select></label>` : ""}`}</div>
+      ${k.measure === "ratio" ? `<p class="muted" style="margin:0;font-size:12px">Résultat = numérateur ÷ dénominateur × 100 (ex. impayés ÷ encours). Créez d'abord les deux indicateurs si besoin.</p>` : `<div class="panel"><header><h2>Filtres</h2></header><div class="body" style="display:flex;flex-direction:column;gap:10px">${ckFiltersForm(k.source, k.f || {})}</div></div>`}
+      <div class="grid3"><label class="f"><span>Affichage</span><select id="ck-fmt">${[["auto", "Automatique"], ["number", "Nombre"], ["money", "Montant"], ["percent", "Pourcentage"], ["days", "Jours"]].map(([a, b]) => `<option value="${a}" ${k.format === a ? "selected" : ""}>${b}</option>`).join("")}</select></label>
+        <label class="f"><span>Alerte (rouge) si la valeur est</span><select id="ck-aop"><option value="">Pas d'alerte</option><option value=">" ${k.alertOp === ">" ? "selected" : ""}>supérieure à</option><option value="<" ${k.alertOp === "<" ? "selected" : ""}>inférieure à</option></select></label>
+        <label class="f"><span>Seuil</span><input type="number" id="ck-aval" value="${h(k.alertVal ?? "")}"></label></div>
+      <div class="ck-preview" id="ck-prev"></div>`;
+    prev(L); };
+  const prev = L => { try { read(L); const tmp = [...ckList().filter(x => x.id !== k.id), k]; const save = S.cfg.customKpis; S.cfg.customKpis = tmp;
+      const rows = [["Tous fonds", ""], ...(S.cfg.funds || []).map(f => [f.name, f.id])].map(([n, id]) => `<span class="ck-pv"><span class="muted">${h(n)}</span><b>${ckValue(k.id, { fundId: id })[0]}</b></span>`).join("");
+      S.cfg.customKpis = save; $("#ck-prev", L).innerHTML = `<div class="eyebrow" style="margin-bottom:6px">Aperçu</div><div class="row" style="gap:8px">${rows}</div>`; } catch (e) { $("#ck-prev", L).textContent = "Aperçu impossible : " + e.message; } };
+  modal(isNew ? "Nouvel indicateur" : "Modifier l'indicateur", `<div class="grid2"><label class="f"><span>Nom de l'indicateur</span><input type="text" id="ck-label" value="${h(k.label)}" placeholder="Ex. Montant des dossiers en due diligence"></label><label class="f"><span>Sous-titre (facultatif)</span><input type="text" id="ck-sub" value="${h(k.sub || "")}" placeholder="Ex. hors dossiers archivés"></label></div><div id="ck-body" style="display:flex;flex-direction:column;gap:12px"></div>`,
+    `${!isNew ? `<button class="btn danger" id="ck-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="ck-ok">${isNew ? "Créer l'indicateur" : "Enregistrer"}</button>`, L => {
+      draw(L);
+      L.addEventListener("change", e => { if (e.target.id === "ck-src") { read(L); const fv = k.f?.fund || k.f?.scope || ""; k.f = fv ? (k.source === "projects" ? { scope: fv } : { fund: fv }) : {}; draw(L); } else if (e.target.id === "ck-meas" || e.target.dataset.ckm === "workflows") { read(L); draw(L); } else prev(L); });
+      L.addEventListener("input", e => { if (e.target.matches("input[type=number],input[type=text]")) prev(L); });
+      $("#ck-ok", L).onclick = () => { read(L); if (!k.label) { toast("Donnez un nom à l'indicateur."); return; } if (k.measure === "ratio" && (!k.num || !k.den)) { toast("Choisissez le numérateur et le dénominateur."); return; }
+        S.cfg.customKpis = [...ckList().filter(x => x.id !== k.id), k]; L.remove(); saveCfg(isNew ? "Indicateur créé" : "Indicateur enregistré"); onSaved && onSaved(k.id); render(); };
+      const d = $("#ck-del", L); d && (d.onclick = () => { L.remove(); confirmBox(`Supprimer l'indicateur « ${k.label} » ? Il disparaîtra des tableaux de bord qui l'utilisent.`, "Supprimer", () => { S.cfg.customKpis = ckList().filter(x => x.id !== k.id); saveCfg("Indicateur supprimé"); render(); }); });
+    }, true);
+}
+/* ---- choix des indicateurs (tableau de bord, fonds, réunion) ---- */
+function ckPicker(title, current, onSave, note) {
+  let sel = [...current];
+  const draw = L => { const cat = kpiCatalog();
+    $("#ckp-sel", L).innerHTML = sel.filter(id => cat[id]).map((id, i) => `<div class="mb-row"><div class="row" style="gap:8px;flex-wrap:nowrap"><span class="mt-num" style="font-size:11px;padding:3px 6px">${String(i + 1).padStart(2, "0")}</span><span class="grow">${h(cat[id])}${id.startsWith("ck_") ? ' <span class="tag">personnalisé</span>' : ""}</span><button class="btn sm ghost" type="button" data-ckp-up="${i}" ${i ? "" : "disabled"}>▲</button><button class="btn sm ghost" type="button" data-ckp-down="${i}" ${i < sel.length - 1 ? "" : "disabled"}>▼</button>${id.startsWith("ck_") && ckCanEdit() ? `<button class="btn sm ghost" type="button" data-ckp-edit="${id}" aria-label="Modifier">${ic("gear")}</button>` : ""}<button class="btn sm ghost danger" type="button" data-ckp-rm="${i}" aria-label="Retirer">${ic("x")}</button></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun indicateur.</p>';
+    $("#ckp-add", L).innerHTML = Object.entries(cat).filter(([id]) => !sel.includes(id)).map(([id, l]) => `<option value="${id}">${h(l)}${id.startsWith("ck_") ? " (personnalisé)" : ""}</option>`).join(""); };
+  modal(title, `${note ? `<p class="muted" style="margin:0;font-size:12.5px">${note}</p>` : ""}<div class="mb-list" id="ckp-sel"></div>
+    <div class="row"><select id="ckp-add" style="max-width:360px" aria-label="Indicateur à ajouter"></select><button class="btn sm" type="button" id="ckp-addbtn">${ic("plus")}Ajouter</button>${ckCanEdit() ? `<button class="btn sm pri" type="button" id="ckp-new" style="margin-left:auto">${ic("plus")}Créer un indicateur</button>` : ""}</div>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="ckp-ok">Enregistrer</button>`, L => {
+      draw(L);
+      L.addEventListener("click", e => { const b = e.target.closest("[data-ckp-up],[data-ckp-down],[data-ckp-rm],[data-ckp-edit]"); if (!b) return; const ds = b.dataset;
+        if (ds.ckpEdit) { ckEditor(ckList().find(x => x.id === ds.ckpEdit), () => draw(L)); return; }
+        if (ds.ckpRm != null) sel.splice(+ds.ckpRm, 1); else { const i = +(ds.ckpUp ?? ds.ckpDown), j = ds.ckpUp != null ? i - 1 : i + 1; [sel[i], sel[j]] = [sel[j], sel[i]]; } draw(L); });
+      $("#ckp-addbtn", L).onclick = () => { const v = $("#ckp-add", L).value; if (v) { sel.push(v); draw(L); } };
+      const nb = $("#ckp-new", L); nb && (nb.onclick = () => ckEditor(null, id => { sel.push(id); draw(L); }));
+      $("#ckp-ok", L).onclick = () => { L.remove(); onSave(sel); };
+    }, true);
+}
+const DASH_KPIS_DEFAULT = ["dossiers", "amount", "study", "lateTasks", "pending"];
+function dashKpis() { const p = store.get(PREF_KEY, {}); return p.dashKpis || S.cfg.dashKpis || DASH_KPIS_DEFAULT; }
+function dashKpiRow() {
+  const t = todayISO(), cat = kpiCatalog();
+  return `<div class="kpis">${dashKpis().filter(k => cat[k]).map(k => { const [v, a, sub] = mbKpiValue(k, { since: addDays(t, -7) }, ""); return `<div class="kpi ${a ? "alert" : ""}"><span class="l">${h(cat[k])}</span><span class="v" style="font-size:22px">${v}</span>${sub ? `<span class="l">${h(sub)}</span>` : ""}</div>`; }).join("")}
+    <button class="kpi kpi-add" data-act10="dash-kpis" title="Choisir et créer des indicateurs">${ic("plus")}<span>Indicateurs</span></button></div>`;
+}
+function sKpis() {
+  return `<div class="panel"><header><h2>Indicateurs personnalisés</h2><span class="spacer"></span>${ckCanEdit() ? `<button class="btn sm pri" data-act10="ck-new">${ic("plus")}Créer un indicateur</button>` : ""}</header><div class="body list">${ckList().map(k => `<div class="li"><div class="grow"><div class="t1">${h(k.label)}</div><div class="t2">${k.measure === "ratio" ? "Ratio" : `${CK_MEASURES[k.measure]} · ${CK_SOURCES[k.source]}`} · valeur actuelle : ${ckValue(k.id, {})[0]}</div></div>${ckCanEdit() ? `<button class="btn sm" data-act10="ck-edit" data-id="${k.id}">Modifier</button>` : ""}</div>`).join("") || '<p class="muted" style="margin:0">Aucun indicateur personnalisé. Créez-en un : « Montant des dossiers en due diligence », « Nombre de tâches en retard d\'Hamdi », « Taux d\'impayés »…</p>'}</div></div>`;
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act10]"); if (!el) return; const A = el.dataset.act10; if (el.tagName === "A") e.preventDefault();
+  if (A === "dash-kpis") ckPicker("Indicateurs du tableau de bord", dashKpis(), sel => { const p = store.get(PREF_KEY, {}); store.set(PREF_KEY, { ...p, dashKpis: sel }); render(); }, "Choix personnel : chacun compose son tableau de bord. Les indicateurs personnalisés sont partagés avec l'équipe.");
+  if (A === "ck-new") ckEditor(null);
+  if (A === "ck-edit") ckEditor(ckList().find(x => x.id === el.dataset.id));
+});
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
