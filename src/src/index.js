@@ -311,6 +311,15 @@ export default {
       try { return await api(req, env, url); }
       catch (e) { if (e.status) return fail(e.status, e.message); console.error(e); return fail(500, "Erreur serveur : " + e.message); }
     }
+    // Icône de l'application : celle importée dans Paramètres, sinon l'icône INMA par défaut.
+    const ic = url.pathname.match(/^\/app-icon-(192|512)\.png$/);
+    if (ic) {
+      try { await ensureSchema(env); const cfg = await getDoc(env, "ws", "config"); const d = cfg?.general?.icon || "";
+        const m = d.match(/^data:image\/png;base64,(.+)$/);
+        if (m) { const bin = Uint8Array.from(atob(m[1]), ch => ch.charCodeAt(0)); return new Response(bin, { headers: { "Content-Type": "image/png", "Cache-Control": "public, max-age=300" } }); }
+      } catch {}
+      return env.ASSETS.fetch(new Request(new URL(`/icon-${ic[1]}.png`, url), req));
+    }
     return env.ASSETS.fetch(req);
   },
 };
