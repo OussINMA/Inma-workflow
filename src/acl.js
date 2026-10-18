@@ -1,6 +1,6 @@
 // Access control: what each signed-in person may read and write. Pure functions (no I/O).
 export const ALL_PERMS = ["settings", "roles", "members", "workflows", "automations", "view_all", "view_amounts", "dossier_create", "dossier_edit_all",
-  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects", "meetings", "ai"];
+  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects", "meetings", "ai", "kpis"];
 const CONFIG_PERMS = ["settings", "roles", "members", "workflows", "automations", "onedrive", "funds", "externals", "export"];
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -131,6 +131,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
       const out = { ...c.cfg }; let ok = false;
       if (c.can("deadlines") && Array.isArray(data.tmm)) { out.tmm = data.tmm.filter(x => x && /^\d{4}-\d{2}$/.test(x.m)).map(x => ({ m: x.m, v: +x.v })); ok = true; }
       if (c.can("meetings") && Array.isArray(data.meetingBoards)) { out.meetingBoards = data.meetingBoards; ok = true; }
+      if (c.can("kpis") && Array.isArray(data.customKpis)) { out.customKpis = data.customKpis.filter(k => k && typeof k === "object" && /^ck_/.test(String(k.id || ""))).slice(0, 200); ok = true; }
       if (ok) return out;
       throw new Denied("Seuls les administrateurs peuvent modifier les paramètres.");
     }

@@ -89,3 +89,7 @@ L'assistant (bouton en haut de chaque écran) répond aux questions sur les doss
 - **Limite par personne** : variable `AI_DAILY_LIMIT` (60 questions par jour par défaut).
 - **Moteur Microsoft (Azure OpenAI)**, si INMA dispose d'un abonnement Azure : ajoutez `AZURE_OPENAI_ENDPOINT` et `AZURE_OPENAI_DEPLOYMENT` (Texte) et `AZURE_OPENAI_API_KEY` (Secret). L'assistant bascule automatiquement dessus.
 - **Désactiver** : `AI_PROVIDER = off`, ou décocher l'assistant dans Paramètres › Général.
+
+## Indicateurs personnalisés
+
+Tableau de bord › carte « + Indicateurs » (ou Paramètres › Champs, Fonds › Personnaliser, Réunion d'équipe › diapositive Indicateurs) : créez un indicateur sans code — mesure (nombre, somme, moyenne, min, max, ratio entre deux indicateurs), source (dossiers, tâches, échéances, échéanciers, participations, projets), filtres (fonds, étapes, phase, responsables, statut, horizon…), format et seuil d'alerte. Aperçu en direct par fonds. Les indicateurs sont partagés avec l'équipe ; le choix des cartes du tableau de bord est personnel. Permission : « Créer des indicateurs personnalisés ».
