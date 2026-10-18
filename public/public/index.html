@@ -6,7 +6,8 @@
 <title>INMA Workflow</title>
 <meta name="theme-color" content="#212121">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" id="app-favicon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <script src="/vendor/msal-browser.min.js"></script>
 <script src="/inma-standalone.js"></script>
@@ -56,7 +57,14 @@ h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.01em}
 /* rail */
 .rail{background:var(--rail);color:var(--rail-ink);display:flex;flex-direction:column;gap:18px;padding:20px 12px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;height:100dvh;overflow:auto;padding-left:max(12px,env(safe-area-inset-left,0px))}
 .brandmark{display:flex;align-items:center;gap:10px;padding:4px 8px}
-.brandmark img{max-height:34px;max-width:150px}
+.brandmark img{max-height:38px;max-width:170px;display:block}
+.brand-logo{flex-direction:column;align-items:flex-start;gap:4px}
+.brand-sub{font-size:9.5px;letter-spacing:.2em;font-weight:600;text-transform:uppercase;color:var(--accent-cfg,#E22529);white-space:nowrap}
+.brand-default svg{height:30px;width:auto;display:block}
+.app-icon-prev{width:44px;height:44px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:var(--surface-2);flex:none}.app-icon-prev img,.app-icon-prev svg{width:40px;height:40px}
+#present .pbar .brand-default svg{height:24px}
+.logo-pill{background:#fff;border-radius:6px;padding:5px 8px;display:inline-block}
+#present .pbar .brandmark img{max-height:28px}
 .wordmark{font-weight:700;font-size:22px;letter-spacing:.18em;color:#fff}
 .wordmark small{display:block;font-size:10px;letter-spacing:.22em;font-weight:500;color:var(--accent-cfg,#E22529);margin-top:1px}
 .navgroup{display:flex;flex-direction:column;gap:2px}
@@ -376,6 +384,17 @@ a.btn{text-decoration:none}
 .mb-params{display:flex;flex-direction:column;gap:8px;padding:8px 0 2px;border-top:1px dashed var(--line)}
 .mb-list{display:flex;flex-direction:column;gap:6px}
 .mb-text h4{font-size:18px}.mb-text{font-size:15px}
+.fh-switch{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fh-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font:inherit;font-weight:600;cursor:pointer;color:var(--ink)}
+.fh-chip.on{border-color:var(--fc,var(--ink));box-shadow:0 0 0 1px var(--fc,var(--ink)) inset}
+.fh-count{font-family:var(--f-mono);font-size:11px;background:var(--surface-2);border-radius:999px;padding:1px 6px;color:var(--muted);font-weight:500}
+.fh-head{overflow:hidden}.fh-bar{width:6px;align-self:stretch;border-radius:3px;background:var(--fc);flex:none}
+.fh-tabs{display:flex;gap:2px;border-top:1px solid var(--line);padding:0 10px;overflow-x:auto}
+.fh-tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.fh-tabs button.on{color:var(--ink);border-bottom-color:var(--fc,var(--accent))}
+.fh-tg{width:22px;padding:0 !important;min-width:22px;justify-content:center;flex:none}.fh-tg-sp{width:22px;display:inline-block;flex:none}
+a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoration-color:var(--line)}a.fh-open:hover{text-decoration-color:var(--accent)}
+.tree.fh-dos>li>.tnode{background:color-mix(in oklab,var(--accent) 4%,transparent)}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
 </style>
 
@@ -616,7 +635,7 @@ function myRole() {
 }
 const can = k => { if (!S.sim && S.isOwner) return true; const r = myRole(); return !!(r && r.perms && r.perms[k]); };
 function canSeeDossier(d) { const mm = me(); if (isExt(mm)) return !!extGrant(d); if (can("view_all")) return true; const m = me(); return !!m && (d.ownerId === m.id || (d.members || []).includes(m.id)); }
-function canEditDossier(d) { if (can("dossier_edit_all")) return true; const m = me(); return !!m && (d.ownerId === m.id || (d.members || []).includes(m.id)); }
+function canEditDossier(d) { if (can("dossier_edit_all")) return true; const m = me(); return !!m && (d.ownerId === m.id || (d.coOwners || []).includes(m.id) || (d.members || []).includes(m.id)); }
 function canEditTask(t) { if (can("task_edit_all")) return true; const m = me(); if (!m) return false; if ((t.assignees || []).includes(m.id) || t.createdBy === m.id) return true; const d = dossierById(t.dossierId); return !!d && d.ownerId === m.id; }
 const visDossiers = () => S.dossiers.filter(d => canSeeDossier(d));
 const visTasks = () => S.tasks.filter(t => { if (can("view_all")) return true; const m = me(); if (m && (t.assignees || []).includes(m.id)) return true; const d = dossierById(t.dossierId); return d ? canSeeDossier(d) : false; });
@@ -729,8 +748,8 @@ async function enterStage(d, stageId, viaApproval) {
   d.stageSince = todayISO();
   await putDoc("dossiers", d);
   const owners = membersWithRole(s.roleId);
-  await log(`${d.code} passe à l'étape « ${s.name} »`, { dossierId: d.id, notify: S.cfg.notify.onStage ? [...new Set([d.ownerId, ...owners].filter(Boolean))] : [] });
-  if (w.autoTasks && s.checklist?.length) for (const c of s.checklist) await createTask({ title: c, dossierId: d.id, stageId: s.id, assignees: [d.ownerId].filter(Boolean), due: s.sla ? addDays(todayISO(), s.sla) : "" }, true);
+  await log(`${d.code} passe à l'étape « ${s.name} »`, { dossierId: d.id, notify: S.cfg.notify.onStage ? [...new Set([...dOwners(d), ...owners].filter(Boolean))] : [] });
+  if (w.autoTasks && s.checklist?.length) for (const c of s.checklist) await createTask({ title: c, dossierId: d.id, stageId: s.id, assignees: dOwners(d), due: s.sla ? addDays(todayISO(), s.sla) : "" }, true);
   await runAutomations("stage_enter", { dossier: d });
 }
 async function moveStage(d, stageId) {
@@ -784,6 +803,9 @@ function unreadCount() { const seen = store.get(seenKey(), ""); return myInbox()
 /* ---------- branding ---------- */
 function applyBranding() {
   const g = S.cfg.general, r = document.documentElement.style;
+  try { let fav = document.getElementById("app-favicon") || document.querySelector('link[rel="icon"]'); if (!fav) { fav = document.createElement("link"); fav.rel = "icon"; fav.id = "app-favicon"; document.head.appendChild(fav); }
+    const want = g.icon || ("data:image/svg+xml;charset=utf-8," + encodeURIComponent(INMA_ICON_SVG.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ')));
+    if (fav.dataset.v !== want.slice(-64)) { fav.href = g.icon ? g.icon : (window.INMA ? "/icon.svg" : want); fav.type = g.icon ? "image/png" : "image/svg+xml"; fav.dataset.v = want.slice(-64); } } catch {}
   r.setProperty("--brand-cfg", g.brand || "#212121"); r.setProperty("--accent-cfg", g.accent || "#E22529");
   r.setProperty("--font-cfg", `"${(g.font || "Montserrat").replace(/"/g, "")}"`); r.setProperty("--density", g.density || "1");
   const fam = (g.font || "").trim();
@@ -801,7 +823,7 @@ function renderRail() {
   const items = NAV.filter(n => mods[n[0]] !== false && navAllowed(n[0])).map(n => `<button class="nav ${S.view === n[0] ? "on" : ""}" data-nav="${n[0]}">${ic(n[2])}<span>${n[1]}</span>${n[0] === "tasks" && myOpen ? `<span class="cnt">${myOpen}</span>` : n[0] === "dossiers" ? `<span class="cnt">${visDossiers().filter(d => !d.archived).length}</span>` : ""}</button>`).join("");
   const settingsBtn = (can("settings") || can("roles") || can("members") || can("workflows") || can("automations") || can("export") || can("onedrive") || can("funds") || can("externals")) ? `<button class="nav ${S.view === "settings" ? "on" : ""}" data-nav="settings">${ic("gear")}<span>Paramètres</span></button>` : "";
   $("#rail").innerHTML = `
-    <div class="brandmark">${g.logo ? `<img src="${h(g.logo)}" alt="${h(g.appName)}">` : `<div class="wordmark">INMA<small>${h((g.appName || "").replace(/^INMA\s*/i, "") || "WORKFLOW").toUpperCase()}</small></div>`}</div>
+    ${brandHTML()}
     <div class="navgroup"><div class="navlabel">Espace</div>${items}</div>
     <div class="navgroup"><div class="navlabel">Administration</div>${settingsBtn || '<span class="navlabel" style="text-transform:none;letter-spacing:0">Accès réservé</span>'}</div>
     <div class="railfoot">
@@ -813,6 +835,13 @@ function renderRail() {
   $("#mobilenav").innerHTML = NAV.filter(n => mods[n[0]] !== false && navAllowed(n[0])).map(n => `<button class="nav ${S.view === n[0] ? "on" : ""}" data-nav="${n[0]}">${n[1]}</button>`).join("") + (settingsBtn ? `<button class="nav ${S.view === "settings" ? "on" : ""}" data-nav="settings">Paramètres</button>` : "");
 }
 const TITLES = { meeting: ["Réunion d'équipe", "Point d'avancement"], projects: ["Corporate & transverse", "Projets"], deadlines: ["Calendrier réglementaire", "Échéances et reportings"], dashboard: ["Pilotage", "Tableau de bord"], funds: ["Architecture", "Fonds"], dossiers: ["Portefeuille de travail", "Dossiers"], tasks: ["Exécution", "Tâches"], calendar: ["Planning", "Calendrier"], team: ["Organisation", "Équipe"], onedrive: ["Documents", "OneDrive"], settings: ["Administration", "Paramètres"] };
+const INMA_ICON_SVG = '<svg viewBox="0 0 100 100" width="36" height="36"><rect width="100" height="100" rx="18" fill="#E22529"/><path d="M26 70 L50 50 L74 30" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="26" cy="70" r="8" fill="#fff"/><circle cx="50" cy="50" r="8" fill="#fff"/><circle cx="74" cy="30" r="10" fill="#fff"/></svg>';
+const INMA_LOGO_SVG = '<svg role="img" aria-label="INMA" xmlns="http://www.w3.org/2000/svg" viewBox="0 -2 232 68"><rect x="0" y="0" width="64" height="64" rx="11.52" fill="#E22529"/><path d="M16.64 44.800000000000004 L32.0 32.0 L47.36 19.2" stroke="#fff" stroke-width="4.48" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16.64" cy="44.800000000000004" r="5.12" fill="#fff"/><circle cx="32.0" cy="32.0" r="5.12" fill="#fff"/><circle cx="47.36" cy="19.2" r="6.4" fill="#fff"/><g fill="#FFFFFF"><path transform="translate(82.00,50.00) scale(0.04600,-0.04600)" d="M83 0V700H245V0Z"/><path transform="translate(102.61,50.00) scale(0.04600,-0.04600)" d="M83 0V700H217L630 196H565V700H725V0H592L178 504H243V0Z"/><path transform="translate(145.30,50.00) scale(0.04600,-0.04600)" d="M83 0V700H217L515 206H444L737 700H870L872 0H720L719 467H747L513 74H440L201 467H235V0Z"/><path transform="translate(194.75,50.00) scale(0.04600,-0.04600)" d="M-9 0 303 700H463L776 0H606L350 618H414L157 0ZM147 150 190 273H550L594 150Z"/></g></svg>';
+function brandHTML(sub) {
+  const g = S.cfg.general || {}; const txt = sub ?? (g.logoSub ?? "Workflow Management");
+  if (g.logo) return `<div class="brandmark brand-logo"><span class="${g.logoBg ? "logo-pill" : ""}"><img src="${h(g.logo)}" alt="${h(g.appName || "INMA")}"></span>${txt ? `<small class="brand-sub">${h(txt)}</small>` : ""}</div>`;
+  return `<div class="brandmark brand-logo"><span class="brand-default">${INMA_LOGO_SVG}</span>${txt ? `<small class="brand-sub">${h(txt)}</small>` : ""}</div>`;
+}
 function renderTop() {
   const [c, t] = TITLES[S.view] || ["", ""]; const n = unreadCount();
   $("#topbar").innerHTML = `<div><div class="crumb">${h(c)}</div><h1>${h(t)}</h1></div><div class="spacer"></div>
@@ -887,7 +916,7 @@ function filterDossiers() {
   ds = ds.filter(d => f.archived ? d.archived : !d.archived);
   if (S.ui.wf && S.ui.wf !== "all") ds = ds.filter(d => d.workflowId === S.ui.wf);
   if (f.vehicle) ds = ds.filter(d => d.vehicle === f.vehicle);
-  if (f.owner) ds = ds.filter(d => d.ownerId === f.owner || (f.owner === "_me" && d.ownerId === me()?.id));
+  if (f.owner) ds = ds.filter(d => dOwners(d).includes(f.owner === "_me" ? me()?.id : f.owner));
   if (f.prio) ds = ds.filter(d => d.priority === f.prio);
   if (f.tag) ds = ds.filter(d => (d.tags || []).includes(f.tag));
   if (f.q) { const q = f.q.toLowerCase(); ds = ds.filter(d => [d.code, d.name, d.sector, d.description, ...(d.tags || [])].join(" ").toLowerCase().includes(q)); }
@@ -922,7 +951,7 @@ function cell(d, c) {
     case "code": return `<span class="mono">${h(d.code)}</span>`; case "name": return `<b>${h(d.name)}</b>`;
     case "workflow": return chip(w?.name || "—", w?.color || "#999"); case "stage": return `${h(s?.name || "—")}${d.pendingApproval ? ' <span class="lock">À VALIDER</span>' : ""}`;
     case "vehicle": return h(d.vehicle || "—"); case "sector": return h(d.sector || "—");
-    case "owner": return `<span class="row" style="flex-wrap:nowrap">${av(d.ownerId)}${h(mname(d.ownerId).split(" ")[0])}</span>`; case "team": return avs(d.members);
+    case "owner": { const o = dOwners(d); return `<span class="row" style="flex-wrap:nowrap">${avs(o)}${o.length === 1 ? h(mname(o[0]).split(" ")[0]) : ""}</span>`; } case "team": return avs(d.members);
     case "amount": return money(d.amount); case "prio": return prio(d.priority); case "start": return due(d.startDate, true); case "due": return due(d.dueDate, d.archived);
     case "tasks": return `<span class="num">${tks.filter(isDone).length}/${tks.length}</span>`; case "tags": return (d.tags || []).map(t => `<span class="tag">${h(t)}</span>`).join(" ");
     case "onedrive": return isURL(d.oneDriveUrl) ? `<a href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Ouvrir</a>` : '<span class="muted">—</span>';
@@ -1021,8 +1050,12 @@ function sGeneral() {
     <div class="grid3"><label class="f"><span>Couleur principale</span><span class="row">${inp("general.brand", g.brand, "color")}<span class="mono">${h(g.brand)}</span></span></label>
       <label class="f"><span>Couleur d'accent</span><span class="row">${inp("general.accent", g.accent, "color")}<span class="mono">${h(g.accent)}</span></span></label>
       <label class="f"><span>Police (nom exact Google Fonts)</span><input type="text" data-cfg="general.font" value="${h(g.font)}" list="font-list" id="cfg-font"><datalist id="font-list">${["Montserrat","Poppins","Open Sans","Lato","Raleway","Roboto","Source Sans 3","Nunito Sans","Work Sans","Barlow","Mulish","Inter","Hanken Grotesk"].map(f => `<option value="${f}">`).join("")}</datalist></label></div>
-    <div class="row"><div class="brandmark" style="background:var(--rail);border-radius:6px;padding:10px 14px">${g.logo ? `<img src="${h(g.logo)}" alt="Logo">` : `<div class="wordmark">INMA<small>LOGO PAR DÉFAUT</small></div>`}</div>
-      <label class="btn">Importer le logo (SVG, PNG)<input type="file" id="logo-file" accept="image/*" hidden></label>${g.logo ? `<button class="btn ghost danger" data-act="logo-clear">Retirer</button>` : ""}<span class="muted" style="font-size:12px">Utilisez de préférence la version blanche du logo INMA : il s'affiche sur le menu principal.</span></div>
+    <div class="row"><div style="background:var(--rail);border-radius:6px;padding:10px 14px">${brandHTML()}</div>
+      <label class="btn">Importer le logo (SVG, PNG)<input type="file" id="logo-file" accept="image/*" hidden></label>${g.logo ? `<button class="btn ghost danger" data-act="logo-clear">Retirer</button>` : ""}<span class="muted" style="font-size:12px">PNG transparent ou SVG. Le menu est foncé : prenez la version blanche du logo, ou cochez « fond blanc ».</span></div>
+    <div class="row"><span class="app-icon-prev">${g.icon ? `<img src="${h(g.icon)}" alt="">` : INMA_ICON_SVG}</span><div style="display:flex;flex-direction:column;gap:4px"><b style="font-size:13px">Icône de l'application</b><span class="muted" style="font-size:12px">Onglet du navigateur, raccourci et application installée depuis Edge. Image carrée (PNG ou SVG, 512 × 512 idéalement).</span></div>
+      <label class="btn">Importer l'icône<input type="file" id="icon-file" accept="image/*" hidden></label>${g.icon ? `<button class="btn ghost danger" data-act="icon-clear">Icône par défaut</button>` : ""}</div>
+    <div class="grid2"><label class="f"><span>Texte sous le logo</span><input type="text" data-cfg="general.logoSub" value="${h(g.logoSub ?? "Workflow Management")}" placeholder="Workflow Management"></label>
+      <label class="chk" style="align-self:end"><input type="checkbox" data-cfgbool="general.logoBg" ${g.logoBg ? "checked" : ""}>Afficher le logo sur un fond blanc (logo couleur)</label></div>
     <div class="grid3"><label class="f"><span>Densité d'affichage</span><select data-cfg="general.density"><option value="0.75" ${g.density === "0.75" ? "selected" : ""}>Compacte</option><option value="1" ${g.density === "1" ? "selected" : ""}>Standard</option><option value="1.3" ${g.density === "1.3" ? "selected" : ""}>Aérée</option></select></label>
       <label class="f"><span>Devise</span>${inp("general.currency", g.currency)}</label>
       <label class="f"><span>Format de date</span><select data-cfg="general.dateFormat"><option value="fr" ${g.dateFormat === "fr" ? "selected" : ""}>16 oct. 2026</option><option value="iso" ${g.dateFormat === "iso" ? "selected" : ""}>2026-10-16</option></select></label>
@@ -1162,8 +1195,9 @@ function renderDrawer() {
     ${d.pendingApproval ? `<div class="banner warn"><b>Validation en attente</b> pour passer à « ${h(w.stages.find(x => x.id === d.pendingApproval.to)?.name)} » · demandée par ${h(mname(d.pendingApproval.by))}${can("stage_approve") ? `<span class="spacer"></span><button class="btn sm pri" data-approve="${d.id}">Valider</button><button class="btn sm" data-reject="${d.id}">Refuser</button>` : ""}</div>` : ""}
     <div class="panel"><div class="body" style="display:flex;flex-direction:column;gap:12px">
       <div class="grid2"><label class="f"><span>Nom du dossier</span><input type="text" id="d-name" value="${h(d.name)}" ${ed ? "" : "disabled"}></label>
-        <label class="f"><span>Responsable</span><select id="d-owner" ${ed ? "" : "disabled"}>${S.cfg.members.filter(m => !m.external).map(m => `<option value="${m.id}" ${d.ownerId === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select></label></div>
+        <div class="f"><span>Responsables</span><div class="row" style="gap:4px 10px">${S.cfg.members.filter(m => !m.external).map(m => `<label class="chk"><input type="checkbox" data-downer="${m.id}" ${dOwners(d).includes(m.id) ? "checked" : ""} ${ed ? "" : "disabled"}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div></div>
       <div class="grid3"><label class="f"><span>Fonds / véhicule</span><select id="d-vehicle" ${ed ? "" : "disabled"}>${vehicles().map(v => `<option ${d.vehicle === v ? "selected" : ""}>${h(v)}</option>`).join("")}</select></label>
+        ${(() => { const fd = (S.cfg.funds || []).find(x => x.name === d.vehicle); return fd && (fd.tree || []).length ? `<label class="f"><span>Emplacement dans l'arborescence du fonds</span><select id="d-node" ${ed ? "" : "disabled"}><option value="">— non classé —</option>${nodeOptions(fd, d.fundNode)}</select></label>` : ""; })()}
         <label class="f"><span>Secteur</span><select id="d-sector" ${ed ? "" : "disabled"}><option value="">—</option>${S.cfg.sectors.map(v => `<option ${d.sector === v ? "selected" : ""}>${h(v)}</option>`).join("")}</select></label>
         <label class="f"><span>Priorité</span><select id="d-prio" ${ed ? "" : "disabled"}>${S.cfg.priorities.map(p => `<option value="${p.id}" ${d.priority === p.id ? "selected" : ""}>${h(p.label)}</option>`).join("")}</select></label>
         ${can("view_amounts") ? `<label class="f"><span>Montant (${h(S.cfg.general.currency)})</span><input type="number" id="d-amount" value="${h(d.amount ?? "")}" ${ed ? "" : "disabled"}></label>` : ""}
@@ -1227,7 +1261,7 @@ function newDossierModal() {
   const form = wfId => { const w = wfById(wfId); return `<div class="grid2"><label class="f"><span>Workflow</span><select id="n-wf">${S.cfg.workflows.map(x => `<option value="${x.id}" ${x.id === wfId ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select></label><label class="f"><span>Nom du dossier / société cible</span><input type="text" id="n-name" placeholder="Ex. Société X — Série A"></label></div>
     <div class="grid3"><label class="f"><span>Étape de départ</span><select id="n-stage">${w.stages.map(s => `<option value="${s.id}">${h(s.name)}</option>`).join("")}</select></label>
       <label class="f"><span>Fonds / véhicule</span><select id="n-vehicle">${vehicles().map(v => `<option ${w.vehicle === v ? "selected" : ""}>${h(v)}</option>`).join("")}</select></label>
-      <label class="f"><span>Responsable</span><select id="n-owner">${S.cfg.members.filter(m => !m.external).map(m => `<option value="${m.id}" ${me()?.id === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select></label>
+      <div class="f"><span>Responsables</span><div class="row" style="gap:4px 10px">${S.cfg.members.filter(m => !m.external).map((m, i, arr) => `<label class="chk"><input type="checkbox" data-nowner="${m.id}" ${(me() ? me().id === m.id : i === 0) ? "checked" : ""}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
       <label class="f"><span>Secteur</span><select id="n-sector"><option value="">—</option>${S.cfg.sectors.map(v => `<option>${h(v)}</option>`).join("")}</select></label>
       <label class="f"><span>Priorité</span><select id="n-prio">${S.cfg.priorities.map((p, i) => `<option value="${p.id}" ${i === 2 ? "selected" : ""}>${h(p.label)}</option>`).join("")}</select></label>
       ${can("view_amounts") ? `<label class="f"><span>Montant (${h(S.cfg.general.currency)})</span><input type="number" id="n-amount"></label>` : ""}
@@ -1239,7 +1273,7 @@ function newDossierModal() {
     $("#nd-ok", L).onclick = async () => {
       const name = $("#n-name", L).value.trim(); if (!name) { $("#n-name", L).focus(); toast("Indiquez le nom du dossier."); return; }
       const w = wfById($("#n-wf", L).value); const od = $("#n-od", L).value.trim();
-      const d = { id: uid("d"), code: nextCode(w), name, workflowId: w.id, stageId: w.stages[0].id, vehicle: $("#n-vehicle", L).value, ownerId: $("#n-owner", L).value, members: [$("#n-owner", L).value], sector: $("#n-sector", L).value, priority: $("#n-prio", L).value, amount: $("#n-amount", L)?.value || "", startDate: todayISO(), dueDate: $("#n-due", L).value, oneDriveUrl: isURL(od) ? od : "", tags: [], custom: {}, docs: [], subfolders: [], history: [], createdAt: todayISO(), createdBy: me()?.id || null, archived: false };
+      const d = { id: uid("d"), code: nextCode(w), name, workflowId: w.id, stageId: w.stages[0].id, vehicle: $("#n-vehicle", L).value, ...(() => { const ow = $$("[data-nowner]", L).filter(x => x.checked).map(x => x.dataset.nowner); const o = ow.length ? ow : [me()?.id || internals()[0]?.id].filter(Boolean); return { ownerId: o[0], coOwners: o.slice(1), members: [...o] }; })(), sector: $("#n-sector", L).value, priority: $("#n-prio", L).value, amount: $("#n-amount", L)?.value || "", startDate: todayISO(), dueDate: $("#n-due", L).value, oneDriveUrl: isURL(od) ? od : "", tags: [], custom: {}, docs: [], subfolders: [], history: [], createdAt: todayISO(), createdBy: me()?.id || null, archived: false };
       L.remove(); await putDoc("dossiers", d); await log(`Dossier créé : ${d.code} · ${d.name}`, { dossierId: d.id, notify: [d.ownerId] });
       await enterStage(d, $("#n-stage", L).value || w.stages[0].id, false); await runAutomations("dossier_created", { dossier: d });
       render(); openDossier(d.id);
@@ -1260,7 +1294,7 @@ function taskModal(t, presetDossier) {
       <label class="f"><span>Échéance</span><input type="date" id="tk-due" value="${h(t.due || "")}" ${dis}></label>
       <label class="f"><span>Récurrence</span><select id="tk-rec" ${dis}>${[["","Aucune"],["daily","Quotidienne"],["weekly","Hebdomadaire"],["monthly","Mensuelle"],["quarterly","Trimestrielle"]].map(x => `<option value="${x[0]}" ${t.recurring === x[0] ? "selected" : ""}>${x[1]}</option>`).join("")}</select></label>
       <label class="f"><span>Dépend de</span><select id="tk-dep" ${dis}><option value="">—</option>${others.map(x => `<option value="${x.id}" ${(t.dependsOn || []).includes(x.id) ? "selected" : ""}>${h(x.title)}</option>`).join("")}</select></label></div>
-    <div><div class="eyebrow" style="margin-bottom:6px">Assignés</div><div class="row">${S.cfg.members.map(m => `<label class="chk"><input type="checkbox" data-tka="${m.id}" ${(t.assignees || []).includes(m.id) ? "checked" : ""} ${dis}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Responsables (une ou plusieurs personnes)</div><div class="row">${S.cfg.members.map(m => `<label class="chk"><input type="checkbox" data-tka="${m.id}" ${(t.assignees || []).includes(m.id) ? "checked" : ""} ${dis}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
     ${fieldsFor("task", wfId).length ? `<div class="grid3">${fieldsFor("task", wfId).map(f => `<label class="f"><span>${h(f.label)}</span>${cfInput(f, t.custom?.[f.id], "tcf")}</label>`).join("")}</div>` : ""}
     <label class="f"><span>Description</span><textarea id="tk-desc" ${dis}>${h(t.description || "")}</textarea></label>
     <div><div class="eyebrow" style="margin-bottom:6px">Checklist</div><div id="tk-check">${(t.checklist || []).map((c, i) => `<label class="chk" style="display:flex;margin:3px 0"><input type="checkbox" class="cb" data-ci="${i}" ${c.done ? "checked" : ""} ${dis}>${h(c.text)}</label>`).join("")}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-newcheck" placeholder="Ajouter un élément…" style="max-width:320px"><button class="btn sm" id="tk-addcheck">Ajouter</button></div>` : ""}</div>
@@ -1309,80 +1343,195 @@ function fundFieldInput(x, v) {
   return `<input type="${t}" data-ff="${x.id}" value="${h(v ?? "")}">`;
 }
 
+/* ---------- onglet Fonds : hub par fonds, relié au reste de l'outil ---------- */
+const FH_TABS = { overview: "Vue d'ensemble", dossiers: "Dossiers", portfolio: "Portefeuille", tree: "Arborescence & documents", projects: "Projets & jalons", deadlines: "Échéances", info: "Fiche du fonds" };
+const FH_KPIS_DEFAULT = ["dossiers", "amount", "positions", "crd", "unpaid", "dl30", "lateTasks", "projects"];
+const fhView = () => ({ tabs: Object.keys(FH_TABS).map(k => ({ id: k, on: true })), kpis: FH_KPIS_DEFAULT, home: "overview", ...(S.cfg.fundView || {}) });
+const fhTabs = () => { const v = fhView(); const known = (v.tabs || []).filter(t => FH_TABS[t.id]); const missing = Object.keys(FH_TABS).filter(k => !known.some(t => t.id === k)).map(id => ({ id, on: true })); return [...known, ...missing]; };
+const dOwners = d => [...new Set([d.ownerId, ...(d.coOwners || [])].filter(Boolean))];
+const fundDossiers = (f, archived) => S.dossiers.filter(d => (archived || !d.archived) && d.vehicle === f.name && canSeeDossier(d));
+const nodePath = (f, nid) => { const r = findNode(f, nid); return r ? [...r.path.map(x => x.name), r.node.name].join(" › ") : ""; };
+const nodeOptions = (f, sel) => { const out = []; walk(f.tree || [], (n, p) => out.push(`<option value="${n.id}" ${sel === n.id ? "selected" : ""}>${h("· ".repeat(p.length) + n.name)}</option>`)); return out.join(""); };
 function vFunds() {
   const m = me(); if (isExt(m)) return vFundsExternal(m);
   const funds = S.cfg.funds || [];
-  const fv = { mode: S.cfg.fundView?.mode || "org", showDossiers: S.cfg.fundView?.showDossiers !== false, ...(S.ui.fv || {}) };
-  const sel = fundById(S.ui.fund) || funds[0]; const root = S.cfg.fundRoot || {};
-  const tb = `<div class="toolbar"><div class="seg">${[["org","Organigramme"],["list","Tableau"]].map(x => `<button class="${fv.mode === x[0] ? "on" : ""}" data-fv="${x[0]}">${x[1]}</button>`).join("")}</div>
-    <label class="chk"><input type="checkbox" id="fv-dossiers" ${fv.showDossiers ? "checked" : ""}>Afficher les dossiers de travail dans l'architecture</label><span class="spacer"></span>
-    ${can("funds") ? `<button class="btn" data-stab-go="funds">${ic("gear")}Personnaliser</button><button class="btn pri" data-act2="fund-add">${ic("plus")}Nouveau fonds</button>` : ""}</div>`;
-  if (!funds.length) return tb + `<div class="empty"><b>Aucun fonds</b><span>Ajoutez vos véhicules : INMA Holding, INMA Finance, INMA Entreprises…</span>${can("funds") ? `<button class="btn pri" data-act2="fund-add">${ic("plus")}Nouveau fonds</button>` : ""}</div>`;
-  let over;
-  if (fv.mode === "list") {
-    const ffs = S.cfg.fundFields || [];
-    over = `<div class="panel tablewrap"><table class="t"><thead><tr><th>Fonds</th><th>Statut</th><th>Type</th><th>Création</th>${ffs.map(x => `<th>${h(x.label)}</th>`).join("")}<th class="r">Dossiers</th><th class="r">Montants</th><th>Dossier racine</th></tr></thead><tbody>
-    ${funds.map(f => { const st = fundStats(f), s = fstatus(f.status); return `<tr class="click" data-fund="${f.id}"><td><span class="row" style="flex-wrap:nowrap"><span class="fdot" style="--fc:${h(f.color)}"></span><b>${h(f.name)}</b></span></td><td>${chip(s.label, s.color)}</td><td>${h(f.type || "À définir")}</td><td class="num">${h(f.year || "—")}</td>${ffs.map(x => `<td>${fieldVal(f, x)}</td>`).join("")}<td class="r num">${st.ds.length}</td><td class="r">${money(st.amount)}</td><td>${isURL(f.url) ? `<a href="${h(f.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${h(linkKind(f.url))}</a>` : '<span class="muted">—</span>'}</td></tr>`; }).join("")}</tbody></table></div>`;
-  } else {
-    const ffs = (S.cfg.fundFields || []).slice(0, 2);
-    over = `<div class="panel"><div class="body"><div class="orgwrap"><div class="orginner">
+  const all = S.ui.fund === "_all" || !funds.length; const sel = all ? null : (fundById(S.ui.fund) || funds[0]);
+  const chipsRow = `<div class="fh-switch"><button class="fh-chip ${all ? "on" : ""}" data-fund="_all"><span class="fdot" style="--fc:var(--ink)"></span>Vue groupe</button>${funds.map(f => { const n = fundDossiers(f).length; return `<button class="fh-chip ${sel?.id === f.id ? "on" : ""}" data-fund="${f.id}" style="--fc:${h(f.color || "#212121")}"><span class="fdot"></span>${h(f.name)}<span class="fh-count">${n}</span></button>`; }).join("")}
+    <span class="spacer"></span>${can("funds") ? `<button class="btn" data-act9="fh-custom">${ic("gear")}Personnaliser</button><button class="btn pri" data-act2="fund-add">${ic("plus")}Nouveau fonds</button>` : ""}</div>`;
+  if (!funds.length) return chipsRow + `<div class="empty"><b>Aucun fonds</b><span>Ajoutez vos véhicules : INMA Holding, INMA Finance, INMA Entreprises…</span>${can("funds") ? `<button class="btn pri" data-act2="fund-add">${ic("plus")}Nouveau fonds</button>` : ""}</div>`;
+  return chipsRow + (all ? fhGroup(funds) : fhHub(sel));
+}
+function fhGroup(funds) {
+  const root = S.cfg.fundRoot || {}; const ffs = (S.cfg.fundFields || []).slice(0, 2); const t = todayISO();
+  const org = `<div class="panel"><div class="body"><div class="orgwrap"><div class="orginner">
       <div class="orgroot"><span class="eyebrow" style="color:var(--rail-muted)">${h(root.subtitle || "Société de gestion")}</span><b>${h(root.name || "INMA Capital")}</b>${isURL(root.url) ? `<a href="${h(root.url)}" target="_blank" rel="noopener" class="orglink">${ic("ext")}${h(linkKind(root.url))}</a>` : ""}</div>
       <div class="orgstem"></div>
-      <div class="orgrow">${funds.map(f => { const st = fundStats(f), s = fstatus(f.status); return `<button class="orgfund ${sel && sel.id === f.id ? "on" : ""}" data-fund="${f.id}" style="--fc:${h(f.color || "#212121")}">
+      <div class="orgrow">${funds.map(f => { const st = fundStats(f), s = fstatus(f.status); return `<button class="orgfund" data-fund="${f.id}" style="--fc:${h(f.color || "#212121")}">
         <span class="row" style="gap:7px;flex-wrap:nowrap"><span class="fdot"></span><b>${h(f.name)}</b></span>
         <span class="row" style="gap:6px">${chip(s.label, s.color)}<span class="muted" style="font-size:12px">${h(f.type || "Type à définir")}${f.year ? " · " + h(f.year) : ""}</span></span>
         ${ffs.map(x => `<span class="kv"><span>${h(x.label)}</span><span>${fieldVal(f, x, true)}</span></span>`).join("")}
-        <span class="kv"><span>Dossiers de travail</span><span class="num">${st.ds.length}</span></span>
-        <span class="kv"><span>Montants</span><span>${money(st.amount)}</span></span><span class="kv"><span>En portefeuille</span><span>${livePositions(f).length}</span></span>
-        <span class="kv"><span>Dossiers liés à OneDrive / SharePoint</span><span class="num">${st.linked}/${st.nodes}</span></span>
-        ${msBar(f)}</button>`; }).join("")}</div>
-    </div></div></div></div>`;
-  }
-  return tb + over + (sel ? fundDetail(sel, fv) : "");
+        <span class="kv"><span>Dossiers en cours</span><span class="num">${st.ds.length}</span></span><span class="kv"><span>Montants</span><span>${money(st.amount)}</span></span><span class="kv"><span>En portefeuille</span><span>${livePositions(f).length}</span></span>
+        ${msBar(f)}</button>`; }).join("")}</div></div></div></div></div>`;
+  const kp = ["dossiers", "amount", "positions", "crd", "unpaid", "dl30", "lateTasks", "projects"];
+  const table = `<div class="panel tablewrap"><table class="t"><thead><tr><th>Fonds</th>${kp.map(k => `<th class="r">${h(MB_KPIS[k])}</th>`).join("")}</tr></thead><tbody>${funds.map(f => `<tr class="click" data-fund="${f.id}"><td><span class="row" style="flex-wrap:nowrap"><span class="fdot" style="--fc:${h(f.color)}"></span><b>${h(f.name)}</b></span></td>${kp.map(k => { const [v, a] = mbKpiValue(k, { since: addDays(t, -7) }, f.id); return `<td class="r num" style="${a ? "color:var(--bad);font-weight:600" : ""}">${v}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`;
+  return org + table;
 }
-
-function treeHTML(f, nodes, ef, el, showD) {
-  return `<ul class="tree">${(nodes || []).map(n => {
-    const shared = S.cfg.members.filter(m => m.external && (m.grants || []).some(g => g.kind === "node" && g.id === n.id)).length;
-    const autoDs = n.auto === "dossiers" && showD ? S.dossiers.filter(d => !d.archived && d.vehicle === f.name && canSeeDossier(d)) : [];
-    return `<li><div class="tnode" data-node="${f.id}|${n.id}">${ic("folder")}<button class="nm linkish" data-nact="edit" title="${h(n.note || "Ouvrir la fiche du dossier")}">${h(n.name)}</button>
-      ${n.auto === "dossiers" ? '<span class="tag">dossiers de travail</span>' : ""}
-      ${isURL(n.url) ? `<span class="lk">${h(linkKind(n.url))}</span>` : (el ? '<span class="lk off">non lié</span>' : "")}
-      ${shared ? `<span class="tag" title="Partagé avec ${shared} externe(s)">${ic("team")} ${shared}</span>` : ""}
-      <span class="acts">${isURL(n.url) ? `<a class="btn sm" href="${h(n.url)}" target="_blank" rel="noopener" title="Ouvrir dans ${h(linkKind(n.url))}" aria-label="Ouvrir">${ic("ext")}</a>` : ""}${el ? `<button class="btn sm ghost" data-nact="edit" title="Lier / modifier / partager" aria-label="Modifier">${ic("link")}</button>` : ""}${ef ? `<button class="btn sm ghost" data-nact="add" title="Ajouter un sous-dossier" aria-label="Ajouter un sous-dossier">${ic("plus")}</button><button class="btn sm ghost" data-nact="up" title="Monter" aria-label="Monter">${ic("up")}</button><button class="btn sm ghost" data-nact="down" title="Descendre" aria-label="Descendre">${ic("down")}</button><button class="btn sm ghost" data-nact="in" title="Placer dans le dossier au-dessus" aria-label="Indenter">${ic("indent")}</button><button class="btn sm ghost" data-nact="out" title="Remonter d'un niveau" aria-label="Désindenter">${ic("outdent")}</button><button class="btn sm ghost danger" data-nact="del" title="Supprimer" aria-label="Supprimer">${ic("trash")}</button>` : ""}</span></div>
-      ${(n.children || []).length ? treeHTML(f, n.children, ef, el, showD) : ""}
-      ${autoDs.length ? `<ul class="tree">${autoDs.map(d => `<li><div class="tnode dosleaf" data-open="${d.id}">${ic("file")}<span class="nm"><span class="mono muted" style="font-size:11px">${h(d.code)}</span> ${h(d.name)}</span><span class="tag">${h(stageOf(d)?.name || "")}</span>${isURL(d.oneDriveUrl) ? `<a class="btn sm" href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener">${ic("ext")}${h(linkKind(d.oneDriveUrl))}</a>` : '<span class="lk off">non lié</span>'}</div></li>`).join("")}</ul>` : ""}</li>`;
-  }).join("")}</ul>`;
+function fhHub(f) {
+  const tabs = fhTabs().filter(t => t.on !== false); let cur = S.ui.ftab || fhView().home || "overview"; if (!tabs.some(t => t.id === cur)) cur = tabs[0]?.id || "overview";
+  const s = fstatus(f.status), st = fundStats(f);
+  const head = `<div class="panel fh-head" style="--fc:${h(f.color || "#212121")}"><div class="body"><div class="row" style="gap:12px;align-items:flex-start;flex-wrap:nowrap"><span class="fh-bar"></span><div class="grow" style="min-width:0">
+      <div class="row" style="gap:8px"><h2 style="margin:0;font-size:20px">${h(f.name)}</h2>${chip(s.label, s.color)}<span class="muted" style="font-size:12.5px">${h(f.type || "Type à définir")}${f.year ? " · depuis " + h(f.year) : ""}</span></div>
+      ${f.description ? `<p class="muted" style="margin:6px 0 0;font-size:13px;max-width:900px">${h(f.description)}</p>` : ""}</div>
+      <div class="row" style="gap:6px;flex:none">${isURL(f.url) ? `<a class="btn" href="${h(f.url)}" target="_blank" rel="noopener">${ic("ext")}Dossier du fonds</a>` : ""}${cpOn() ? `<button class="btn cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}</div></div></div>
+    <nav class="fh-tabs" role="tablist">${tabs.map(t => `<button role="tab" class="${t.id === cur ? "on" : ""}" data-ftab="${t.id}">${h(FH_TABS[t.id])}${t.id === "dossiers" ? ` <span class="fh-count">${st.ds.length}</span>` : t.id === "portfolio" ? ` <span class="fh-count">${livePositions(f).length}</span>` : ""}</button>`).join("")}</nav></div>`;
+  const body = { overview: fhOverview, dossiers: fhDossiers, portfolio: fhPortfolio, tree: fhTree, projects: fhProjects, deadlines: fhDeadlines, info: fhInfo }[cur](f);
+  return head + body;
 }
-
-function fundDetail(f, fv) {
-  const ef = can("funds"), el = ef || can("onedrive"); const st = fundStats(f); const ffs = S.cfg.fundFields || []; const s = fstatus(f.status);
+function fhOverview(f) {
+  const t = todayISO(), mt = { since: addDays(t, -7) }; const ks = (fhView().kpis || FH_KPIS_DEFAULT).filter(k => MB_KPIS[k]);
+  const kpis = `<div class="kpis">${ks.map(k => { const [v, a] = mbKpiValue(k, mt, f.id); return `<div class="kpi ${a ? "alert" : ""}"><span class="l">${h(MB_KPIS[k])}</span><span class="v" style="font-size:22px">${v}</span></div>`; }).join("")}</div>`;
+  const ds = fundDossiers(f); const wfs = S.cfg.workflows.filter(w => ds.some(d => d.workflowId === w.id));
+  const pipe = wfs.map(w => { const max = Math.max(1, ...w.stages.map(s => ds.filter(d => d.workflowId === w.id && d.stageId === s.id).length)); return `<div class="eyebrow" style="margin:6px 0">${h(w.name)}</div><div class="bars">${w.stages.map(s => { const n = ds.filter(d => d.workflowId === w.id && d.stageId === s.id).length; return n ? `<button class="bar linkish" style="text-decoration:none" data-fh-stage="${w.id}|${s.id}"><span class="lbl">${h(s.name)}</span><span class="track"><span class="fill" style="width:${n / max * 100}%;background:${h(f.color || "var(--brand)")}"></span></span><span class="num r">${n}</span></button>` : ""; }).join("")}</div>`; }).join("") || '<p class="muted" style="margin:0">Aucun dossier en cours dans ce fonds.</p>';
+  const occ = dlOccAll(addDays(t, -200), addDays(t, 45)).filter(x => x.o.fund === f.name && x.status !== "sent" && (x.late || x.due <= addDays(t, 45))).slice(0, 8);
+  const late = visTasks().filter(x => !isDone(x) && x.due && x.due < t && dossierById(x.dossierId)?.vehicle === f.name).slice(0, 8);
+  const act = S.activity.filter(e => e.dossierId && dossierById(e.dossierId)?.vehicle === f.name).slice(0, 8);
+  const decs = visMeetings().flatMap(m => (m.decisions || []).filter(x => x.text && ((x.refKind === "dossier" && dossierById(x.refId)?.vehicle === f.name) || m.scope === f.id)).map(x => ({ m, x }))).slice(0, 6);
+  return kpis + `<div class="dash"><div class="panel"><header><h2>Pipeline par étape</h2><span class="spacer"></span><button class="btn sm ghost" data-ftab="dossiers">Tous les dossiers</button></header><div class="body">${pipe}</div></div>
+    <div class="panel"><header><h2>Prochaines échéances</h2><span class="spacer"></span><button class="btn sm ghost" data-ftab="deadlines">Tout voir</button></header><div class="body list">${occ.map(occRow).join("") || '<p class="muted" style="margin:0">Rien dans les 45 prochains jours.</p>'}</div></div></div>
+    <div class="dash"><div class="panel"><header><h2>Tâches en retard</h2><span class="chip">${late.length}</span></header><div class="body list">${late.map(taskLine).join("") || '<p class="muted" style="margin:0">Aucune tâche en retard.</p>'}</div></div>
+    <div class="panel"><header><h2>Décisions récentes</h2></header><div class="body list">${decs.map(({ m, x }) => `<div class="li" data-mtv="${m.id}" style="cursor:pointer"><div class="grow"><div class="t1" style="white-space:normal">${h(x.text)}</div><div class="t2">${fdate(m.date)} · ${h(m.title)}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucune décision consignée sur ce fonds.</p>'}</div></div></div>
+    <div class="panel"><header><h2>Activité récente</h2></header><div class="body list">${act.map(e => `<div class="li">${av(e.by)}<div class="grow"><div class="t1" style="white-space:normal;font-weight:500">${h(e.text)}</div><div class="t2">${new Date(e.at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Pas d\'activité récente.</p>'}</div></div>`;
+}
+function fhDossiers(f) {
+  const q = S.ui.fhq || {}; let ds = fundDossiers(f, q.arch);
+  if (q.wf) ds = ds.filter(d => d.workflowId === q.wf); if (q.stage) ds = ds.filter(d => d.stageId === q.stage); if (q.owner) ds = ds.filter(d => dOwners(d).includes(q.owner)); if (q.text) { const s = aiNorm(q.text); ds = ds.filter(d => aiNorm(d.code + " " + d.name + " " + (d.sector || "")).includes(s)); }
+  ds.sort((a, b) => (wfById(b.workflowId)?.stages.findIndex(x => x.id === b.stageId) ?? 0) - (wfById(a.workflowId)?.stages.findIndex(x => x.id === a.stageId) ?? 0));
+  const wf = wfById(q.wf); const ed = d => canEditDossier(d);
+  const tb = `<div class="toolbar"><input type="search" id="fhq-text" value="${h(q.text || "")}" placeholder="Rechercher un dossier" style="max-width:220px" aria-label="Rechercher">
+    <select id="fhq-wf" aria-label="Workflow"><option value="">Tous les workflows</option>${S.cfg.workflows.map(w => `<option value="${w.id}" ${q.wf === w.id ? "selected" : ""}>${h(w.name)}</option>`).join("")}</select>
+    ${wf ? `<select id="fhq-stage" aria-label="Étape"><option value="">Toutes les étapes</option>${wf.stages.map(s => `<option value="${s.id}" ${q.stage === s.id ? "selected" : ""}>${h(s.name)}</option>`).join("")}</select>` : ""}
+    <select id="fhq-owner" aria-label="Responsable"><option value="">Tous responsables</option>${internals().map(m => `<option value="${m.id}" ${q.owner === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select>
+    <label class="chk"><input type="checkbox" id="fhq-arch" ${q.arch ? "checked" : ""}>Archivés</label><span class="spacer"></span>
+    ${can("dossier_edit_all") || can("funds") ? `<button class="btn" data-act9="fh-attach" data-fid="${f.id}">Rattacher un dossier existant</button>` : ""}${can("dossier_create") ? `<button class="btn pri" data-act="new-dossier">${ic("plus")}Nouveau dossier</button>` : ""}</div>`;
+  if (!ds.length) return tb + `<div class="empty"><b>Aucun dossier${Object.values(q).some(Boolean) ? " ne correspond" : " dans ce fonds"}</b><span>Un dossier appartient au fonds choisi dans son champ « Fonds / véhicule ». Utilisez « Rattacher un dossier existant » pour en ajouter.</span></div>`;
+  return tb + `<div class="panel tablewrap"><table class="t mt-table"><thead><tr><th>Réf.</th><th>Dossier</th><th>Responsables</th><th style="min-width:160px">Avancement</th><th>Tâches</th><th class="r">Montant</th><th>Emplacement dans l'arborescence</th><th>Documents</th></tr></thead><tbody>
+    ${ds.map(d => { const w = wfById(d.workflowId), s = stageOf(d), idx = w ? w.stages.indexOf(s) : -1; const tk = S.tasks.filter(x => x.dossierId === d.id), lt = tk.filter(x => !isDone(x) && x.due && x.due < todayISO()).length;
+      return `<tr class="click" data-open="${d.id}"><td class="mono" style="font-size:12px">${h(d.code)}</td><td><b>${h(d.name)}</b>${d.pendingApproval ? ' <span class="lock">À VALIDER</span>' : ""}${d.archived ? ' <span class="tag">Archivé</span>' : ""}<div class="muted" style="font-size:11.5px">${h(d.sector || "")}</div></td>
+        <td>${avs(dOwners(d))}</td><td><div class="mstep">${(w?.stages || []).map((x, i) => `<i class="${i < idx ? "done" : i === idx ? "cur" : ""}"></i>`).join("")}</div><div style="font-size:12px;margin-top:3px"><b>${h(s?.name || "—")}</b></div></td>
+        <td class="num">${tk.length - tk.filter(x => !isDone(x)).length}/${tk.length}${lt ? ` <span class="chip" style="background:var(--bad-bg);color:var(--bad)">${lt}</span>` : ""}</td><td class="r">${money(d.amount)}</td>
+        <td onclick="event.stopPropagation()">${ed(d) && (f.tree || []).length ? `<select data-fh-place="${d.id}" style="max-width:230px;font-size:12px"><option value="">— non classé —</option>${nodeOptions(f, d.fundNode)}</select>` : `<span style="font-size:12px">${h(nodePath(f, d.fundNode) || "—")}</span>`}</td>
+        <td onclick="event.stopPropagation()">${isURL(d.oneDriveUrl) ? `<a class="btn sm" href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener">${ic("ext")}${h(linkKind(d.oneDriveUrl))}</a>` : `<button class="btn sm ghost" data-open="${d.id}" data-tab="onedrive">Lier</button>`}</td></tr>`; }).join("")}</tbody></table></div>`;
+}
+function fhPortfolio(f) {
+  return positionsPanel(f) + `<div class="panel"><header><h2>Remboursements (échéanciers)</h2><span class="spacer"></span>${can("deadlines") ? `<button class="btn sm" data-act7="sch-new">${ic("plus")}Nouvel échéancier</button>` : ""}<button class="btn sm ghost" data-act7="sch-show" data-ref="">Voir tous les échéanciers</button></header><div class="body">${mbCustomSlide({ type: "schedules", fund: f.id }, {}).html}</div></div>`;
+}
+function fhProjects(f) {
+  const ef = can("funds"); const ms = f.milestones || [];
+  const msPanel = `<div class="panel"><header><h2>${f.status === "fs_build" ? "Étapes de constitution" : "Jalons du fonds"}</h2></header><div class="body">${msBar(f)}<div class="list">${ms.map((x, i) => `<div class="li"><input type="checkbox" class="cb" data-ms-done="${i}" ${x.done ? "checked" : ""} ${ef ? "" : "disabled"} aria-label="Jalon franchi"><div class="grow"><div class="t1" style="white-space:normal;${x.done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(x.text)}</div></div>${x.due ? due(x.due, x.done) : ""}${ef ? `<button class="btn sm ghost danger" data-ms-del="${i}" aria-label="Supprimer le jalon">${ic("trash")}</button>` : ""}</div>`).join("") || '<p class="muted" style="margin:6px 0 0">Aucun jalon.</p>'}</div>
+    ${ef ? `<div class="row" style="margin-top:8px"><input type="text" id="ms-text" placeholder="Nouveau jalon (ex. Premier closing)" style="max-width:280px"><input type="date" id="ms-due" style="width:auto" aria-label="Échéance"><button class="btn sm" data-act2="ms-add">Ajouter</button></div>` : ""}</div></div>`;
+  return fundProjectsPanel(f) + msPanel;
+}
+function fhDeadlines(f) {
+  const t = todayISO(); const l = dlOccAll(addDays(t, -400), addDays(t, 120)).filter(x => x.o.fund === f.name && (x.status !== "sent" || x.due >= addDays(t, -30)));
+  const open = l.filter(x => x.status !== "sent"), done = l.filter(x => x.status === "sent").reverse().slice(0, 10);
+  return `<div class="toolbar"><span class="muted" style="font-size:12.5px">Échéances, reportings et remboursements de ${h(f.name)} : retards et 4 prochains mois.</span><span class="spacer"></span><button class="btn" data-act9="fh-dl-all" data-fname="${h(f.name)}">Ouvrir dans Échéances</button>${can("deadlines") ? `<button class="btn" data-act7="sch-new">${ic("plus")}Nouvel échéancier</button><button class="btn pri" data-act3="dl-new">${ic("plus")}Nouvelle échéance</button>` : ""}</div>
+    <div class="panel"><header><h2>À traiter</h2><span class="chip">${open.length}</span></header><div class="body list">${open.map(occRow).join("") || '<p class="muted" style="margin:0">Rien à traiter.</p>'}</div></div>
+    ${done.length ? `<div class="panel"><header><h2>Récemment remis / payés</h2></header><div class="body list">${done.map(occRow).join("")}</div></div>` : ""}`;
+}
+function fhInfo(f) {
+  const ef = can("funds"); const st = fundStats(f); const ffs = S.cfg.fundFields || [];
+  const ext = S.cfg.members.filter(m => m.external && (m.grants || []).some(g => g.kind === "node" && g.fundId === f.id)).length;
   const info = ef ? `<div style="display:flex;flex-direction:column;gap:10px">
       <div class="grid2"><label class="f"><span>Nom du fonds</span><input type="text" id="fd-name" value="${h(f.name)}"></label><label class="f"><span>Statut</span><select id="fd-status">${(S.cfg.fundStatuses || []).map(x => `<option value="${x.id}" ${f.status === x.id ? "selected" : ""}>${h(x.label)}</option>`).join("")}</select></label></div>
       <div class="grid3"><label class="f"><span>Type</span><select id="fd-type"><option value="">À définir</option>${(S.cfg.fundTypes || []).map(t => `<option ${f.type === t ? "selected" : ""}>${h(t)}</option>`).join("")}</select></label><label class="f"><span>Année de création</span><input type="text" id="fd-year" value="${h(f.year || "")}" placeholder="2026"></label><label class="f"><span>Couleur</span><input type="color" id="fd-color" value="${h(f.color || "#212121")}"></label></div>
       <label class="f"><span>Dossier racine OneDrive / SharePoint</span><input type="url" id="fd-url" value="${h(f.url || "")}" placeholder="https://…sharepoint.com/…"></label>
       ${ffs.length ? `<div class="grid2">${ffs.map(x => `<label class="f"><span>${h(x.label)}</span>${fundFieldInput(x, f.fields?.[x.id])}</label>`).join("")}</div>` : ""}
-      <label class="f"><span>Description / stratégie</span><textarea id="fd-desc" rows="3">${h(f.description || "")}</textarea></label>
-      <div class="row"><button class="btn pri" data-act2="fund-save">Enregistrer</button><button class="btn" data-act2="fund-dup">${ic("copy")}Dupliquer</button><span class="spacer"></span>${st.ds.length ? `<span class="muted" style="font-size:12px">${st.ds.length} dossier(s) rattaché(s) : suppression impossible</span>` : `<button class="btn danger" data-act2="fund-del">Supprimer le fonds</button>`}</div></div>`
+      <label class="f"><span>Description / stratégie</span><textarea id="fd-desc" rows="4">${h(f.description || "")}</textarea></label>
+      <div class="row"><button class="btn pri" data-act2="fund-save">Enregistrer</button><button class="btn" data-act2="fund-dup">${ic("copy")}Dupliquer</button><button class="btn" data-stab-go="funds">${ic("gear")}Champs et statuts des fonds</button><span class="spacer"></span>${st.ds.length ? `<span class="muted" style="font-size:12px">${st.ds.length} dossier(s) rattaché(s) : suppression impossible</span>` : `<button class="btn danger" data-act2="fund-del">Supprimer le fonds</button>`}</div></div>`
     : `<div style="display:flex;flex-direction:column;gap:8px"><p style="margin:0">${h(f.description || "")}</p>${ffs.map(x => `<div class="kv"><span>${h(x.label)}</span><span>${fieldVal(f, x)}</span></div>`).join("")}${isURL(f.url) ? `<div>${linkBtn(f.url, "Ouvrir le dossier du fonds")}</div>` : ""}</div>`;
-  const ms = f.milestones || [];
-  const msPanel = `<div class="panel"><header><h2>${f.status === "fs_build" ? "Étapes de constitution" : "Jalons"}</h2></header><div class="body">${msBar(f)}<div class="list">${ms.map((x, i) => `<div class="li"><input type="checkbox" class="cb" data-ms-done="${i}" ${x.done ? "checked" : ""} ${ef ? "" : "disabled"} aria-label="Jalon franchi"><div class="grow"><div class="t1" style="white-space:normal;${x.done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(x.text)}</div></div>${x.due ? due(x.due, x.done) : ""}${ef ? `<button class="btn sm ghost danger" data-ms-del="${i}" aria-label="Supprimer le jalon">${ic("trash")}</button>` : ""}</div>`).join("") || '<p class="muted" style="margin:6px 0 0">Aucun jalon.</p>'}</div>
-    ${ef ? `<div class="row" style="margin-top:8px"><input type="text" id="ms-text" placeholder="Nouveau jalon (ex. Premier closing)" style="max-width:280px"><input type="date" id="ms-due" style="width:auto" aria-label="Échéance"><button class="btn sm" data-act2="ms-add">Ajouter</button></div>` : ""}</div></div>`;
-  const dsPanel = `<div class="panel"><header><h2>Dossiers de travail rattachés à ${h(f.name)}</h2><span class="muted" style="font-size:12px">${st.ds.length} · ${money(st.amount)}</span></header><div class="body tablewrap">${st.ds.length ? `<table class="t"><thead><tr><th>Réf.</th><th>Dossier</th><th>Étape</th><th class="r">Montant</th><th>Lien</th></tr></thead><tbody>${st.ds.map(d => `<tr class="click" data-open="${d.id}"><td class="mono">${h(d.code)}</td><td><b>${h(d.name)}</b></td><td>${h(stageOf(d)?.name || "—")}</td><td class="r">${money(d.amount)}</td><td>${isURL(d.oneDriveUrl) ? `<a href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${h(linkKind(d.oneDriveUrl))}</a>` : '<span class="chip" style="background:var(--warn-bg)">À lier</span>'}</td></tr>`).join("")}</tbody></table>` : `<p class="muted" style="margin:0">Aucun dossier de travail dans ce fonds. Choisissez « ${h(f.name)} » dans le champ Fonds d'un dossier pour l'y rattacher.</p>`}</div></div>`;
-  const ext = S.cfg.members.filter(m => m.external && (m.grants || []).some(g => g.kind === "node" && g.fundId === f.id)).length;
-  return `<div class="fundgrid">
-    <div class="panel"><header><span class="fdot" style="--fc:${h(f.color)}"></span><h2>Architecture · ${h(f.name)}</h2><span class="spacer"></span>${ef && window.INMA?.graph?.available() ? `<button class="btn sm" data-act2="fund-od" title="Crée sous le dossier racine du fonds les dossiers manquants et enregistre leurs liens">Créer dans OneDrive</button>` : ""}${ef ? `<button class="btn sm" data-act2="tree-import">Modifier en texte</button><button class="btn sm pri" data-act2="node-root">${ic("plus")}Dossier</button>` : ""}</header>
-      <div class="body treeroot">
-        <div class="tnode" style="font-weight:700">${ic("cloud")}<span class="nm">${h(f.name)} · dossier racine</span>${isURL(f.url) ? `<span class="lk">${h(linkKind(f.url))}</span><a class="btn sm" href="${h(f.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>` : (ef ? '<span class="lk off">non lié</span>' : "")}</div>
-        ${(f.tree || []).length ? treeHTML(f, f.tree, ef, el, fv.showDossiers) : '<p class="muted">Architecture vide. Ajoutez un premier dossier.</p>'}
-        <p class="muted" style="font-size:11.5px;margin:10px 0 0">${ef ? "Survolez un dossier pour en ajouter un sous-dossier, le déplacer, le lier à OneDrive / SharePoint ou le partager avec un externe. " : ""}${ext ? `${ext} externe(s) ont accès à des dossiers de ce fonds.` : ""}</p>
-      </div></div>
-    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
-      <div class="panel"><header><h2>Fiche du fonds</h2>${chip(s.label, s.color)}</header><div class="body">${info}</div></div>
-      ${msPanel}
-    </div>
-  </div>${positionsPanel(f)}${fundProjectsPanel(f)}${dsPanel}`;
+  return `<div class="panel"><header><h2>Fiche du fonds</h2>${chip(fstatus(f.status).label, fstatus(f.status).color)}<span class="spacer"></span>${ext ? `<span class="muted" style="font-size:12px">${ext} externe(s) ont accès à des dossiers de ce fonds</span>` : ""}</header><div class="body">${info}</div></div>`;
 }
+/* ---- arborescence : dossiers OneDrive, sous-dossiers et dossiers de travail rattachés ---- */
+function fhNodeDossiers(f, n, showUnplaced) { return fundDossiers(f).filter(d => d.fundNode === n.id || (showUnplaced && n.auto === "dossiers" && (!d.fundNode || !findNode(f, d.fundNode)))); }
+function fhDossierLeaf(d) {
+  const w = wfById(d.workflowId); const subs = (d.subfolders || []).filter(s => s.name); const open = (S.ui.fhOpen || {})["d:" + d.id];
+  return `<li><div class="tnode dosleaf">${subs.length ? `<button class="btn sm ghost fh-tg" data-fh-toggle="d:${d.id}" aria-label="Déplier">${open ? "▾" : "▸"}</button>` : '<span class="fh-tg-sp"></span>'}${ic("file")}<button class="nm linkish" data-open="${d.id}"><span class="mono muted" style="font-size:11px">${h(d.code)}</span> ${h(d.name)}</button><span class="tag">${h(stageOf(d)?.name || "")}</span>${avs(dOwners(d))}
+    <span class="acts" style="opacity:1">${isURL(d.oneDriveUrl) ? `<a class="btn sm" href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener" title="Ouvrir le dossier OneDrive / SharePoint">${ic("ext")}Ouvrir</a>` : `<button class="btn sm ghost" data-open="${d.id}" data-tab="onedrive">Lier à OneDrive</button>`}</span></div>
+    ${open && subs.length ? `<ul class="tree">${subs.map(s => `<li><div class="tnode">${ic("folder")}<span class="nm">${h(s.name.split("/").pop())}</span>${isURL(s.url) ? `<a class="btn sm" href="${h(s.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>` : '<span class="lk off">non lié</span>'}</div></li>`).join("")}</ul>` : ""}</li>`;
+}
+function fhTreeHTML(f, nodes, ef, el, depth = 0) {
+  return `<ul class="tree">${(nodes || []).map(n => {
+    const shared = S.cfg.members.filter(m => m.external && (m.grants || []).some(g => g.kind === "node" && g.id === n.id)).length;
+    const ds = fhNodeDossiers(f, n, true); const kids = (n.children || []).length + ds.length; const closed = (S.ui.fhOpen || {})["n:" + n.id] === false;
+    return `<li><div class="tnode" data-node="${f.id}|${n.id}">${kids ? `<button class="btn sm ghost fh-tg" data-fh-toggle="n:${n.id}" aria-label="${closed ? "Déplier" : "Replier"}">${closed ? "▸" : "▾"}</button>` : '<span class="fh-tg-sp"></span>'}${ic("folder")}
+      ${isURL(n.url) ? `<a class="nm fh-open" href="${h(n.url)}" target="_blank" rel="noopener" title="Ouvrir dans ${h(linkKind(n.url))}">${h(n.name)}</a>` : `<button class="nm linkish" data-nact="edit" title="${h(n.note || "Lier ce dossier à OneDrive / SharePoint")}">${h(n.name)}</button>`}
+      ${ds.length ? `<span class="tag">${ds.length} dossier${ds.length > 1 ? "s" : ""}</span>` : ""}${isURL(n.url) ? `<span class="lk">${h(linkKind(n.url))}</span>` : (el ? '<span class="lk off">non lié</span>' : "")}${shared ? `<span class="tag" title="Partagé avec ${shared} externe(s)">${ic("team")} ${shared}</span>` : ""}
+      <span class="acts">${isURL(n.url) ? `<a class="btn sm" href="${h(n.url)}" target="_blank" rel="noopener" title="Ouvrir" aria-label="Ouvrir">${ic("ext")}</a>` : ""}${el ? `<button class="btn sm ghost" data-nact="edit" title="Lien, note, partage" aria-label="Modifier">${ic("link")}</button>` : ""}${can("dossier_edit_all") || can("funds") || can("dossier_create") ? `<button class="btn sm ghost" data-nact="linkd" title="Rattacher un dossier de travail ici" aria-label="Rattacher un dossier">${ic("file")}+</button>` : ""}${ef ? `<button class="btn sm ghost" data-nact="add" title="Ajouter un sous-dossier" aria-label="Ajouter un sous-dossier">${ic("plus")}</button><button class="btn sm ghost" data-nact="up" title="Monter" aria-label="Monter">${ic("up")}</button><button class="btn sm ghost" data-nact="down" title="Descendre" aria-label="Descendre">${ic("down")}</button><button class="btn sm ghost" data-nact="in" title="Placer dans le dossier au-dessus" aria-label="Indenter">${ic("indent")}</button><button class="btn sm ghost" data-nact="out" title="Remonter d'un niveau" aria-label="Désindenter">${ic("outdent")}</button><button class="btn sm ghost danger" data-nact="del" title="Supprimer" aria-label="Supprimer">${ic("trash")}</button>` : ""}</span></div>
+      ${closed ? "" : `${(n.children || []).length ? fhTreeHTML(f, n.children, ef, el, depth + 1) : ""}${ds.length ? `<ul class="tree fh-dos">${ds.map(fhDossierLeaf).join("")}</ul>` : ""}`}</li>`;
+  }).join("")}</ul>`;
+}
+function fhTree(f) {
+  const ef = can("funds"), el = ef || can("onedrive");
+  const unplaced = fundDossiers(f).filter(d => !d.fundNode || !findNode(f, d.fundNode)); const hasAuto = (() => { let a = false; walk(f.tree || [], n => { if (n.auto === "dossiers") a = true; }); return a; })();
+  return `<div class="panel"><header><span class="fdot" style="--fc:${h(f.color)}"></span><h2>Arborescence · ${h(f.name)}</h2><span class="spacer"></span><button class="btn sm ghost" data-fh-expand="${f.id}">Tout déplier</button><button class="btn sm ghost" data-fh-collapse="${f.id}">Tout replier</button>${ef && window.INMA?.graph?.available() ? `<button class="btn sm" data-act2="fund-od" title="Crée sous le dossier racine du fonds les dossiers manquants et enregistre leurs liens">Créer dans OneDrive</button>` : ""}${ef ? `<button class="btn sm" data-act2="tree-import">Modifier en texte</button><button class="btn sm pri" data-act2="node-root">${ic("plus")}Dossier</button>` : ""}</header>
+    <div class="body treeroot">
+      <div class="tnode" style="font-weight:700"><span class="fh-tg-sp"></span>${ic("cloud")}${isURL(f.url) ? `<a class="nm fh-open" href="${h(f.url)}" target="_blank" rel="noopener">${h(f.name)} · dossier racine</a><span class="lk">${h(linkKind(f.url))}</span>` : `<span class="nm">${h(f.name)} · dossier racine</span>${ef ? '<span class="lk off">non lié</span>' : ""}`}</div>
+      ${(f.tree || []).length ? fhTreeHTML(f, f.tree, ef, el) : '<p class="muted">Arborescence vide. Ajoutez un premier dossier.</p>'}
+      <p class="muted" style="font-size:11.5px;margin:10px 0 0">Cliquez un nom de dossier lié pour l'ouvrir dans OneDrive / SharePoint. Survolez une ligne pour lier, ajouter un sous-dossier, déplacer, rattacher un dossier de travail ou partager avec un externe.</p></div></div>
+    ${unplaced.length && !hasAuto ? `<div class="panel"><header><h2>Dossiers de travail non classés</h2><span class="chip">${unplaced.length}</span><span class="spacer"></span><span class="muted" style="font-size:12px">Choisissez leur emplacement dans l'arborescence</span></header><div class="body list">${unplaced.map(d => `<div class="li"><button class="linkish grow" data-open="${d.id}" style="text-align:left"><span class="mono muted" style="font-size:11px">${h(d.code)}</span> ${h(d.name)}</button>${canEditDossier(d) && (f.tree || []).length ? `<select data-fh-place="${d.id}" style="max-width:260px;font-size:12px"><option value="">— non classé —</option>${nodeOptions(f, "")}</select>` : ""}</div>`).join("")}</div></div>` : ""}`;
+}
+/* ---- rattacher un dossier de travail ---- */
+function fhAttachModal(f, nid) {
+  const node = nid ? findNode(f, nid)?.node : null;
+  const cand = visDossiers().filter(d => !d.archived && canEditDossier(d) && !(d.vehicle === f.name && (nid ? d.fundNode === nid : true)));
+  const inner = `<p class="muted" style="margin:0;font-size:12.5px">${node ? `Les dossiers choisis seront rattachés à ${h(f.name)} et classés dans « ${h(nodePath(f, nid))} ».` : `Les dossiers choisis passent dans le fonds ${h(f.name)}.`}</p>
+    <input type="search" id="fa-q" placeholder="Filtrer…" aria-label="Filtrer">
+    <div class="list" id="fa-list" style="max-height:340px;overflow:auto">${cand.map(d => `<label class="li fa-item" data-q="${h(aiNorm(d.code + " " + d.name + " " + (d.vehicle || "")))}"><input type="checkbox" class="cb" value="${d.id}"><div class="grow"><div class="t1">${h(d.code)} · ${h(d.name)}</div><div class="t2">${h(d.vehicle || "Sans fonds")}${d.fundNode && d.vehicle ? " · " + h(nodePath(fundById((S.cfg.funds || []).find(x => x.name === d.vehicle)?.id) || {}, d.fundNode)) : ""} · ${h(stageOf(d)?.name || "")}</div></div></label>`).join("") || '<p class="muted">Aucun autre dossier disponible.</p>'}</div>
+    ${node && can("funds") ? `<label class="chk"><input type="checkbox" id="fa-sub">Créer un sous-dossier au nom de chaque dossier (« Réf_Nom ») dans « ${h(node.name)} »</label>` : ""}
+    ${node && isURL(node.url) ? `<label class="chk"><input type="checkbox" id="fa-url" checked>Utiliser le lien OneDrive de « ${h(node.name)} » pour les dossiers qui n'en ont pas</label>` : ""}`;
+  modal(node ? `Rattacher des dossiers · ${node.name}` : `Rattacher des dossiers à ${f.name}`, inner, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="fa-ok">Rattacher</button>`, L => {
+    $("#fa-q", L).oninput = e => { const q = aiNorm(e.target.value); $$(".fa-item", L).forEach(x => x.hidden = q && !x.dataset.q.includes(q)); };
+    $("#fa-ok", L).onclick = async () => { const ids = $$("#fa-list input:checked", L).map(x => x.value); if (!ids.length) { toast("Cochez au moins un dossier."); return; }
+      const live = fundById(f.id); let cfgChanged = false;
+      for (const id of ids) { const d = dossierById(id); if (!d) continue; d.vehicle = live.name; let target = nid || "";
+        if (nid && $("#fa-sub", L)?.checked) { const ln = findNode(live, nid)?.node; if (ln) { const c = { id: uid("n"), name: folderName(d), url: "", note: "", auto: "", children: [] }; (ln.children = ln.children || []).push(c); target = c.id; cfgChanged = true; } }
+        d.fundNode = target; if (nid && $("#fa-url", L)?.checked && !isURL(d.oneDriveUrl) && !($("#fa-sub", L)?.checked)) d.oneDriveUrl = findNode(live, nid)?.node.url || "";
+        await putDoc("dossiers", d); await log(`${d.code} rattaché à ${live.name}${target ? " · " + nodePath(live, target) : ""}`, { dossierId: d.id }); }
+      if (cfgChanged) saveCfg(); L.remove(); toast(`${ids.length} dossier(s) rattaché(s)`); render();
+    };
+  }, true);
+}
+/* ---- personnalisation de l'onglet ---- */
+function fhCustomModal() {
+  const v = fhView(); let tabs = clone(fhTabs()); let kpis = [...(v.kpis || FH_KPIS_DEFAULT)];
+  const draw = L => { $("#fhc-tabs", L).innerHTML = tabs.map((t, k) => `<div class="mb-row"><div class="row" style="gap:8px;flex-wrap:nowrap"><input type="checkbox" class="cb" data-fhc-on="${k}" ${t.on !== false ? "checked" : ""}><span class="grow">${h(FH_TABS[t.id])}</span><label class="chk" style="font-size:12px"><input type="radio" name="fhc-home" value="${t.id}" ${v.home === t.id ? "checked" : ""}>Ouvrir par défaut</label><button class="btn sm ghost" type="button" data-fhc-up="${k}" ${k ? "" : "disabled"}>▲</button><button class="btn sm ghost" type="button" data-fhc-down="${k}" ${k < tabs.length - 1 ? "" : "disabled"}>▼</button></div></div>`).join(""); };
+  modal("Personnaliser l'onglet Fonds", `<div><div class="eyebrow" style="margin-bottom:6px">Onglets de chaque fonds (ordre et affichage)</div><div class="mb-list" id="fhc-tabs"></div></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Indicateurs de la vue d'ensemble</div><div class="row">${Object.entries(MB_KPIS).map(([k, l]) => `<label class="chk"><input type="checkbox" data-fhc-k="${k}" ${kpis.includes(k) ? "checked" : ""}>${h(l)}</label>`).join("")}</div></div>
+    <p class="muted" style="margin:0;font-size:12px">Statuts, types, champs des fiches et arborescence type d'un nouveau fonds : Paramètres › Fonds & architecture.</p>`,
+    `<button class="btn" data-stab-go="funds" data-mclose="1">Paramètres des fonds</button><span class="spacer"></span><button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="fhc-ok">Enregistrer</button>`, L => {
+      draw(L);
+      L.addEventListener("click", e => { const b = e.target.closest("[data-fhc-up],[data-fhc-down]"); if (!b) return; $$("[data-fhc-on]", L).forEach(x => tabs[+x.dataset.fhcOn].on = x.checked); const k = +(b.dataset.fhcUp ?? b.dataset.fhcDown); const j = b.dataset.fhcUp != null ? k - 1 : k + 1; [tabs[k], tabs[j]] = [tabs[j], tabs[k]]; draw(L); });
+      $("#fhc-ok", L).onclick = () => { $$("[data-fhc-on]", L).forEach(x => tabs[+x.dataset.fhcOn].on = x.checked); if (!tabs.some(t => t.on !== false)) { toast("Gardez au moins un onglet."); return; }
+        S.cfg.fundView = { ...(S.cfg.fundView || {}), tabs, kpis: $$("[data-fhc-k]", L).filter(x => x.checked).map(x => x.dataset.fhcK), home: $('input[name="fhc-home"]:checked', L)?.value || "overview" };
+        L.remove(); saveCfg("Onglet Fonds personnalisé"); render(); };
+    }, true);
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-ftab],[data-fh-toggle],[data-fh-expand],[data-fh-collapse],[data-fh-stage],[data-act9]"); if (!el) return; const ds = el.dataset;
+  if (ds.ftab) { S.ui.ftab = ds.ftab; saveUI(); render(); return; }
+  if (ds.fhToggle) { e.stopPropagation(); const o = S.ui.fhOpen = { ...(S.ui.fhOpen || {}) }; const k = ds.fhToggle; o[k] = k.startsWith("d:") ? !o[k] : o[k] === false; saveUI(); render(); return; }
+  if (ds.fhExpand || ds.fhCollapse) { const f = fundById(ds.fhExpand || ds.fhCollapse); const o = S.ui.fhOpen = { ...(S.ui.fhOpen || {}) }; walk(f?.tree || [], n => { o["n:" + n.id] = !!ds.fhExpand; }); if (ds.fhExpand) fundDossiers(f).forEach(d => o["d:" + d.id] = true); saveUI(); render(); return; }
+  if (ds.fhStage) { const [wf, st] = ds.fhStage.split("|"); S.ui.fhq = { wf, stage: st }; S.ui.ftab = "dossiers"; saveUI(); render(); return; }
+  if (ds.act9 === "fh-custom") fhCustomModal();
+  if (ds.act9 === "fh-attach") { const f = fundById(ds.fid); if (f) fhAttachModal(f); }
+  if (ds.act9 === "fh-dl-all") { S.view = "deadlines"; S.ui.dl = { ...(S.ui.dl || {}), fund: ds.fname, view: "upcoming" }; saveUI(); render(); }
+});
+document.addEventListener("change", async e => {
+  const t = e.target;
+  if (t.dataset?.fhPlace) { const d = dossierById(t.dataset.fhPlace); if (!d || !canEditDossier(d)) return; d.fundNode = t.value; const f = (S.cfg.funds || []).find(x => x.name === d.vehicle); await putDoc("dossiers", d); await log(`${d.code} classé dans ${t.value && f ? nodePath(f, t.value) : "« non classé »"}`, { dossierId: d.id }); toast("Emplacement enregistré"); render(); return; }
+  if (["fhq-wf", "fhq-stage", "fhq-owner", "fhq-arch"].includes(t.id)) { const k = t.id.slice(4); S.ui.fhq = { ...(S.ui.fhq || {}), [k]: t.type === "checkbox" ? t.checked : t.value, ...(k === "wf" ? { stage: "" } : {}) }; saveUI(); render(); }
+});
+document.addEventListener("input", e => { if (e.target.id === "fhq-text") { S.ui.fhq = { ...(S.ui.fhq || {}), text: e.target.value }; clearTimeout(S._fhT); S._fhT = setTimeout(() => { const p = e.target.selectionStart; render(); const q = $("#fhq-text"); if (q) { q.focus(); try { q.setSelectionRange(p, p); } catch {} } }, 250); } });
 
 function vFundsExternal(m) {
   const items = activeGrants(m).filter(g => g.kind === "node").map(g => {
@@ -1558,6 +1707,7 @@ document.addEventListener("click", async e => {
   if (ds.nact) {
     const [fid, nid] = (el.closest("[data-node]")?.dataset.node || "").split("|"); const live = liveNode(fid, nid); if (!live) return; const { f, n } = live; const a = ds.nact;
     if (a === "edit") { nodeModal(f, n); return; }
+    if (a === "linkd") { fhAttachModal(f, n.id); return; }
     if (!can("funds")) return;
     const list = parentList(f, nid); const i = list.indexOf(n);
     if (a === "add") { const c = { id: uid("n"), name: "Nouveau dossier", url: "", note: "", auto: "", children: [] }; (n.children = n.children || []).push(c); saveCfg(); render(); nodeModal(f, c, true); return; }
@@ -2076,7 +2226,7 @@ function mtDossierRow(d) {
   const next = open.filter(t => t.due).sort((a, b) => a.due < b.due ? -1 : 1)[0] || open[0];
   const inStage = d.stageSince ? daysBetween(d.stageSince, todayISO()) : null, over = s?.sla && inStage > s.sla;
   return `<tr class="click" data-open="${d.id}"><td class="mono" style="font-size:12px">${h(d.code)}</td><td><b>${h(d.name)}</b>${d.pendingApproval ? ' <span class="lock">À VALIDER</span>' : ""}<div class="muted" style="font-size:11.5px">${h(d.vehicle || "")}${d.sector ? " · " + h(d.sector) : ""}</div></td>
-    <td><span class="row" style="flex-wrap:nowrap;gap:6px">${av(d.ownerId)}${h(mname(d.ownerId).split(" ")[0])}</span></td>
+    <td><span class="row" style="flex-wrap:nowrap;gap:6px">${avs(dOwners(d))}${dOwners(d).length === 1 ? h(mname(d.ownerId).split(" ")[0]) : ""}</span></td>
     <td><div class="mstep" title="${h((w?.stages || []).map(x => x.name).join(" › "))}">${(w?.stages || []).map((x, i) => `<i class="${i < idx ? "done" : i === idx ? "cur" : ""}"></i>`).join("")}</div><div style="font-size:12px;margin-top:3px"><b>${h(s?.name || "—")}</b> <span class="muted">· étape ${idx + 1}/${w?.stages.length || "?"}</span></div></td>
     <td class="num ${over ? "" : ""}" style="${over ? "color:var(--bad);font-weight:600" : ""}">${inStage != null ? inStage + " j" : "—"}${s?.sla ? `<span class="muted" style="font-weight:400"> / ${s.sla}</span>` : ""}</td>
     <td class="num">${tks.length - open.length}/${tks.length}${late.length ? ` <span class="chip" style="background:var(--bad-bg);color:var(--bad)">${late.length} en retard</span>` : ""}</td>
@@ -2164,7 +2314,7 @@ function drawPresent() {
   const slides = boardSlides({ since: addDays(todayISO(), -7), fund: "", ...(S.ui.mt || {}) }); if (!slides.length) { S.present = null; return; }
   S.present.i = Math.max(0, Math.min(slides.length - 1, S.present.i)); const s = slides[S.present.i];
   let el = $("#present"); if (!el) { el = document.createElement("div"); el.id = "present"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Présentation"); document.body.appendChild(el); }
-  el.innerHTML = `<div class="pbar"><div class="wordmark" style="font-size:16px">INMA<small>RÉUNION D'ÉQUIPE</small></div><span class="spacer"></span><span class="muted num">${S.present.i + 1} / ${slides.length}</span><button class="btn sm" data-pv="-1" ${S.present.i === 0 ? "disabled" : ""} aria-label="Diapositive précédente">‹ Précédent</button><button class="btn sm" data-pv="1" ${S.present.i === slides.length - 1 ? "disabled" : ""} aria-label="Diapositive suivante">Suivant ›</button>${can("meetings") ? `<button class="btn sm" data-act5="mt-new">Rédiger le compte rendu</button>` : ""}<button class="btn sm" data-pv="x">Quitter</button></div>
+  el.innerHTML = `<div class="pbar">${brandHTML("Réunion d'équipe")}<span class="spacer"></span><span class="muted num">${S.present.i + 1} / ${slides.length}</span><button class="btn sm" data-pv="-1" ${S.present.i === 0 ? "disabled" : ""} aria-label="Diapositive précédente">‹ Précédent</button><button class="btn sm" data-pv="1" ${S.present.i === slides.length - 1 ? "disabled" : ""} aria-label="Diapositive suivante">Suivant ›</button>${can("meetings") ? `<button class="btn sm" data-act5="mt-new">Rédiger le compte rendu</button>` : ""}<button class="btn sm" data-pv="x">Quitter</button></div>
     <div class="pbody"><div class="mt-head"><span class="mt-num">${String(S.present.i + 1).padStart(2, "0")}</span><div><h2 style="font-size:26px">${s.color ? `<span class="fdot" style="--fc:${h(s.color)};margin-right:10px;width:14px;height:14px"></span>` : ""}${h(s.title)}</h2><div class="muted">${h(s.sub || "")}</div></div></div>${s.html}</div>
     <div class="pdots">${slides.map((x, i) => `<button class="${i === S.present.i ? "on" : ""}" data-pv-go="${i}" aria-label="${h(x.title)}" title="${h(x.title)}"></button>`).join("")}</div>`;
 }
@@ -2447,7 +2597,7 @@ function cpDossierBlock(d, o, full) {
   const head = `### ${d.code} · ${d.name}`;
   const base = [cpLine("Workflow", w?.name), cpLine("Étape", s ? `${s.name} (${idx + 1}/${w.stages.length})${inStage != null ? `, depuis ${inStage} j${s.sla ? ` (délai cible ${s.sla} j)` : ""}` : ""}` : ""),
     cpLine("Étapes du processus", full && w ? w.stages.map(x => x.name).join(" › ") : ""),
-    cpLine("Fonds", d.vehicle), cpLine("Secteur", d.sector), cpLine("Responsable", cpWho(d.ownerId, o)),
+    cpLine("Fonds", d.vehicle), cpLine("Secteur", d.sector), cpLine(dOwners(d).length > 1 ? "Responsables" : "Responsable", dOwners(d).map(x => cpWho(x, o)).join(", ")),
     cpLine("Équipe", full ? (d.members || []).map(x => cpWho(x, o)).join(", ") : ""), cpLine("Montant", cpAmt(d.amount, o)),
     cpLine("Priorité", prioById(d.priority)?.label), cpLine("Échéance du dossier", d.dueDate ? cpD(d.dueDate) : ""),
     d.pendingApproval ? `- Validation en attente pour passer à « ${w?.stages.find(x => x.id === d.pendingApproval.to)?.name || "?"} »` : ""];
@@ -2514,7 +2664,7 @@ function cpTasksBlock(o) {
   return `# Tâches ouvertes (${open.length})\n` + Object.entries(by).map(([a, l]) => `## ${a ? cpWho(a, o) : "Non assignées"} (${l.length})\n${l.sort((x, y) => (x.due || "9").localeCompare(y.due || "9")).map(t => cpTaskLine(t, o) + (t.dossierId ? ` [${dossierById(t.dossierId)?.code || ""}]` : "")).join("\n")}`).join("\n\n");
 }
 function cpTeamBlock(o) {
-  return `# Charge de l'équipe\n` + internals().map(m => { const own = visDossiers().filter(d => !d.archived && d.ownerId === m.id); const tk = visTasks().filter(t => !isDone(t) && (t.assignees || []).includes(m.id)); const late = tk.filter(t => t.due && t.due < todayISO());
+  return `# Charge de l'équipe\n` + internals().map(m => { const own = visDossiers().filter(d => !d.archived && dOwners(d).includes(m.id)); const tk = visTasks().filter(t => !isDone(t) && (t.assignees || []).includes(m.id)); const late = tk.filter(t => t.due && t.due < todayISO());
     return `- ${cpWho(m.id, o)}${m.title && o.names !== false ? " (" + m.title + ")" : ""} : ${own.length} dossier(s) en responsabilité${own.length ? " [" + own.map(d => d.code).join(", ") + "]" : ""}, ${tk.length} tâche(s) ouverte(s) dont ${late.length} en retard`; }).join("\n");
 }
 /* contexts available right now */
@@ -2823,7 +2973,7 @@ Actions possibles (champs facultatifs sauf indication ; dates au format AAAA-MM-
 - {"type":"update_task","task":"titre exact ou partiel de la tâche","status":"libellé de statut","due":"…","assignees":["Nom"],"priority":"…","title":"nouveau titre","comment":"commentaire à ajouter"}
 - {"type":"complete_task","task":"…"} · {"type":"delete_task","task":"…"}
 - {"type":"create_dossier","name":"…"(obligatoire),"workflow":"…","fund":"…","owner":"Nom","members":["Nom"],"sector":"…","amount":nombre,"priority":"…","due":"…","description":"…","stage":"…"}
-- {"type":"update_dossier","dossier":"…","name":"…","owner":"Nom","add_members":["Nom"],"fund":"…","sector":"…","amount":nombre,"priority":"…","due":"…","description":"…","onedrive":"https://…"}
+- {"type":"update_dossier","dossier":"…","name":"…","owner":"Nom","owners":["Nom","Nom"] (remplace la liste des responsables),"add_members":["Nom"],"fund":"…","sector":"…","amount":nombre,"priority":"…","due":"…","description":"…","onedrive":"https://…"}
 - {"type":"move_stage","dossier":"…","stage":"nom de l'étape cible"} · {"type":"approve_stage","dossier":"…"} · {"type":"reject_stage","dossier":"…"}
 - {"type":"archive_dossier","dossier":"…","archived":true|false}
 - {"type":"add_note","dossier":"…","text":"…"} (note dans l'historique du dossier)
@@ -2890,7 +3040,8 @@ function aiPlanOne(a) {
       if (!canEditDossier(d)) return N(`Modifier ${d.code}`, "vous n'avez pas les droits de modification sur ce dossier");
       const ch = [], up = {}; const own = a.owner ? aiMember(a.owner) : null; if (a.owner && !own) return N(`Modifier ${d.code}`, `personne « ${a.owner} » inconnue`);
       if (a.name) { up.name = String(a.name); ch.push(`nom → ${a.name}`); } if (own) { up.ownerId = own.id; ch.push(`responsable → ${own.name}`); }
-      const add = aiMembers(a.add_members); if (add.length) { up.members = [...new Set([...(d.members || []), ...add])]; ch.push(`équipe + ${add.map(mname).join(", ")}`); }
+      if (a.owners) { const ow = aiMembers(a.owners); if (aiUnknown(a.owners).length) return N(`Modifier ${d.code}`, `personne inconnue : ${aiUnknown(a.owners).join(", ")}`); if (ow.length) { up.ownerId = ow[0]; up.coOwners = ow.slice(1); up.members = [...new Set([...(d.members || []), ...ow])]; ch.push(`responsables → ${ow.map(mname).join(", ")}`); } }
+      const add = aiMembers(a.add_members); if (add.length) { up.members = [...new Set([...(up.members || d.members || []), ...add])]; ch.push(`équipe + ${add.map(mname).join(", ")}`); }
       if (a.fund) { const v = vehicles().find(x => aiNorm(x).includes(aiNorm(a.fund))); if (v) { up.vehicle = v; ch.push(`fonds → ${v}`); } }
       if (a.sector) { up.sector = S.cfg.sectors.find(x => aiNorm(x) === aiNorm(a.sector)) || a.sector; ch.push(`secteur → ${up.sector}`); }
       if (a.amount != null && a.amount !== "") { if (!can("view_amounts")) return N(`Modifier le montant de ${d.code}`, "votre rôle ne gère pas les montants"); up.amount = String(a.amount); ch.push(`montant → ${(+a.amount).toLocaleString("fr-FR")}`); }
@@ -3308,7 +3459,7 @@ function mbCustomSlide(def, mt) {
   if (T === "text") return { title, sub: def.sub || "", html: `<div class="panel"><div class="body ai-a mb-text" style="border:0">${mdLite(def.body || "") || '<p class="muted">Texte vide : modifiez cette diapositive dans « Personnaliser ».</p>'}</div></div>` };
   if (T === "kpis") { const ks = (def.kpis && def.kpis.length ? def.kpis : ["dossiers", "lateTasks", "dl30", "projects"]).filter(k => MB_KPIS[k]);
     return { title, sub: fn || "", html: `<div class="kpis">${ks.map(k => { const [v, alert] = mbKpiValue(k, mt, fid); return `<div class="kpi ${alert ? "alert" : ""}"><span class="l">${h(MB_KPIS[k])}</span><span class="v" style="font-size:26px">${v}</span></div>`; }).join("")}</div>` }; }
-  if (T === "dossiers") { let ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn) && (!def.workflow || d.workflowId === def.workflow) && (!def.owner || d.ownerId === def.owner) && (!def.stage || aiNorm(stageOf(d)?.name).includes(aiNorm(def.stage))) && (!def.pending || d.pendingApproval) && (!def.late || S.tasks.some(x => x.dossierId === d.id && !isDone(x) && x.due && x.due < t)));
+  if (T === "dossiers") { let ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn) && (!def.workflow || d.workflowId === def.workflow) && (!def.owner || dOwners(d).includes(def.owner)) && (!def.stage || aiNorm(stageOf(d)?.name).includes(aiNorm(def.stage))) && (!def.pending || d.pendingApproval) && (!def.late || S.tasks.some(x => x.dossierId === d.id && !isDone(x) && x.due && x.due < t)));
     ds.sort(def.sort === "amount" ? (a, b) => num(b.amount) - num(a.amount) : def.sort === "recent" ? (a, b) => String(b.createdAt).localeCompare(String(a.createdAt)) : (a, b) => (wfById(b.workflowId)?.stages.findIndex(s => s.id === b.stageId) ?? 0) - (wfById(a.workflowId)?.stages.findIndex(s => s.id === a.stageId) ?? 0));
     return { title, sub: `${ds.length} dossier(s)${fn ? " · " + fn : ""}`, html: ds.length ? `<div class="panel tablewrap"><table class="t mt-table"><thead><tr><th>Réf.</th><th>Dossier</th><th>Responsable</th><th style="min-width:180px">Avancement</th><th>Dans l'étape</th><th>Tâches</th><th>Prochaine action</th><th class="r">Montant</th></tr></thead><tbody>${ds.slice(0, 40).map(mtDossierRow).join("")}</tbody></table></div>` : empty("Aucun dossier ne correspond aux filtres de cette diapositive.") }; }
   if (T === "tasks") { const who = def.assignee === "_me" ? me()?.id : def.assignee; let l = visTasks().filter(x => (!who || (x.assignees || []).includes(who)) && (!fn || dossierById(x.dossierId)?.vehicle === fn));
@@ -3469,7 +3620,7 @@ document.addEventListener("click", async e => {
   }
   if (A === "sim-on") { S.sim = { roleId: $("#sim-role").value, memberId: $("#sim-member").value || null }; S.view = "dashboard"; render(); }
   if (A === "sim-off") { S.sim = null; render(); }
-  if (A === "d-save") { const d = dossierById(S.openDossier); d.name = $("#d-name").value.trim() || d.name; d.ownerId = $("#d-owner").value; d.vehicle = $("#d-vehicle").value; d.sector = $("#d-sector").value; d.priority = $("#d-prio").value; if ($("#d-amount")) d.amount = $("#d-amount").value; d.startDate = $("#d-start").value; d.dueDate = $("#d-due").value; d.description = $("#d-desc").value; d.members = $$("[data-dmember]").filter(x => x.checked).map(x => x.dataset.dmember); if (!d.members.includes(d.ownerId)) d.members.push(d.ownerId); d.tags = $$("[data-dtag]").filter(x => x.checked).map(x => x.dataset.dtag); d.custom = { ...(d.custom || {}) }; $$("#layer [data-cf]").forEach(x => d.custom[x.dataset.cf] = x.value); await putDoc("dossiers", d); await log(`Dossier mis à jour : ${d.code}`, { dossierId: d.id }); toast("Dossier enregistré"); render(); renderDrawer(); }
+  if (A === "d-save") { const d = dossierById(S.openDossier); d.name = $("#d-name").value.trim() || d.name; { const ow = $$("[data-downer]").filter(x => x.checked).map(x => x.dataset.downer); if (ow.length) { d.ownerId = ow.includes(d.ownerId) ? d.ownerId : ow[0]; d.coOwners = ow.filter(x => x !== d.ownerId); } } { const nv = $("#d-vehicle").value; if (nv !== d.vehicle) d.fundNode = ""; else if ($("#d-node")) d.fundNode = $("#d-node").value; d.vehicle = nv; } d.sector = $("#d-sector").value; d.priority = $("#d-prio").value; if ($("#d-amount")) d.amount = $("#d-amount").value; d.startDate = $("#d-start").value; d.dueDate = $("#d-due").value; d.description = $("#d-desc").value; d.members = $$("[data-dmember]").filter(x => x.checked).map(x => x.dataset.dmember); for (const o of dOwners(d)) if (!d.members.includes(o)) d.members.push(o); d.tags = $$("[data-dtag]").filter(x => x.checked).map(x => x.dataset.dtag); d.custom = { ...(d.custom || {}) }; $$("#layer [data-cf]").forEach(x => d.custom[x.dataset.cf] = x.value); await putDoc("dossiers", d); await log(`Dossier mis à jour : ${d.code}`, { dossierId: d.id }); toast("Dossier enregistré"); render(); renderDrawer(); }
   if (A === "d-archive") { const d = dossierById(S.openDossier); d.archived = !d.archived; await putDoc("dossiers", d); await log(`${d.code} ${d.archived ? "archivé" : "désarchivé"}`, { dossierId: d.id }); render(); renderDrawer(); }
   if (A === "d-delete") { const d = dossierById(S.openDossier); confirmBox(`Supprimer définitivement ${d.code} et ses ${S.tasks.filter(t => t.dossierId === d.id).length} tâches ?`, "Supprimer", async () => { for (const t of S.tasks.filter(t => t.dossierId === d.id)) await delDoc("tasks", t.id); await delDoc("dossiers", d.id); await log(`Dossier supprimé : ${d.code} · ${d.name}`); S.openDossier = null; renderDrawer(); render(); }); }
   if (A === "od-save") { const d = dossierById(S.openDossier); const u = $("#od-url").value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; } d.oneDriveUrl = u; d.subfolders = $$("[data-subf]").map(x => ({ name: x.dataset.subf, url: x.value.trim() })).filter(x => isURL(x.url)); await putDoc("dossiers", d); await log(`${d.code} : liens OneDrive mis à jour`, { dossierId: d.id }); toast("Liens OneDrive enregistrés"); renderDrawer(); render(); }
@@ -3480,6 +3631,7 @@ document.addEventListener("click", async e => {
   if (A === "wf-add") { const w = { id: uid("w"), name: "Nouveau workflow", prefix: "WF", color: "#4C6A88", vehicle: vehicles()[0], autoTasks: true, stages: [st("À démarrer", S.cfg.roles[0].id, 7), st("En cours", S.cfg.roles[0].id, 14), st("Validation", S.cfg.roles[0].id, 3, true), st("Terminé", S.cfg.roles[0].id, 0)], folders: ["01_Documents"] }; S.cfg.workflows.push(w); S.ui.wfEdit = w.id; saveCfg("Workflow créé"); render(); }
   if (A === "field-add") { S.cfg.customFields.push({ id: uid("cf"), label: "Nouveau champ", type: "text", scope: "dossier", workflows: [], options: [] }); saveCfg(); render(); }
   if (A === "auto-add") { S.cfg.automations.push({ id: uid("a"), name: "Nouvelle règle", enabled: true, trigger: { type: "task_status", value: S.cfg.statuses[0].id }, action: { type: "notify_role", value: S.cfg.roles[0].id } }); saveCfg(); render(); }
+  if (A === "icon-clear") { S.cfg.general.icon = ""; saveCfg("Icône par défaut rétablie"); render(); }
   if (A === "logo-clear") { S.cfg.general.logo = ""; saveCfg("Logo retiré"); render(); }
   if (A === "export") exportJSON();
   if (A === "export-csv") exportCSV();
@@ -3494,7 +3646,7 @@ document.addEventListener("change", async e => {
   if (t.id && t.id.startsWith("tf-")) { S.ui.tf = S.ui.tf || {}; const k = t.id.slice(3); if (k === "done") S.ui.tf.showDone = t.checked; else S.ui.tf[k] = t.value; saveUI(); render(); return; }
   if (ds.done) { const tk = S.tasks.find(x => x.id === ds.done); await completeTask(tk, t.checked); renderDrawer(); return; }
   if (ds.cfg) { let v = t.type === "number" ? (t.value === "" ? "" : +t.value) : t.value; setPath(S.cfg, ds.cfg, v); saveCfg(); if (ds.rerender || /\.(type|roleId)$/.test(ds.cfg) || ds.cfg.startsWith("general.")) render(); return; }
-  if (ds.cfgbool) { setPath(S.cfg, ds.cfgbool, t.checked); saveCfg(); if (ds.cfgbool.startsWith("copilot.")) { renderTop(); renderAI(); } return; }
+  if (ds.cfgbool) { setPath(S.cfg, ds.cfgbool, t.checked); saveCfg(); if (ds.cfgbool.startsWith("general.")) render(); if (ds.cfgbool.startsWith("copilot.")) { renderTop(); renderAI(); } return; }
   if (ds.cfglines) { setPath(S.cfg, ds.cfglines, t.value.split("\n").map(x => x.trim()).filter(Boolean)); saveCfg(); return; }
   if (ds.mod) { S.cfg.general.modules[ds.mod] = t.checked; saveCfg(); render(); return; }
   if (ds.perm) { const [rid, k] = ds.perm.split("|"); role(rid).perms[k] = t.checked; saveCfg(); return; }
@@ -3502,7 +3654,8 @@ document.addEventListener("change", async e => {
   if (ds.roleColor) { role(ds.roleColor).color = t.value; saveCfg(); return; }
   if (ds.fwf) { const [i, wid] = ds.fwf.split("|"); const f = S.cfg.customFields[+i]; f.workflows = t.checked ? [...new Set([...(f.workflows || []), wid])] : (f.workflows || []).filter(x => x !== wid); saveCfg(); return; }
   if (ds.odwf) { S.cfg.onedrive.perWorkflowRoot = S.cfg.onedrive.perWorkflowRoot || {}; S.cfg.onedrive.perWorkflowRoot[ds.odwf] = t.value.trim(); saveCfg(); return; }
-  if (t.id === "logo-file" && t.files[0]) { const f = t.files[0]; const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const sc = Math.min(1, 320 / img.width, 90 / img.height); const c = document.createElement("canvas"); c.width = Math.round(img.width * sc) || 160; c.height = Math.round(img.height * sc) || 40; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); S.cfg.general.logo = c.toDataURL("image/png"); saveCfg("Logo mis à jour"); render(); }; img.onerror = () => toast("Image illisible. Essayez un PNG."); img.src = r.result; }; r.readAsDataURL(f); return; }
+  if (t.id === "icon-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const c = document.createElement("canvas"); c.width = c.height = 512; const x = c.getContext("2d"); const sc = Math.min(512 / (img.width || 512), 512 / (img.height || 512)); const w = (img.width || 512) * sc, hh = (img.height || 512) * sc; x.drawImage(img, (512 - w) / 2, (512 - hh) / 2, w, hh); S.cfg.general.icon = c.toDataURL("image/png"); saveCfg("Icône de l'application mise à jour"); render(); }; img.onerror = () => toast("Image illisible. Essayez un PNG."); img.src = r.result; }; r.readAsDataURL(t.files[0]); return; }
+  if (t.id === "logo-file" && t.files[0]) { const f = t.files[0]; const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const sc = Math.min(1, 640 / img.width, 180 / img.height); const c = document.createElement("canvas"); c.width = Math.round(img.width * sc) || 160; c.height = Math.round(img.height * sc) || 40; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); S.cfg.general.logo = c.toDataURL("image/png"); saveCfg("Logo mis à jour"); render(); }; img.onerror = () => toast("Image illisible. Essayez un PNG."); img.src = r.result; }; r.readAsDataURL(f); return; }
   if (t.id === "import-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j.cfg || !Array.isArray(j.dossiers)) throw 0; confirmBox(`Importer ${j.dossiers.length} dossiers et ${(j.tasks || []).length} tâches ? Les paramètres seront remplacés ; les éléments existants de même identifiant aussi.`, "Importer", async () => { S.cfg = { ...DEFAULT_CFG(), ...j.cfg }; saveCfg("Paramètres importés"); for (const d of j.dossiers) await putDoc("dossiers", d); for (const x of j.tasks || []) await putDoc("tasks", x); for (const x of j.deadlines || []) await putDoc("deadlines", x); for (const x of j.projects || []) await putDoc("projects", x); for (const x of j.meetings || []) await putDoc("meetings", x); toast("Import terminé"); render(); }); } catch { toast("Fichier invalide : utilisez une sauvegarde exportée depuis l'outil."); } }; r.readAsText(t.files[0]); }
 });
 document.addEventListener("input", e => { if (e.target.id === "f-q" || e.target.id === "tf-q") { clearTimeout(S.qT); const id = e.target.id; S.qT = setTimeout(() => { if (id === "f-q") S.ui.filters.q = e.target.value; else { S.ui.tf = S.ui.tf || {}; S.ui.tf.q = e.target.value; } saveUI(); render(); const el = $("#" + id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 250); } });

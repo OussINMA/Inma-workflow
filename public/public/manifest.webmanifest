@@ -1,0 +1,15 @@
+{
+  "name": "INMA Workflow",
+  "short_name": "INMA Workflow",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F1F1F1",
+  "theme_color": "#212121",
+  "lang": "fr",
+  "icons": [
+    { "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
