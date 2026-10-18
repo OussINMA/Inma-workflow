@@ -33,13 +33,13 @@ export function canSeeDossier(c, d) {
   if (c.isExt) return !!grantFor(c, "dossier", d.id);
   if (c.can("view_all")) return true;
   const m = c.member;
-  return !!m && (d.ownerId === m.id || (d.members || []).includes(m.id));
+  return !!m && (d.ownerId === m.id || (d.coOwners || []).includes(m.id) || (d.members || []).includes(m.id));
 }
 function canEditDossier(c, d) {
   if (c.isExt) return false;
   if (c.can("dossier_edit_all")) return true;
   const m = c.member;
-  return !!m && (d.ownerId === m.id || (d.members || []).includes(m.id));
+  return !!m && (d.ownerId === m.id || (d.coOwners || []).includes(m.id) || (d.members || []).includes(m.id));
 }
 function canSeeTask(c, t, dossierOf) {
   if (!c.isExt && c.can("view_all")) return true;
