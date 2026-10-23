@@ -71,6 +71,15 @@ export function inviteEmail({ name, inviter, roleLabel, code, appUrl, appName, e
   return { subject, html, text };
 }
 
+export function notifEmail({ text, name, author, dossier, appUrl, appName }) {
+  const subject = `[${appName}] ${text.length > 90 ? text.slice(0, 88) + "…" : text}`;
+  const html = layout(appName, `<p style="margin:0 0 12px">Bonjour ${esc((name || "").split(" ")[0])},</p>
+    <p style="margin:0 0 12px;font-size:15px;font-weight:600">${esc(text)}</p>
+    ${dossier ? `<p style="margin:0 0 12px;color:#555">Dossier : ${esc(dossier)}</p>` : ""}${author ? `<p style="margin:0 0 16px;color:#555">Par ${esc(author)}</p>` : ""}
+    <p style="margin:0 0 18px"><a href="${esc(appUrl)}" style="display:inline-block;background:#E22529;color:#fff;text-decoration:none;font-weight:600;padding:10px 18px;border-radius:6px">Ouvrir ${esc(appName)}</a></p>
+    <p style="margin:0;font-size:12px;color:#888">Vous recevez cet e-mail selon vos préférences de notification (cloche › Régler).</p>`);
+  return { subject, html, text: `${text}${dossier ? "\nDossier : " + dossier : ""}\n\n${appUrl}` };
+}
 export function otpEmail({ code, appName }) {
   const subject = `Votre code de connexion ${appName} : ${code}`;
   const html = layout(subject, `<p style="margin:0 0 14px">Votre code de connexion :</p>

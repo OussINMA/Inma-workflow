@@ -148,6 +148,12 @@
       return g(`/drives/${it.driveId}/items/${it.id}/invite`, { method: "POST", body: { recipients: [{ email }], requireSignIn: true, sendInvitation: true, roles: [write ? "write" : "read"], message: message || "Accès partagé depuis INMA Workflow" } });
     },
     pick: pickFolder,
+    async info(url) {
+      const it = await g(`/shares/${shareId(url)}/driveItem?$select=id,name,lastModifiedDateTime,lastModifiedBy,folder,parentReference`);
+      let modified = it.lastModifiedDateTime, by = it.lastModifiedBy?.user?.displayName || "";
+      if (it.folder) { const ch = await g(`/drives/${it.parentReference.driveId}/items/${it.id}/children?$select=name,lastModifiedDateTime,lastModifiedBy&$top=200`); for (const x of ch.value || []) if (x.lastModifiedDateTime > modified) { modified = x.lastModifiedDateTime; by = x.lastModifiedBy?.user?.displayName || by; } }
+      return { modified, by, name: it.name };
+    },
   };
 
   /* ---------------- folder picker ---------------- */
@@ -298,6 +304,7 @@
 
   window.INMA = {
     standalone: true,
+    mailReady: () => !!st.pub?.mailReady,
     use: async name => { await st.ready; return { db: dbShim, user: userShim, downloads: downloadsShim }[name] || null; },
     me: () => st.me,
     graph,
