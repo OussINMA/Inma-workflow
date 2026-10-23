@@ -448,6 +448,22 @@ a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoratio
 .tc-act{margin-left:8px;display:inline-flex;gap:8px;font-weight:400}
 .tc-act .linkish{font-size:11px}
 @media (max-width:760px){.ag-scroll{max-height:520px}.ag-ev span{display:none}.ag-head,.ag-ad,.ag-body{grid-template-columns:40px repeat(var(--n),minmax(0,1fr))}}
+
+.gd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.gd-card{display:grid;grid-template-columns:34px minmax(0,1fr);gap:4px 10px;align-items:start;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface);min-width:0}
+.gd-card:hover{border-color:color-mix(in oklab,var(--accent) 45%,var(--line))}
+.gd-ic{flex:none;width:34px;height:40px;border-radius:5px;background:var(--t);color:#fff;font-weight:800;font-size:11px;display:grid;place-items:center;letter-spacing:.02em;box-shadow:inset 0 -6px 0 rgba(0,0,0,.12)}
+.gd-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.gd-t{font-weight:600;font-size:13.5px;line-height:1.3;overflow-wrap:anywhere}
+.gd-m{font-size:11.5px;color:var(--muted)}
+.gd-d{font-size:12.5px;color:var(--ink);margin-top:2px}
+.gd-tpl{color:var(--accent);font-weight:700}
+.gd-pin{color:#B7791F}
+.gd-acts{grid-column:2;display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px}
+.gd-ess{border-color:color-mix(in oklab,#B7791F 45%,var(--line))}
+.gd-intro .body{font-size:13.5px}
+.gd-row{display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto;gap:6px;align-items:center}
+@media (max-width:640px){.gd-row{grid-template-columns:1fr auto}.gd-row input[type=url]{grid-column:1/-1}}
 </style>
 
 <div class="app" id="app">
@@ -505,6 +521,7 @@ const ICON = {
   present:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/>',
   shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  book:'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5A2.5 2.5 0 0 1 6.5 19H20v3H6.5"/><path d="M8 7h8M8 11h6"/>',
   userplus:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5M19 8v6M16 11h6"/>'
 };
 const ic = (n, cls = "") => `<svg class="${cls}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n] || ""}</svg>`;
@@ -877,7 +894,7 @@ function applyBranding() {
 }
 
 /* ---------- shell ---------- */
-const NAV = [["dashboard","Tableau de bord","dash"],["meeting","Réunion d'équipe","present"],["funds","Fonds","fund"],["projects","Projets","flag"],["dossiers","Dossiers","folder"],["compliance","Conformité","shield"],["tasks","Tâches","task"],["calendar","Calendrier","cal"],["deadlines","Échéances","deadline"],["team","Équipe","team"],["onedrive","OneDrive","cloud"]];
+const NAV = [["dashboard","Tableau de bord","dash"],["meeting","Réunion d'équipe","present"],["funds","Fonds","fund"],["projects","Projets","flag"],["dossiers","Dossiers","folder"],["compliance","Conformité","shield"],["tasks","Tâches","task"],["calendar","Calendrier","cal"],["deadlines","Échéances","deadline"],["guide","Guide INMA","book"],["team","Équipe","team"],["onedrive","OneDrive","cloud"]];
 function renderRail() {
   const g = S.cfg.general, mods = g.modules || {}, m = me(), r = myRole();
   const myOpen = m ? S.tasks.filter(t => (t.assignees || []).includes(m.id) && !isDone(t)).length : 0;
@@ -895,7 +912,7 @@ function renderRail() {
     </div>`;
   $("#mobilenav").innerHTML = NAV.filter(n => mods[n[0]] !== false && navAllowed(n[0])).map(n => `<button class="nav ${S.view === n[0] ? "on" : ""}" data-nav="${n[0]}">${n[1]}</button>`).join("") + (settingsBtn ? `<button class="nav ${S.view === "settings" ? "on" : ""}" data-nav="settings">Paramètres</button>` : "");
 }
-const TITLES = { compliance: ["Contrôle & documents", "Conformité"], meeting: ["Réunion d'équipe", "Point d'avancement"], projects: ["Corporate & transverse", "Projets"], deadlines: ["Calendrier réglementaire", "Échéances et reportings"], dashboard: ["Pilotage", "Tableau de bord"], funds: ["Architecture", "Fonds"], dossiers: ["Portefeuille de travail", "Dossiers"], tasks: ["Exécution", "Tâches"], calendar: ["Planning", "Calendrier"], team: ["Organisation", "Équipe"], onedrive: ["Documents", "OneDrive"], settings: ["Administration", "Paramètres"] };
+const TITLES = { compliance: ["Contrôle & documents", "Conformité"], meeting: ["Réunion d'équipe", "Point d'avancement"], projects: ["Corporate & transverse", "Projets"], deadlines: ["Calendrier réglementaire", "Échéances et reportings"], dashboard: ["Pilotage", "Tableau de bord"], funds: ["Architecture", "Fonds"], dossiers: ["Portefeuille de travail", "Dossiers"], tasks: ["Exécution", "Tâches"], calendar: ["Planning", "Calendrier"], team: ["Organisation", "Équipe"], onedrive: ["Documents", "OneDrive"], guide: ["Ressources", "Guide INMA"], settings: ["Administration", "Paramètres"] };
 const INMA_ICON_SVG = '<svg viewBox="0 0 100 100" width="36" height="36"><rect width="100" height="100" rx="18" fill="#E22529"/><path d="M26 70 L50 50 L74 30" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="26" cy="70" r="8" fill="#fff"/><circle cx="50" cy="50" r="8" fill="#fff"/><circle cx="74" cy="30" r="10" fill="#fff"/></svg>';
 const INMA_LOGO_SVG = '<svg role="img" aria-label="INMA" xmlns="http://www.w3.org/2000/svg" viewBox="0 -2 232 68"><rect x="0" y="0" width="64" height="64" rx="11.52" fill="#E22529"/><path d="M16.64 44.800000000000004 L32.0 32.0 L47.36 19.2" stroke="#fff" stroke-width="4.48" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16.64" cy="44.800000000000004" r="5.12" fill="#fff"/><circle cx="32.0" cy="32.0" r="5.12" fill="#fff"/><circle cx="47.36" cy="19.2" r="6.4" fill="#fff"/><g fill="#FFFFFF"><path transform="translate(82.00,50.00) scale(0.04600,-0.04600)" d="M83 0V700H245V0Z"/><path transform="translate(102.61,50.00) scale(0.04600,-0.04600)" d="M83 0V700H217L630 196H565V700H725V0H592L178 504H243V0Z"/><path transform="translate(145.30,50.00) scale(0.04600,-0.04600)" d="M83 0V700H217L515 206H444L737 700H870L872 0H720L719 467H747L513 74H440L201 467H235V0Z"/><path transform="translate(194.75,50.00) scale(0.04600,-0.04600)" d="M-9 0 303 700H463L776 0H606L350 618H414L157 0ZM147 150 190 273H550L594 150Z"/></g></svg>';
 function brandHTML(sub) {
@@ -4657,6 +4674,133 @@ function vAgendaTab() {
     ${past.length && can("meetings") ? `<div class="panel"><header><h2>Réunions passées sans compte rendu</h2><span class="chip">${past.length}</span></header><div class="body">${agUpcomingHTML(past, "")}</div></div>` : ""}`;
 }
 
+/* ---------- Guide INMA : modèles, procédures et documents de référence, alimentés depuis OneDrive / SharePoint ---------- */
+const GD_TYPES = { word: ["Word", "#2B579A", "W"], excel: ["Excel", "#217346", "X"], ppt: ["PowerPoint", "#C43E1C", "P"], pdf: ["PDF", "#B3191D", "PDF"], img: ["Image", "#7A5BB0", "IMG"], link: ["Lien", "#4C6A88", "↗"], other: ["Fichier", "#7B8794", "•"] };
+const gdType = name => { const e = (/\.([a-z0-9]+)$/i.exec(name || "")?.[1] || "").toLowerCase();
+  if (/^(docx?|dotx?|odt|rtf)$/.test(e)) return "word"; if (/^(xlsx?|xlsm|xltx?|csv|ods)$/.test(e)) return "excel"; if (/^(pptx?|potx?|odp)$/.test(e)) return "ppt"; if (e === "pdf") return "pdf"; if (/^(png|jpe?g|svg|gif|webp)$/.test(e)) return "img"; return e ? "other" : "link"; };
+const gdBase = n => String(n || "").replace(/\.[a-z0-9]{2,5}$/i, "");
+const gdIsTpl = x => /\.(dotx?|xltx?|potx?)$/i.test(x.name || "") || [...(x.path || []), x.cat || ""].some(p => /mod[eè]le|template|canevas|trame/i.test(p));
+function gdCfg() { const g = S.cfg.guide || {}; return { intro: g.intro ?? "Retrouvez ici les modèles, procédures, chartes et documents de référence d'INMA Capital. Utilisez toujours la dernière version publiée ici plutôt qu'une copie locale.", roots: g.roots || [], items: g.items || [], pins: g.pins || [], depth: g.depth || 3 }; }
+const gdCanEdit = () => can("settings");
+const GD_CACHE_KEY = "inma-guide-cache";
+S.gdCache = S.gdCache || store.get(GD_CACHE_KEY, {}) || {};
+const gdLive = () => !!(window.INMA?.graph?.available?.() && window.INMA.graph.listTree);
+function gdLoad(force) {
+  if (!gdLive() || !window.INMA.graph.signedIn()) return;
+  for (const r of gdCfg().roots) {
+    if (!isURL(r.url)) continue; const c = S.gdCache[r.id];
+    if (c?.loading || (!force && c && c.url === r.url && Date.now() - (c.at || 0) < 10 * 60e3)) continue;
+    S.gdCache[r.id] = { ...(c || {}), loading: true };
+    window.INMA.graph.listTree(r.url, gdCfg().depth).then(res => { S.gdCache[r.id] = { url: r.url, at: Date.now(), items: res.items, rootName: res.root.name }; try { store.set(GD_CACHE_KEY, S.gdCache); } catch {} if (S.view === "guide") render(); })
+      .catch(er => { S.gdCache[r.id] = { ...(c || {}), loading: false, err: er.message || "lecture impossible" }; if (S.view === "guide") render(); });
+  }
+}
+function gdAll() {
+  const c = gdCfg(), out = [];
+  for (const r of c.roots) { const k = S.gdCache[r.id]; if (!k?.items || k.url !== r.url) continue;
+    for (const x of k.items) out.push({ key: "f:" + x.id, live: true, src: x, title: gdBase(x.name), name: x.name, url: x.url, cat: x.path[0] || "Général", sub: x.path.slice(1).join(" › "), description: x.description || "", modified: x.modified, by: x.by, type: gdType(x.name), root: r.name }); }
+  for (const m of c.items) out.push({ key: "m:" + m.id, live: false, src: m, title: m.title || "Sans titre", name: m.title, url: m.url, cat: m.cat || "Général", sub: "", description: m.description || "", modified: m.updatedAt || "", by: m.by ? mname(m.by) : "", type: m.type || (t => t === "other" ? "link" : t)(gdType(decodeURIComponent(String(m.url || "").split(/[?#]/)[0].replace(/^https?:\/\/[^/]+\/?/, "")))) });
+  return out.map(x => ({ ...x, tpl: gdIsTpl(x), pinned: c.pins.includes(x.key) }));
+}
+function gdCard(x) {
+  const t = GD_TYPES[x.type] || GD_TYPES.other;
+  const canUse = x.live && window.INMA?.graph?.copyTo && !isExt(me());
+  return `<div class="gd-card">
+    <span class="gd-ic" style="--t:${t[1]}">${t[2]}</span>
+    <div class="gd-main"><div class="gd-t" title="${h(x.name)}">${x.pinned ? '<span class="gd-pin" title="Essentiel">★</span> ' : ""}${h(x.title)}</div>
+      <div class="gd-m">${h(t[0])}${x.tpl ? ' · <span class="gd-tpl">Modèle</span>' : ""}${x.sub ? " · " + h(x.sub) : ""}${x.modified ? " · mis à jour le " + h(fdate(String(x.modified).slice(0, 10))) : ""}${x.by ? " par " + h(x.by) : ""}</div>
+      ${x.description ? `<div class="gd-d">${h(x.description)}</div>` : ""}</div>
+    <div class="gd-acts">${isURL(x.url) ? `<a class="btn sm" href="${h(x.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>` : ""}
+      ${canUse ? `<button class="btn sm" data-gd="use" data-key="${h(x.key)}" title="Copier ce document dans le dossier OneDrive d'un dossier">${ic("plus")}Utiliser</button>` : ""}
+      <button class="btn sm ghost" data-gd="copy" data-url="${h(x.url || "")}" title="Copier le lien">${ic("copy")}</button>
+      ${gdCanEdit() ? `<button class="btn sm ghost" data-gd="pin" data-key="${h(x.key)}" title="${x.pinned ? "Retirer des essentiels" : "Ajouter aux essentiels"}">${x.pinned ? "★" : "☆"}</button>` : ""}</div></div>`;
+}
+function vGuide() {
+  gdLoad(false);
+  const c = gdCfg(), f = S.ui.gd = { q: "", cat: "", type: "", tpl: "", ...(S.ui.gd || {}) };
+  const all = gdAll(); const cats = [...new Set(all.map(x => x.cat))].sort((a, b) => a.localeCompare(b, "fr"));
+  const q = f.q.trim().toLowerCase();
+  const list = all.filter(x => (!f.cat || x.cat === f.cat) && (!f.type || x.type === f.type) && (!f.tpl || x.tpl) && (!q || [x.title, x.name, x.cat, x.sub, x.description].join(" ").toLowerCase().includes(q)));
+  const loading = c.roots.some(r => S.gdCache[r.id]?.loading), errs = c.roots.filter(r => S.gdCache[r.id]?.err).map(r => `${h(r.name || "Dossier")} : ${h(S.gdCache[r.id].err)}`);
+  const status = !c.roots.length ? "" : !gdLive() ? `<div class="banner info"><span>Les documents des dossiers OneDrive du guide s'affichent automatiquement dans la version déployée de l'outil. Ici : ${c.roots.map(r => linkBtn(r.url, r.name || "Dossier du guide")).join(" ")}</span></div>`
+    : !window.INMA.graph.signedIn() ? `<div class="banner info"><span>Connectez-vous à Microsoft pour afficher les documents du guide.</span><button class="btn sm pri" data-gd="login">Se connecter à Microsoft</button></div>`
+    : errs.length ? `<div class="banner bad"><span>Lecture du dossier impossible — ${errs.join(" · ")}</span><button class="btn sm" data-gd="refresh">Réessayer</button></div>` : "";
+  const newest = Math.max(0, ...c.roots.map(r => S.gdCache[r.id]?.at || 0));
+  const tb = `<div class="toolbar"><input type="search" id="gd-q" value="${h(f.q)}" placeholder="Rechercher un modèle, une procédure…" style="max-width:300px" aria-label="Rechercher">
+    <select id="gd-cat" aria-label="Rubrique"><option value="">Toutes les rubriques</option>${cats.map(x => `<option ${f.cat === x ? "selected" : ""}>${h(x)}</option>`).join("")}</select>
+    <select id="gd-type" aria-label="Type"><option value="">Tous types</option>${Object.entries(GD_TYPES).map(([k, v]) => `<option value="${k}" ${f.type === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select>
+    <label class="chk"><input type="checkbox" id="gd-tpl" ${f.tpl ? "checked" : ""}>Modèles uniquement</label>
+    <span class="spacer"></span>${c.roots.length && gdLive() ? `<span class="muted" style="font-size:12px">${loading ? "Mise à jour…" : newest ? "Synchronisé à " + new Date(newest).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : ""}</span><button class="btn sm" data-gd="refresh" ${loading ? "disabled" : ""}>Actualiser</button>` : ""}
+    ${gdCanEdit() ? `<button class="btn pri" data-gd="manage">${ic("gear")}Gérer le guide</button>` : ""}</div>`;
+  const intro = c.intro ? `<div class="panel gd-intro"><div class="body"><p style="margin:0">${h(c.intro)}</p>${c.roots.length ? `<div class="row" style="margin-top:8px;gap:6px"><span class="muted" style="font-size:12px">Source :</span>${c.roots.map(r => odLink(r.url, null, "folder", r.name || "Dossier du guide")).join("")}</div>` : ""}</div></div>` : "";
+  if (!all.length && !loading) return tb + intro + status + `<div class="empty"><b>Le guide est vide pour l'instant</b><span>${c.roots.length ? "Le dossier lié ne contient pas encore de documents, ou il n'a pas pu être lu." : "Liez un dossier OneDrive / SharePoint (par exemple « Guide INMA ») : chaque sous-dossier devient une rubrique et chaque fichier déposé y apparaît automatiquement. Vous pouvez aussi ajouter des liens à la main."}</span>${gdCanEdit() ? `<button class="btn pri" data-gd="manage">Gérer le guide</button>` : `<span>Demandez à un administrateur de le configurer.</span>`}</div>`;
+  const pins = list.filter(x => x.pinned);
+  const by = {}; for (const x of list) (by[x.cat] ||= []).push(x);
+  const sections = Object.keys(by).sort((a, b) => a.localeCompare(b, "fr")).map(cat => `<div class="panel"><header><h2>${h(cat)}</h2><span class="chip">${by[cat].length}</span></header><div class="body gd-grid">${by[cat].sort((a, b) => (b.pinned - a.pinned) || a.title.localeCompare(b.title, "fr")).map(gdCard).join("")}</div></div>`).join("");
+  return tb + intro + status + (pins.length && !f.cat && !q ? `<div class="panel gd-ess"><header><h2>★ Essentiels</h2><span class="chip">${pins.length}</span></header><div class="body gd-grid">${pins.map(gdCard).join("")}</div></div>` : "")
+    + (sections || `<div class="empty"><b>Aucun document ne correspond</b><button class="btn" data-gd="reset">Effacer les filtres</button></div>`);
+}
+function gdManage() {
+  const c = clone(gdCfg());
+  const rootRow = (r, i) => `<div class="gd-row"><input type="text" data-gr-n="${i}" value="${h(r.name || "")}" placeholder="Nom (ex. Guide INMA)" aria-label="Nom du dossier"><input type="url" data-gr-u="${i}" value="${h(r.url || "")}" placeholder="https://…sharepoint.com/… (dossier)" aria-label="Lien du dossier"><button class="btn sm ghost danger" data-gr-del="${i}" aria-label="Retirer">${ic("x")}</button></div>`;
+  const itemRow = (m, i) => `<div class="stagecard"><span class="ix">${String(i + 1).padStart(2, "0")}</span><div style="display:flex;flex-direction:column;gap:6px"><div class="grid2"><input type="text" data-gi-t="${i}" value="${h(m.title || "")}" placeholder="Titre" aria-label="Titre"><input type="text" data-gi-c="${i}" value="${h(m.cat || "")}" placeholder="Rubrique (ex. Modèles juridiques)" aria-label="Rubrique" list="gd-cats"></div><input type="url" data-gi-u="${i}" value="${h(m.url || "")}" placeholder="Lien (fichier OneDrive, SharePoint ou site web)" aria-label="Lien"><div class="row" style="flex-wrap:nowrap"><input type="text" data-gi-d="${i}" value="${h(m.description || "")}" placeholder="Description : à quoi sert ce document, quand l'utiliser" aria-label="Description"><button class="btn sm ghost danger" data-gi-del="${i}">Retirer</button></div></div></div>`;
+  const draw = L => { $("#gd-roots", L).innerHTML = c.roots.map(rootRow).join("") || '<p class="muted" style="margin:0;font-size:12.5px">Aucun dossier lié.</p>'; $("#gd-items", L).innerHTML = c.items.map(itemRow).join("") || '<p class="muted" style="margin:0;font-size:12.5px">Aucun lien ajouté à la main.</p>'; };
+  const read = L => { c.intro = $("#gd-intro", L).value; c.depth = +$("#gd-depth", L).value || 3;
+    c.roots = c.roots.map((r, i) => ({ ...r, name: ($(`[data-gr-n="${i}"]`, L)?.value ?? r.name).trim(), url: ($(`[data-gr-u="${i}"]`, L)?.value ?? r.url).trim() }));
+    c.items = c.items.map((m, i) => ({ ...m, title: ($(`[data-gi-t="${i}"]`, L)?.value ?? m.title).trim(), cat: ($(`[data-gi-c="${i}"]`, L)?.value ?? m.cat).trim(), url: ($(`[data-gi-u="${i}"]`, L)?.value ?? m.url).trim(), description: ($(`[data-gi-d="${i}"]`, L)?.value ?? m.description).trim() })); };
+  const cats = [...new Set(gdAll().map(x => x.cat))];
+  modal("Gérer le Guide INMA", `<label class="f"><span>Texte d'introduction</span><textarea id="gd-intro" rows="3">${h(c.intro)}</textarea></label>
+    <div><div class="eyebrow" style="margin-bottom:4px">Dossiers OneDrive / SharePoint du guide</div>
+      <p class="muted" style="margin:0 0 8px;font-size:12px">Chaque sous-dossier devient une rubrique (ex. « Modèles juridiques », « Procédures », « Charte graphique ») et chaque fichier déposé apparaît automatiquement, avec sa date de mise à jour. Pour alimenter le guide, il suffit de déposer ou de remplacer les fichiers dans OneDrive. La description d'un fichier saisie dans OneDrive (Détails) s'affiche aussi.</p>
+      <div id="gd-roots" style="display:flex;flex-direction:column;gap:6px"></div><button class="btn sm" id="gd-root-add" style="margin-top:6px">${ic("plus")}Lier un dossier</button>
+      <label class="f" style="margin-top:8px;max-width:260px"><span>Profondeur de lecture des sous-dossiers</span><select id="gd-depth">${[1, 2, 3, 4].map(n => `<option value="${n}" ${c.depth === n ? "selected" : ""}>${n} niveau${n > 1 ? "x" : ""}</option>`).join("")}</select></label></div>
+    <div><div class="eyebrow" style="margin-bottom:4px">Liens ajoutés à la main</div><p class="muted" style="margin:0 0 8px;font-size:12px">Pour un document rangé ailleurs, un site ou un outil externe (portail de la BCT, du CMF, de l'INNORPI…).</p>
+      <datalist id="gd-cats">${cats.map(x => `<option value="${h(x)}">`).join("")}</datalist><div id="gd-items" style="display:flex;flex-direction:column;gap:8px"></div><button class="btn sm" id="gd-item-add" style="margin-top:6px">${ic("plus")}Ajouter un lien</button></div>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="gd-save">Enregistrer</button>`, L => {
+      draw(L);
+      $("#gd-root-add", L).onclick = () => { read(L); c.roots.push({ id: uid("gr"), name: c.roots.length ? "" : "Guide INMA", url: "" }); draw(L); };
+      $("#gd-item-add", L).onclick = () => { read(L); c.items.push({ id: uid("gi"), title: "", cat: "", url: "", description: "", by: me()?.id || null }); draw(L); };
+      L.addEventListener("click", e => { const a = e.target.closest("[data-gr-del]"), b = e.target.closest("[data-gi-del]"); if (a) { read(L); c.roots.splice(+a.dataset.grDel, 1); draw(L); } if (b) { read(L); c.items.splice(+b.dataset.giDel, 1); draw(L); } });
+      $("#gd-save", L).onclick = () => { read(L);
+        const bad = [...c.roots.filter(r => r.url && !isURL(r.url)), ...c.items.filter(m => m.url && !isURL(m.url))]; if (bad.length) { toast("Un lien n'est pas valide : il doit commencer par https://"); return; }
+        c.roots = c.roots.filter(r => r.url); c.items = c.items.filter(m => m.title || m.url).map(m => ({ ...m, updatedAt: m.updatedAt || new Date().toISOString() }));
+        S.cfg.guide = c; L.remove(); saveCfg("Guide INMA enregistré"); gdLoad(true); render(); };
+    }, true);
+}
+function gdUse(x) {
+  const ds = visDossiers().filter(d => !d.archived && isURL(d.oneDriveUrl) && canCollect(d));
+  if (!ds.length) { toast("Aucun dossier avec un dossier OneDrive lié que vous pouvez modifier."); return; }
+  const dests = d => [{ v: d.oneDriveUrl, l: "Dossier principal" }, ...(d.subfolders || []).filter(s => isURL(s.url)).map(s => ({ v: s.url, l: s.name }))];
+  modal("Utiliser dans un dossier", `<p class="muted" style="margin:0;font-size:12.5px">Une copie de « ${h(x.name)} » est créée dans le dossier OneDrive choisi. Le modèle d'origine du guide n'est pas modifié.</p>
+    <label class="f"><span>Dossier</span><select id="gu-d">${ds.map(d => `<option value="${d.id}" ${S.openDossier === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
+    <label class="f"><span>Emplacement</span><select id="gu-p"></select></label>
+    <label class="f"><span>Nom de la copie</span><input type="text" id="gu-n"></label>
+    <label class="chk"><input type="checkbox" id="gu-ref" checked>Référencer la copie dans les documents du dossier</label>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="gu-ok">Créer la copie</button>`, L => {
+      const fill = () => { const d = dossierById($("#gu-d", L).value); $("#gu-p", L).innerHTML = dests(d).map(o => `<option value="${h(o.v)}">${h(o.l)}</option>`).join(""); const ext = /\.[a-z0-9]+$/i.exec(x.name)?.[0] || ""; $("#gu-n", L).value = `${d.code} - ${gdBase(x.name)}${ext.replace(/^\.(dotx|xltx|potx)$/i, m => ({ ".dotx": ".docx", ".xltx": ".xlsx", ".potx": ".pptx" })[m.toLowerCase()])}`; };
+      fill(); $("#gu-d", L).onchange = fill;
+      $("#gu-ok", L).onclick = async () => { const d = dossierById($("#gu-d", L).value), dest = $("#gu-p", L).value, name = $("#gu-n", L).value.trim() || x.name; const b = $("#gu-ok", L); b.disabled = true; b.textContent = "Copie en cours…";
+        try { const res = await window.INMA.graph.copyTo(x.src, dest, name);
+          if ($("#gu-ref", L).checked) { const live = dossierById(d.id); live.docs = [...(live.docs || []), { name: res?.fileName || name, url: res?.fileUrl || dest, folder: $("#gu-p", L).selectedOptions[0]?.text || "", by: me()?.id || null, at: todayISO(), fromGuide: x.name }]; await putDoc("dossiers", live); }
+          await log(`${d.code} : modèle « ${gdBase(x.name)} » copié dans le dossier OneDrive`, { dossierId: d.id });
+          L.remove(); toast(res?.fileUrl ? "Copie créée dans le dossier OneDrive" : "Copie lancée dans OneDrive (quelques secondes peuvent être nécessaires)"); render(); renderDrawer();
+        } catch (er) { b.disabled = false; b.textContent = "Créer la copie"; toast("Copie impossible : " + (er.message || "erreur")); } };
+    });
+}
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-gd]"); if (!el) return; const a = el.dataset.gd;
+  if (a === "manage") return gdManage();
+  if (a === "refresh") { gdLoad(true); render(); return; }
+  if (a === "login") { window.INMA?.msLogin?.(); return; }
+  if (a === "reset") { S.ui.gd = {}; saveUI(); render(); return; }
+  if (a === "copy") { if (el.dataset.url) copyText(el.dataset.url); return; }
+  const x = gdAll().find(y => y.key === el.dataset.key); if (!x) return;
+  if (a === "use") return gdUse(x);
+  if (a === "pin") { const c = gdCfg(); const pins = c.pins.includes(x.key) ? c.pins.filter(k => k !== x.key) : [...c.pins, x.key]; S.cfg.guide = { ...(S.cfg.guide || {}), pins }; saveCfg(x.pinned ? "Retiré des essentiels" : "Ajouté aux essentiels"); render(); }
+});
+document.addEventListener("input", e => { if (e.target.id === "gd-q") { S.ui.gd = { ...(S.ui.gd || {}), q: e.target.value }; clearTimeout(S._gdT); S._gdT = setTimeout(() => { saveUI(); render(); const i = $("#gd-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
+document.addEventListener("change", e => { const t = e.target; if (!["gd-cat", "gd-type", "gd-tpl"].includes(t.id)) return; const f = S.ui.gd = { ...(S.ui.gd || {}) }; if (t.id === "gd-cat") f.cat = t.value; if (t.id === "gd-type") f.type = t.value; if (t.id === "gd-tpl") f.tpl = t.checked ? 1 : ""; saveUI(); render(); });
+
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
 document.addEventListener("click", async e => {
@@ -4804,7 +4948,7 @@ async function loadSamples() {
 function render() {
   if (S.view !== "settings" && !navAllowed(S.view)) S.view = NAV.find(n => navAllowed(n[0]))?.[0] || "dossiers";
   applyBranding(); renderRail(); renderTop();
-  const v = { compliance: vCompliance, meeting: vMeeting, projects: vProjects, deadlines: vDeadlines, funds: vFunds, dashboard: vDashboard, dossiers: vDossiers, tasks: vTasks, calendar: vCalendar, team: vTeam, onedrive: vOneDrive, settings: vSettings }[S.view] || vDashboard;
+  const v = { guide: vGuide, compliance: vCompliance, meeting: vMeeting, projects: vProjects, deadlines: vDeadlines, funds: vFunds, dashboard: vDashboard, dossiers: vDossiers, tasks: vTasks, calendar: vCalendar, team: vTeam, onedrive: vOneDrive, settings: vSettings }[S.view] || vDashboard;
   $("#content").innerHTML = banners() + v();
   if (S.ai?.open && !document.querySelector("#aipanel :focus") && !S.ai.busy) renderAI();
 }

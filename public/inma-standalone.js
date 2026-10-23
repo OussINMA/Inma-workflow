@@ -122,7 +122,7 @@
   async function g(path, opts = {}) {
     const t = await token(opts.scopes || DRIVE_SCOPES);
     const r = await fetch(path.startsWith("http") ? path : "https://graph.microsoft.com/v1.0" + path, { method: opts.method || "GET", body: opts.body ? JSON.stringify(opts.body) : undefined, headers: { Authorization: "Bearer " + t, "Content-Type": "application/json", ...(opts.headers || {}) } });
-    if (r.status === 204) return null;
+    if (r.status === 204 || r.status === 202) return null;
     const j = await r.json().catch(() => null);
     if (!r.ok) { const e = new Error(j?.error?.message || ("Microsoft Graph : erreur " + r.status)); e.status = r.status; throw e; }
     return j;
@@ -175,6 +175,34 @@
       return g(`/drives/${it.driveId}/items/${it.id}/invite`, { method: "POST", body: { recipients: [{ email }], requireSignIn: true, sendInvitation: true, roles: [write ? "write" : "read"], message: message || "Accès partagé depuis INMA Workflow" } });
     },
     pick: pickFolder,
+    // Liste le contenu d'un dossier (récursif) : sert au module « Guide INMA »
+    async listTree(url, maxDepth = 3, maxItems = 600) {
+      const root = await graph.resolve(url); const out = []; let n = 0;
+      const walk = async (driveId, id, path, depth) => {
+        let next = `/drives/${driveId}/items/${id}/children?$top=200&$select=id,name,webUrl,file,folder,size,lastModifiedDateTime,lastModifiedBy,description,parentReference`;
+        while (next && n < maxItems) {
+          const j = await g(next);
+          for (const x of j.value || []) {
+            if (n >= maxItems) break;
+            if (x.folder) { if (depth < maxDepth) await walk(driveId, x.id, [...path, x.name], depth + 1); continue; }
+            n++; out.push({ id: x.id, driveId, name: x.name, url: x.webUrl, path, size: x.size || 0, modified: x.lastModifiedDateTime || "", by: x.lastModifiedBy?.user?.displayName || "", mime: x.file?.mimeType || "", description: x.description || "" });
+          }
+          next = j["@odata.nextLink"] || null;
+        }
+      };
+      await walk(root.driveId, root.id, [], 0);
+      return { root, items: out };
+    },
+    // Copie un fichier (modèle) dans un dossier OneDrive / SharePoint
+    async copyTo(src, destUrl, name) {
+      const dest = await graph.resolve(destUrl);
+      await g(`/drives/${src.driveId}/items/${src.id}/copy?@microsoft.graph.conflictBehavior=rename`, { method: "POST", body: { parentReference: { driveId: dest.driveId, id: dest.id }, name } });
+      for (let i = 0; i < 8; i++) { // la copie est asynchrone : on attend le nouveau fichier pour renvoyer son lien
+        await new Promise(r => setTimeout(r, 900));
+        try { const it = await g(`/drives/${dest.driveId}/items/${dest.id}:/${encodeURIComponent(name)}?$select=id,webUrl,name`); if (it?.webUrl) return { ...dest, fileUrl: it.webUrl, fileName: it.name }; } catch {}
+      }
+      return dest;
+    },
     async info(url) {
       const it = await g(`/shares/${shareId(url)}/driveItem?$select=id,name,lastModifiedDateTime,lastModifiedBy,folder,parentReference`);
       let modified = it.lastModifiedDateTime, by = it.lastModifiedBy?.user?.displayName || "";
