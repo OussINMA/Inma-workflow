@@ -116,6 +116,7 @@ export function snapshot(c, all, version) {
     dossiers, tasks, activity,
     projects: c.isExt ? [] : (all.projects || []),
     meetings: (all.meetings || []).filter(m => canSeeMeeting(c, m)),
+    events: (all.events || []).map(e => eventView(c, e)).filter(Boolean),
     prefs: (all.prefs || []).filter(p => p.id === c.member?.id),
     deadlines: c.isExt ? [] : (all.deadlines || []).map(o => c.can("view_amounts") ? o : stripDeadlineAmounts(o)),
     claims: c.member ? [{ id: c.user.id, memberId: c.member.id, code: seesCodes ? (c.member.code || "") : "" }] : [],
@@ -134,6 +135,21 @@ function extDocReqs(existing, data) {
   const inc = Object.fromEntries((Array.isArray(data.docReqs) ? data.docReqs : []).map(x => [x?.id, x]));
   return (existing.docReqs || []).map(x => { const n = inc[x.id]; if (!n || x.status === "validated" || n.status !== "received" || !/^https:\/\//i.test(String(n.url || ""))) return x;
     return { ...x, status: "received", url: String(n.url).slice(0, 2000), receivedAt: new Date().toISOString(), history: [...(x.history || []), ...(Array.isArray(n.history) ? n.history.slice(-1) : [])].slice(-30) }; });
+}
+// Commentaires de tâche : chacun ne modifie ou ne supprime que les siens (les administrateurs, tous).
+function guardComments(c, data, existing) {
+  const inc = Array.isArray(data.comments) ? data.comments : existing.comments || [];
+  if (c.isAdmin) return inc;
+  const mine = x => x && x.by === c.member?.id;
+  const keep = (existing.comments || []).filter(x => !mine(x)); // ceux des autres restent tels quels
+  return [...keep, ...inc.filter(mine)].sort((a, b) => String(a.at).localeCompare(String(b.at)));
+}
+// Agenda : réunions planifiées. Une réunion privée n'est visible en détail que de l'organisateur et des participants.
+const evInvolved = (c, e) => c.isAdmin || [e.organizerId, e.createdBy, ...(e.attendees || [])].includes(c.member?.id);
+export function eventView(c, e) {
+  if (c.isExt) return null;
+  if (!e.private || evInvolved(c, e)) return e;
+  return { id: e.id, title: "Occupé", private: true, masked: true, date: e.date, start: e.start, end: e.end, allDay: e.allDay, organizerId: e.organizerId, attendees: e.attendees || [] };
 }
 const NOTIF_KEYS = ["assign", "mention", "stage", "compliance", "block", "deadline", "meeting", "project", "other"];
 // Returns the document to store (possibly narrowed), or throws Denied.
@@ -208,11 +224,21 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     }
     if (!canSeeTask(c, existing, dossierOf)) throw new Denied();
     if (c.isExt) {
-      const out = { ...existing, comments: Array.isArray(data.comments) ? data.comments : existing.comments };
+      const out = { ...existing, comments: guardComments(c, data, existing) };
       if ((existing.assignees || []).includes(c.member.id)) Object.assign(out, { status: data.status, checklist: data.checklist, completedAt: data.completedAt });
       return out;
     }
-    return data;
+    return { ...data, comments: guardComments(c, data, existing) };
+  }
+  if (coll === "events") {
+    if (c.isExt || !c.member) throw new Denied("Seuls les membres de l'équipe peuvent planifier des réunions.");
+    if (!existing) return { ...data, createdBy: c.member.id, organizerId: data.organizerId || c.member.id };
+    if (c.isAdmin || existing.organizerId === c.member.id || existing.createdBy === c.member.id) return { ...data, createdBy: existing.createdBy };
+    if ((existing.attendees || []).includes(c.member.id)) {
+      const r = data.responses && typeof data.responses === "object" ? data.responses[c.member.id] : undefined;
+      return { ...existing, responses: { ...(existing.responses || {}), ...(r ? { [c.member.id]: String(r).slice(0, 20) } : {}) }, crId: data.crId ?? existing.crId };
+    }
+    throw new Denied("Seul l'organisateur peut modifier cette réunion.");
   }
   if (coll === "deadlines") {
     if (c.isExt) throw new Denied();
@@ -254,6 +280,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
 export function checkDelete(c, coll, existing, dossierOf) {
   if (coll === "prefs") { if (!c.member || (existing && existing.id !== c.member.id && !c.isAdmin)) throw new Denied(); return; }
   if (coll === "deadlines") { if (c.isExt || !(c.isAdmin || c.can("deadlines"))) throw new Denied("Votre rôle ne permet pas de supprimer des échéances."); return; }
+  if (coll === "events") { if (c.isExt || !(c.isAdmin || existing?.organizerId === c.member?.id || existing?.createdBy === c.member?.id)) throw new Denied("Seul l'organisateur peut supprimer cette réunion."); return; }
   if (coll === "meetings") { if (c.isExt || !(c.isAdmin || (c.can("meetings") && canSeeMeeting(c, existing)))) throw new Denied("Votre rôle ne permet pas de supprimer ce compte rendu."); return; }
   if (coll === "projects") { if (c.isExt || !(c.isAdmin || c.can("projects"))) throw new Denied("Votre rôle ne permet pas de supprimer des projets."); return; }
   if (coll === "dossiers") { if (c.isExt || !c.can("dossier_delete")) throw new Denied("Votre rôle ne permet pas de supprimer des dossiers."); return; }
