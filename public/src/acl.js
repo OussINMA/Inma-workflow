@@ -1,6 +1,6 @@
 // Access control: what each signed-in person may read and write. Pure functions (no I/O).
 export const ALL_PERMS = ["settings", "roles", "members", "workflows", "automations", "view_all", "view_amounts", "dossier_create", "dossier_edit_all",
-  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects", "meetings", "ai", "kpis"];
+  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects", "meetings", "ai", "kpis", "compliance"];
 const CONFIG_PERMS = ["settings", "roles", "members", "workflows", "automations", "onedrive", "funds", "externals", "export"];
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -15,6 +15,7 @@ export function context(user, cfg, adminEmails) {
   return { cfg, user, member, perms, isAdmin, isExt, can: k => !!perms[k] };
 }
 
+export const canReview = c => c.isAdmin || c.can("compliance") || ((c.cfg.compliance?.reviewers || []).includes(c.member?.id));
 export const activeGrants = m => (m?.grants || []).filter(g => !g.until || g.until >= today());
 const grantFor = (c, kind, id) => activeGrants(c.member).find(g => g.kind === kind && g.id === id) || null;
 
@@ -44,6 +45,7 @@ function canEditDossier(c, d) {
 function canSeeTask(c, t, dossierOf) {
   if (!c.isExt && c.can("view_all")) return true;
   const m = c.member;
+  if (t.projectId && m && !c.isExt) return true;
   if (m && (t.assignees || []).includes(m.id)) return true;
   if (t.dossierId) return canSeeDossier(c, dossierOf(t.dossierId));
   return !c.isExt && !!m && t.createdBy === m.id;
@@ -114,12 +116,26 @@ export function snapshot(c, all, version) {
     dossiers, tasks, activity,
     projects: c.isExt ? [] : (all.projects || []),
     meetings: (all.meetings || []).filter(m => canSeeMeeting(c, m)),
+    prefs: (all.prefs || []).filter(p => p.id === c.member?.id),
     deadlines: c.isExt ? [] : (all.deadlines || []).map(o => c.can("view_amounts") ? o : stripDeadlineAmounts(o)),
     claims: c.member ? [{ id: c.user.id, memberId: c.member.id, code: seesCodes ? (c.member.code || "") : "" }] : [],
     me: { userId: c.user.id, email: c.user.email, name: c.user.name, isAdmin: c.isAdmin, memberId: c.member?.id || null, external: c.isExt },
   };
 }
 
+// Conformité : seuls les vérificateurs valident un document ou la conformité d'un dossier.
+function guardValidation(out, existing) {
+  const old = Object.fromEntries((existing.docReqs || []).map(x => [x.id, x]));
+  if (Array.isArray(out.docReqs)) out.docReqs = out.docReqs.map(x => x && x.status === "validated" && old[x.id]?.status !== "validated" ? { ...x, status: old[x.id]?.status || "received" } : x);
+  if (out.compliance?.status === "validated" && existing.compliance?.status !== "validated") out.compliance = existing.compliance;
+}
+// Invités externes (accès « contribution ») : ils peuvent seulement déposer un lien sur un document demandé.
+function extDocReqs(existing, data) {
+  const inc = Object.fromEntries((Array.isArray(data.docReqs) ? data.docReqs : []).map(x => [x?.id, x]));
+  return (existing.docReqs || []).map(x => { const n = inc[x.id]; if (!n || x.status === "validated" || n.status !== "received" || !/^https:\/\//i.test(String(n.url || ""))) return x;
+    return { ...x, status: "received", url: String(n.url).slice(0, 2000), receivedAt: new Date().toISOString(), history: [...(x.history || []), ...(Array.isArray(n.history) ? n.history.slice(-1) : [])].slice(-30) }; });
+}
+const NOTIF_KEYS = ["assign", "mention", "stage", "compliance", "block", "deadline", "meeting", "project", "other"];
 // Returns the document to store (possibly narrowed), or throws Denied.
 // existing: current stored doc or null; dossierOf(id): stored dossier lookup (tasks only).
 export function checkWrite(c, coll, id, data, existing, dossierOf) {
@@ -131,6 +147,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
       const out = { ...c.cfg }; let ok = false;
       if (c.can("deadlines") && Array.isArray(data.tmm)) { out.tmm = data.tmm.filter(x => x && /^\d{4}-\d{2}$/.test(x.m)).map(x => ({ m: x.m, v: +x.v })); ok = true; }
       if (c.can("meetings") && Array.isArray(data.meetingBoards)) { out.meetingBoards = data.meetingBoards; ok = true; }
+      if (canReview(c) && data.compliance && typeof data.compliance === "object") { out.compliance = data.compliance; if (Array.isArray(data.blockReasons)) out.blockReasons = data.blockReasons.map(String).slice(0, 40); ok = true; }
       if (c.can("kpis") && Array.isArray(data.customKpis)) { out.customKpis = data.customKpis.filter(k => k && typeof k === "object" && /^ck_/.test(String(k.id || ""))).slice(0, 200); ok = true; }
       if (ok) return out;
       throw new Denied("Seuls les administrateurs peuvent modifier les paramètres.");
@@ -169,11 +186,14 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     if (!canSeeDossier(c, existing)) throw new Denied();
     if (c.isExt) {
       if (grantFor(c, "dossier", id)?.level !== "contribute") throw new Denied("Votre accès à ce dossier est en lecture seule.");
-      return { ...existing, docs: Array.isArray(data.docs) ? data.docs : existing.docs };
+      return { ...existing, docs: Array.isArray(data.docs) ? data.docs : existing.docs, docReqs: extDocReqs(existing, data) };
     }
-    if (!(canEditDossier(c, existing) || c.can("stage_advance") || c.can("onedrive") || c.can("dossier_delete") || c.can("stage_approve")))
+    if (!(canEditDossier(c, existing) || c.can("stage_advance") || c.can("onedrive") || c.can("dossier_delete") || c.can("stage_approve"))) {
+      if (canReview(c)) return { ...existing, docReqs: Array.isArray(data.docReqs) ? data.docReqs : existing.docReqs, compliance: data.compliance ?? existing.compliance };
       throw new Denied("Votre rôle ne permet pas de modifier ce dossier.");
+    }
     const out = { ...data };
+    if (!canReview(c)) guardValidation(out, existing);
     if (!c.can("view_amounts")) {
       out.amount = existing.amount;
       out.custom = { ...(data.custom || {}) };
@@ -216,8 +236,13 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     if (!existing) throw new Denied("Votre rôle ne permet pas de créer des projets.");
     const mid = c.member?.id;
     if (mid && (existing.ownerId === mid || (existing.members || []).includes(mid)))
-      return { ...existing, status: data.status, health: data.health, progress: data.progress, nextStep: data.nextStep, description: data.description, url: data.url, milestones: data.milestones, updatedAt: data.updatedAt };
+      return { ...existing, status: data.status, health: data.health, progress: data.progress, nextStep: data.nextStep, description: data.description, url: data.url, milestones: data.milestones, docs: Array.isArray(data.docs) ? data.docs : existing.docs, odNames: data.odNames ?? existing.odNames, updatedAt: data.updatedAt };
     throw new Denied("Seuls le responsable et l'équipe du projet peuvent le mettre à jour.");
+  }
+  if (coll === "prefs") {
+    if (!c.member || (id !== c.member.id && !c.isAdmin)) throw new Denied("Vous ne pouvez modifier que vos propres préférences.");
+    const pick = o => Object.fromEntries(NOTIF_KEYS.map(k => [k, !!(o || {})[k]]));
+    return { inapp: pick(data.inapp), reminders: data.reminders !== false, email: { on: !!data.email?.on, kinds: pick(data.email?.kinds) }, updatedAt: new Date().toISOString() };
   }
   if (coll === "activity") {
     if (existing) throw new Denied();
@@ -227,6 +252,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
 }
 
 export function checkDelete(c, coll, existing, dossierOf) {
+  if (coll === "prefs") { if (!c.member || (existing && existing.id !== c.member.id && !c.isAdmin)) throw new Denied(); return; }
   if (coll === "deadlines") { if (c.isExt || !(c.isAdmin || c.can("deadlines"))) throw new Denied("Votre rôle ne permet pas de supprimer des échéances."); return; }
   if (coll === "meetings") { if (c.isExt || !(c.isAdmin || (c.can("meetings") && canSeeMeeting(c, existing)))) throw new Denied("Votre rôle ne permet pas de supprimer ce compte rendu."); return; }
   if (coll === "projects") { if (c.isExt || !(c.isAdmin || c.can("projects"))) throw new Denied("Votre rôle ne permet pas de supprimer des projets."); return; }

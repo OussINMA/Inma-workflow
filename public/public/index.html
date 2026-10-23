@@ -126,6 +126,17 @@ label.f>span{letter-spacing:.02em}
 .kpi .v{font-family:var(--f-mono);font-size:26px;font-weight:500;letter-spacing:-.02em}
 .kpi .l{font-size:12px;color:var(--muted)}
 .kpi.alert .v{color:var(--bad)}
+.dh{cursor:grab;color:var(--muted);font-size:14px;line-height:1;padding:2px 4px;border-radius:4px;user-select:none;flex:none;display:inline-flex;align-items:center}.dh:hover,.dh:focus-visible{color:var(--ink);background:var(--surface-2);outline:none}.dh:active{cursor:grabbing}
+td>.dh{margin-right:4px;vertical-align:middle}.tkc{display:flex;align-items:center;gap:4px}
+[data-si].s-dragging{opacity:.45}[data-si].s-before{box-shadow:inset 0 2px 0 var(--accent)}[data-si].s-after{box-shadow:inset 0 -2px 0 var(--accent)}
+.odl{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:12.5px;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:2px 8px;max-width:100%;background:var(--surface)}.odl>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}.odl:hover{border-color:var(--accent);color:var(--accent)}.odl svg{width:13px;height:13px;flex:none}
+.step{cursor:pointer}.step.view .bar2{outline:2px solid var(--ink);outline-offset:1px}.step.view .nm{text-decoration:underline;font-weight:700}.ckd{width:18px;text-align:center;color:var(--muted);font-weight:700}.ckd.ok{color:var(--ok)}
+.pgr{display:inline-block;width:64px;height:6px;border-radius:9px;background:var(--surface-2);overflow:hidden;vertical-align:middle;flex:none}.pgr.wide{width:120px}.pgr>span{display:block;height:100%;background:var(--accent);border-radius:9px}.pgr-n{font-size:11.5px;color:var(--muted);margin-left:4px}
+.hi-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:#C2413A;background:var(--bad-bg);border-radius:99px;padding:1px 7px;white-space:nowrap}
+.blk-tag{display:inline-block;margin-left:6px;font-size:10px;font-weight:800;letter-spacing:.05em;color:#fff;background:var(--bad);border-radius:4px;padding:1px 5px;vertical-align:middle}
+.banner.bad{background:var(--bad-bg);border-color:color-mix(in oklab,var(--bad) 40%,transparent)}.banner.ok{background:var(--ok-bg);border-color:color-mix(in oklab,var(--ok) 40%,transparent)}
+.doc-t td{vertical-align:top}.doc-note{white-space:normal;color:#B7791F;font-size:12px;margin-top:2px}.chip.sm{font-size:10.5px;padding:1px 6px}th.c,td.c{text-align:center}
+.pj-tasks{border:1px solid var(--line);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:6px}
 .kpi-add{border:1px dashed var(--line);background:transparent;color:var(--muted);cursor:pointer;display:flex;flex-direction:row!important;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:13px;min-height:84px}.kpi-add:hover{color:var(--accent);border-color:var(--accent)}
 .ck-preview{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface-2)}.ck-pv{display:inline-flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:12px}.ck-pv b{font-size:15px}
 .dash{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
@@ -453,6 +464,7 @@ const ICON = {
   link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
   spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
   present:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/>',
+  shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
   userplus:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5M19 8v6M16 11h6"/>'
 };
@@ -464,7 +476,7 @@ const PERMS = [
   ["workflows","Workflows, champs & statuts"],["automations","Automatisations"],["view_all","Voir tous les dossiers"],
   ["view_amounts","Voir les montants"],["dossier_create","Créer des dossiers"],["dossier_edit_all","Modifier tous les dossiers"],
   ["dossier_delete","Supprimer / archiver"],["stage_advance","Faire avancer les étapes"],["stage_approve","Valider les étapes soumises à approbation"],
-  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["meetings","Rédiger les comptes rendus de réunion"],["ai","Utiliser l'assistant IA"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"],["kpis","Créer des indicateurs personnalisés"]
+  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["meetings","Rédiger les comptes rendus de réunion"],["ai","Utiliser l'assistant IA"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"],["kpis","Créer des indicateurs personnalisés"],["compliance","Contrôle conformité (valider les documents)"]
 ];
 const ALL = Object.fromEntries(PERMS.map(p => [p[0], true]));
 const pset = keys => Object.fromEntries(PERMS.map(p => [p[0], keys.includes(p[0])]));
@@ -585,7 +597,7 @@ const DEFAULT_CFG = () => fixIds({
 function fixIds(c) { c.workflows.forEach(w => w.stages.forEach((s, i) => s.id = w.id + "_s" + (i + 1))); c.automations.forEach((a, i) => a.id = "a_def_" + (i + 1)); return c; }
 /* ---------- state ---------- */
 const S = {
-  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [], projects: [], meetings: [], mtDraft: null,
+  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [], projects: [], meetings: [], prefs: [], mtDraft: null,
   mode: "loading", db: null, user: null, uid: null, isOwner: false, canEditArtifact: false, downloads: null,
   view: "dashboard", sim: null, ui: store.get("inma-wf-ui", { dView: "kanban", tView: "list", wf: "all", calMonth: null, filters: {}, cols: ["code","name","stage","owner","amount","due","prio"], stab: "general" }),
   openDossier: null, inboxOpen: false
@@ -594,7 +606,7 @@ const saveUI = () => store.set("inma-wf-ui", S.ui);
 
 /* ---------- persistence ---------- */
 const LOCAL_KEY = "inma-wf-local-v1";
-function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, activity: S.activity.slice(0, 300) }); }
+function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, prefs: S.prefs, activity: S.activity.slice(0, 300) }); }
 let cfgTimer;
 function saveCfg(msg) {
   applyBranding();
@@ -614,7 +626,7 @@ async function delDoc(coll, id) {
   if (S.mode === "cloud") { try { await S.db.collection(coll).doc(id).delete(); } catch (e) { toast(errMsg(e)); } } else localSave();
 }
 async function log(text, opts = {}) {
-  const e = { id: uid("e"), at: new Date().toISOString(), by: me()?.id || null, text, dossierId: opts.dossierId || null, taskId: opts.taskId || null, notify: opts.notify || [] };
+  const e = { id: uid("e"), at: new Date().toISOString(), by: me()?.id || null, text, dossierId: opts.dossierId || null, taskId: opts.taskId || null, notify: opts.notify || [] }; e.kind = opts.kind || notifKind(e);
   S.activity.unshift(e); S.activity = S.activity.slice(0, 300);
   if (S.mode === "cloud") { try { await S.db.collection("activity").doc(e.id).set(e); } catch {} } else localSave();
 }
@@ -640,7 +652,7 @@ function canSeeDossier(d) { const mm = me(); if (isExt(mm)) return !!extGrant(d)
 function canEditDossier(d) { if (can("dossier_edit_all")) return true; const m = me(); return !!m && (d.ownerId === m.id || (d.coOwners || []).includes(m.id) || (d.members || []).includes(m.id)); }
 function canEditTask(t) { if (can("task_edit_all")) return true; const m = me(); if (!m) return false; if ((t.assignees || []).includes(m.id) || t.createdBy === m.id) return true; const d = dossierById(t.dossierId); return !!d && d.ownerId === m.id; }
 const visDossiers = () => S.dossiers.filter(d => canSeeDossier(d));
-const visTasks = () => S.tasks.filter(t => { if (can("view_all")) return true; const m = me(); if (m && (t.assignees || []).includes(m.id)) return true; const d = dossierById(t.dossierId); return d ? canSeeDossier(d) : false; });
+const visTasks = () => S.tasks.filter(t => { if (can("view_all")) return true; const m = me(); if (m && (t.assignees || []).includes(m.id)) return true; if (t.projectId && m && !isExt(m)) return true; const d = dossierById(t.dossierId); return d ? canSeeDossier(d) : false; });
 
 /* ---------- lookups / formatters ---------- */
 const wfById = id => S.cfg.workflows.find(w => w.id === id);
@@ -705,7 +717,7 @@ function applyPrefs() {
 }
 function migrateCfg(raw) {
   if (S._migrated || !raw) return; S._migrated = true; let ch = !raw.funds || !raw.projectCategories || !raw.meetingTypes; const D = DEFAULT_CFG();
-  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects", "meetings", "ai", "kpis"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : k === "ai" ? r.id !== "r_guest" : !!(r.perms.settings && r.perms.roles); ch = true; } }
+  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects", "meetings", "ai", "kpis", "compliance"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : k === "ai" ? r.id !== "r_guest" : !!(r.perms.settings && r.perms.roles); ch = true; } }
   for (const f of S.cfg.funds || []) if (!Array.isArray(f.positions)) { f.positions = DEF_POS(f.id); ch = true; }
   if (!window.INMA) for (const m of S.cfg.members) if (!m.code) { m.code = genCode(); ch = true; }
   if (ch && (S.isOwner || can("settings") || can("members"))) saveCfg("Espace mis à jour : fonds, accès externes et codes d'accès");
@@ -730,7 +742,7 @@ async function runAutomations(type, ctx) {
     if (act.type === "set_priority") { target.priority = act.value; await putDoc(ctx.task ? "tasks" : "dossiers", target); }
     if (act.type === "add_tag") { target.tags = [...new Set([...(target.tags || []), act.value])]; await putDoc(ctx.task ? "tasks" : "dossiers", target); }
     if (act.type === "assign_role" && ctx.task) { const ids = membersWithRole(act.value); if (ids.length) { ctx.task.assignees = [...new Set([...(ctx.task.assignees || []), ids[0]])]; await putDoc("tasks", ctx.task); } }
-    if (act.type === "create_task") { const did = ctx.dossier?.id || ctx.task?.dossierId; await createTask({ title: act.value || "Tâche automatique", dossierId: did, assignees: ctx.dossier ? [ctx.dossier.ownerId].filter(Boolean) : [] }, true); }
+    if (act.type === "create_task") { const did = ctx.dossier?.id || ctx.task?.dossierId; if (ctx.backward || taskExists(did, act.value || "Tâche automatique")) continue; await createTask({ title: act.value || "Tâche automatique", dossierId: did, assignees: ctx.dossier ? [ctx.dossier.ownerId].filter(Boolean) : [] }, true); }
   }
 }
 
@@ -745,14 +757,15 @@ async function createTask(data, silent) {
 }
 async function enterStage(d, stageId, viaApproval) {
   const w = wfById(d.workflowId); const s = w.stages.find(x => x.id === stageId); if (!s) return;
-  const prev = stageOf(d);
-  d.stageId = stageId; d.history = [...(d.history || []), { at: new Date().toISOString(), by: me()?.id || null, from: prev?.name || null, to: s.name, approved: !!viaApproval }];
+  const prev = stageOf(d); const backward = !!prev && w.stages.indexOf(prev) > w.stages.indexOf(s);
+  d.stageId = stageId; d.history = [...(d.history || []), { at: new Date().toISOString(), by: me()?.id || null, from: prev?.name || null, fromId: prev?.id || null, to: s.name, toId: s.id, approved: !!viaApproval, back: backward || undefined }];
   d.stageSince = todayISO();
   await putDoc("dossiers", d);
   const owners = membersWithRole(s.roleId);
   await log(`${d.code} passe à l'étape « ${s.name} »`, { dossierId: d.id, notify: S.cfg.notify.onStage ? [...new Set([...dOwners(d), ...owners].filter(Boolean))] : [] });
-  if (w.autoTasks && s.checklist?.length) for (const c of s.checklist) await createTask({ title: c, dossierId: d.id, stageId: s.id, assignees: dOwners(d), due: s.sla ? addDays(todayISO(), s.sla) : "" }, true);
-  await runAutomations("stage_enter", { dossier: d });
+  // Tâches automatiques : jamais en revenant en arrière, et jamais si une tâche du même nom existe déjà dans le dossier.
+  if (w.autoTasks && s.checklist?.length && !backward) for (const c of s.checklist) { if (taskExists(d.id, c)) continue; await createTask({ title: c, dossierId: d.id, stageId: s.id, assignees: dOwners(d), due: s.sla ? addDays(todayISO(), s.sla) : "" }, true); }
+  await runAutomations("stage_enter", { dossier: d, backward });
 }
 async function moveStage(d, stageId) {
   const w = wfById(d.workflowId); const cur = stageOf(d); const ci = w.stages.indexOf(cur), ni = w.stages.findIndex(s => s.id === stageId);
@@ -790,13 +803,13 @@ async function completeTask(t, done) {
 /* ---------- notifications ---------- */
 function myInbox() {
   const m = me(); if (!m) return [];
-  const items = S.activity.filter(e => (e.notify || []).includes(m.id)).slice(0, 40).map(e => ({ at: e.at, text: e.text, dossierId: e.dossierId, taskId: e.taskId }));
-  if (S.cfg.notify.overdue) for (const t of S.tasks.filter(t => (t.assignees || []).includes(m.id) && !isDone(t) && t.due)) {
+  const np = myNotifPrefs(); const items = S.activity.filter(e => (e.notify || []).includes(m.id) && np.inapp[notifKind(e)] !== false).slice(0, 40).map(e => ({ at: e.at, text: e.text, dossierId: e.dossierId, taskId: e.taskId }));
+  if (S.cfg.notify.overdue && np.reminders) for (const t of S.tasks.filter(t => (t.assignees || []).includes(m.id) && !isDone(t) && t.due)) {
     const n = daysBetween(todayISO(), t.due);
     if (n < 0) items.unshift({ at: t.due, text: `En retard de ${-n} j : « ${t.title} »`, taskId: t.id, alert: true });
     else if (n <= S.cfg.notify.dueSoonDays) items.unshift({ at: t.due, text: `Échéance ${n === 0 ? "aujourd'hui" : "dans " + n + " j"} : « ${t.title} »`, taskId: t.id });
   }
-  if (S.cfg.notify.overdue) items.unshift(...dlInbox(m));
+  if (S.cfg.notify.overdue && np.reminders) items.unshift(...dlInbox(m));
   return items;
 }
 const seenKey = () => "inma-wf-seen-" + (me()?.id || "x");
@@ -818,7 +831,7 @@ function applyBranding() {
 }
 
 /* ---------- shell ---------- */
-const NAV = [["dashboard","Tableau de bord","dash"],["meeting","Réunion d'équipe","present"],["funds","Fonds","fund"],["projects","Projets","flag"],["dossiers","Dossiers","folder"],["tasks","Tâches","task"],["calendar","Calendrier","cal"],["deadlines","Échéances","deadline"],["team","Équipe","team"],["onedrive","OneDrive","cloud"]];
+const NAV = [["dashboard","Tableau de bord","dash"],["meeting","Réunion d'équipe","present"],["funds","Fonds","fund"],["projects","Projets","flag"],["dossiers","Dossiers","folder"],["compliance","Conformité","shield"],["tasks","Tâches","task"],["calendar","Calendrier","cal"],["deadlines","Échéances","deadline"],["team","Équipe","team"],["onedrive","OneDrive","cloud"]];
 function renderRail() {
   const g = S.cfg.general, mods = g.modules || {}, m = me(), r = myRole();
   const myOpen = m ? S.tasks.filter(t => (t.assignees || []).includes(m.id) && !isDone(t)).length : 0;
@@ -836,7 +849,7 @@ function renderRail() {
     </div>`;
   $("#mobilenav").innerHTML = NAV.filter(n => mods[n[0]] !== false && navAllowed(n[0])).map(n => `<button class="nav ${S.view === n[0] ? "on" : ""}" data-nav="${n[0]}">${n[1]}</button>`).join("") + (settingsBtn ? `<button class="nav ${S.view === "settings" ? "on" : ""}" data-nav="settings">Paramètres</button>` : "");
 }
-const TITLES = { meeting: ["Réunion d'équipe", "Point d'avancement"], projects: ["Corporate & transverse", "Projets"], deadlines: ["Calendrier réglementaire", "Échéances et reportings"], dashboard: ["Pilotage", "Tableau de bord"], funds: ["Architecture", "Fonds"], dossiers: ["Portefeuille de travail", "Dossiers"], tasks: ["Exécution", "Tâches"], calendar: ["Planning", "Calendrier"], team: ["Organisation", "Équipe"], onedrive: ["Documents", "OneDrive"], settings: ["Administration", "Paramètres"] };
+const TITLES = { compliance: ["Contrôle & documents", "Conformité"], meeting: ["Réunion d'équipe", "Point d'avancement"], projects: ["Corporate & transverse", "Projets"], deadlines: ["Calendrier réglementaire", "Échéances et reportings"], dashboard: ["Pilotage", "Tableau de bord"], funds: ["Architecture", "Fonds"], dossiers: ["Portefeuille de travail", "Dossiers"], tasks: ["Exécution", "Tâches"], calendar: ["Planning", "Calendrier"], team: ["Organisation", "Équipe"], onedrive: ["Documents", "OneDrive"], settings: ["Administration", "Paramètres"] };
 const INMA_ICON_SVG = '<svg viewBox="0 0 100 100" width="36" height="36"><rect width="100" height="100" rx="18" fill="#E22529"/><path d="M26 70 L50 50 L74 30" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="26" cy="70" r="8" fill="#fff"/><circle cx="50" cy="50" r="8" fill="#fff"/><circle cx="74" cy="30" r="10" fill="#fff"/></svg>';
 const INMA_LOGO_SVG = '<svg role="img" aria-label="INMA" xmlns="http://www.w3.org/2000/svg" viewBox="0 -2 232 68"><rect x="0" y="0" width="64" height="64" rx="11.52" fill="#E22529"/><path d="M16.64 44.800000000000004 L32.0 32.0 L47.36 19.2" stroke="#fff" stroke-width="4.48" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16.64" cy="44.800000000000004" r="5.12" fill="#fff"/><circle cx="32.0" cy="32.0" r="5.12" fill="#fff"/><circle cx="47.36" cy="19.2" r="6.4" fill="#fff"/><g fill="#FFFFFF"><path transform="translate(82.00,50.00) scale(0.04600,-0.04600)" d="M83 0V700H245V0Z"/><path transform="translate(102.61,50.00) scale(0.04600,-0.04600)" d="M83 0V700H217L630 196H565V700H725V0H592L178 504H243V0Z"/><path transform="translate(145.30,50.00) scale(0.04600,-0.04600)" d="M83 0V700H217L515 206H444L737 700H870L872 0H720L719 467H747L513 74H440L201 467H235V0Z"/><path transform="translate(194.75,50.00) scale(0.04600,-0.04600)" d="M-9 0 303 700H463L776 0H606L350 618H414L157 0ZM147 150 190 273H550L594 150Z"/></g></svg>';
 function brandHTML(sub) {
@@ -854,7 +867,7 @@ function renderTop() {
 }
 function renderInbox() {
   const items = myInbox();
-  return `<div class="inbox"><div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><b>Notifications</b><span class="spacer"></span><button class="btn sm ghost" data-act="inbox-read">Tout marquer comme lu</button></div>
+  return `<div class="inbox"><div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><b>Notifications</b><span class="spacer"></span><button class="btn sm ghost" data-act11="notif-prefs">Régler</button><button class="btn sm ghost" data-act="inbox-read">Tout marquer comme lu</button></div>
     ${!me() ? `<p class="muted">Associez votre compte à un membre de l'équipe pour recevoir vos notifications.</p>` : items.length ? `<div class="list">${items.map(i => `<div class="li" ${i.occ ? `data-occ="${i.occ}"` : i.taskId ? `data-open-task="${i.taskId}"` : i.dossierId ? `data-open="${i.dossierId}"` : ""} style="cursor:pointer"><div class="grow"><div class="t1" style="white-space:normal;${i.alert ? "color:var(--bad)" : ""}">${h(i.text)}</div><div class="t2">${h(fdate(String(i.at).slice(0, 10)))}</div></div></div>`).join("")}</div>` : `<p class="muted">Rien de nouveau.</p>`}</div>`;
 }
 function banners() {
@@ -903,9 +916,9 @@ function vDashboard() {
 function emptyDossiers() {
   return `<div class="empty"><b>Aucun dossier pour l'instant</b><span>Créez votre premier dossier (investissement, financement, conseil…) ou chargez des exemples pour tester les workflows.</span><div class="row">${can("dossier_create") ? `<button class="btn pri" data-act="new-dossier">${ic("plus")}Nouveau dossier</button>` : ""}${can("export") ? `<button class="btn" data-act="samples">Charger des exemples</button>` : ""}</div></div>`;
 }
-function taskLine(t) {
+function taskLine(t, si) {
   const d = dossierById(t.dossierId), done = isDone(t), s = statusById(t.status);
-  return `<div class="li"><input type="checkbox" class="cb" data-done="${t.id}" ${done ? "checked" : ""} ${canEditTask(t) ? "" : "disabled"} aria-label="Terminer"><div class="grow" data-open-task="${t.id}" style="cursor:pointer"><div class="t1" style="${done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(t.title)}${t.recurring ? ' <span class="tag">récurrente</span>' : ""}</div><div class="t2">${d ? h(d.code + " · " + d.name) : "Sans dossier"}</div></div>${chip(s.label, s.color)}${due(t.due, done)}${avs(t.assignees)}</div>`;
+  return `<div class="li"${si != null ? ` data-si="${si}"` : ""}>${si != null ? dh() : ""}<input type="checkbox" class="cb" data-done="${t.id}" ${done ? "checked" : ""} ${canEditTask(t) ? "" : "disabled"} aria-label="Terminer"><div class="grow" data-open-task="${t.id}" style="cursor:pointer"><div class="t1" style="${done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(t.title)}${t.recurring ? ' <span class="tag">récurrente</span>' : ""}</div><div class="t2">${d ? h(d.code + " · " + d.name) : t.projectId && (S.projects || []).find(p => p.id === t.projectId) ? "Projet · " + h((S.projects || []).find(p => p.id === t.projectId).title) : "Sans dossier"}</div></div>${!done && isHiPrio(t) ? prio(t.priority) : ""}${chip(s.label, s.color)}${due(t.due, done)}${avs(t.assignees)}</div>`;
 }
 
 function filterDossiers() {
@@ -916,12 +929,14 @@ function filterDossiers() {
   if (f.owner) ds = ds.filter(d => dOwners(d).includes(f.owner === "_me" ? me()?.id : f.owner));
   if (f.prio) ds = ds.filter(d => d.priority === f.prio);
   if (f.tag) ds = ds.filter(d => (d.tags || []).includes(f.tag));
+  if (f.block) ds = ds.filter(d => f.block === "on" ? isBlocked(d) : !isBlocked(d));
+  if (f.hiprio) ds = ds.filter(d => hiPrioTasks(d).length);
   if (f.q) { const q = f.q.toLowerCase(); ds = ds.filter(d => [d.code, d.name, d.sector, d.description, ...(d.tags || [])].join(" ").toLowerCase().includes(q)); }
   const sort = f.sort || "due";
   ds.sort((a, b) => sort === "amount" ? (+b.amount || 0) - (+a.amount || 0) : sort === "name" ? a.name.localeCompare(b.name) : sort === "code" ? (a.code || "").localeCompare(b.code || "") : (a.dueDate || "9999") < (b.dueDate || "9999") ? -1 : 1);
   return ds;
 }
-const COLS = { code: "Réf.", name: "Dossier", workflow: "Workflow", stage: "Étape", vehicle: "Fonds", sector: "Secteur", owner: "Responsable", team: "Équipe", amount: "Montant", prio: "Priorité", start: "Début", due: "Échéance", tasks: "Tâches", tags: "Étiquettes", onedrive: "OneDrive" };
+const COLS = { code: "Réf.", name: "Dossier", workflow: "Workflow", stage: "Étape", vehicle: "Fonds", sector: "Secteur", owner: "Responsable", team: "Équipe", amount: "Montant", prio: "Priorité", start: "Début", due: "Échéance", tasks: "Tâches", tags: "Étiquettes", onedrive: "OneDrive", progress: "Avancement", hiprio: "Tâches prioritaires", block: "Blocage", compliance: "Conformité" };
 function vDossiers() {
   const f = S.ui.filters || {}, v = S.ui.dView;
   const tb = `<div class="toolbar">
@@ -932,6 +947,8 @@ function vDossiers() {
     <select id="f-prio" aria-label="Priorité"><option value="">Toutes priorités</option>${S.cfg.priorities.map(p => `<option value="${p.id}" ${f.prio === p.id ? "selected" : ""}>${h(p.label)}</option>`).join("")}</select>
     <select id="f-tag" aria-label="Étiquette"><option value="">Toutes étiquettes</option>${S.cfg.tags.map(t => `<option ${f.tag === t ? "selected" : ""}>${h(t)}</option>`).join("")}</select>
     <select id="f-sort" aria-label="Tri">${[["due","Tri : échéance"],["amount","Tri : montant"],["name","Tri : nom"],["code","Tri : référence"]].map(x => `<option value="${x[0]}" ${(f.sort || "due") === x[0] ? "selected" : ""}>${x[1]}</option>`).join("")}</select>
+    <select id="f-block" aria-label="Blocage"><option value="">Bloqués et non bloqués</option><option value="on" ${f.block === "on" ? "selected" : ""}>Dossiers bloqués</option><option value="off" ${f.block === "off" ? "selected" : ""}>Non bloqués</option></select>
+    <select id="f-hiprio" aria-label="Tâches prioritaires"><option value="">Toutes tâches</option><option value="on" ${f.hiprio === "on" ? "selected" : ""}>Avec tâches prioritaires</option></select>
     <input type="search" id="f-q" placeholder="Rechercher…" value="${h(f.q || "")}">
     <label class="chk"><input type="checkbox" id="f-arch" ${f.archived ? "checked" : ""}>Archivés</label>
     ${v === "list" ? `<button class="btn sm" data-act="cols">Colonnes</button>` : ""}
@@ -951,7 +968,11 @@ function cell(d, c) {
     case "owner": { const o = dOwners(d); return `<span class="row" style="flex-wrap:nowrap">${avs(o)}${o.length === 1 ? h(mname(o[0]).split(" ")[0]) : ""}</span>`; } case "team": return avs(d.members);
     case "amount": return money(d.amount); case "prio": return prio(d.priority); case "start": return due(d.startDate, true); case "due": return due(d.dueDate, d.archived);
     case "tasks": return `<span class="num">${tks.filter(isDone).length}/${tks.length}</span>`; case "tags": return (d.tags || []).map(t => `<span class="tag">${h(t)}</span>`).join(" ");
-    case "onedrive": return isURL(d.oneDriveUrl) ? `<a href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Ouvrir</a>` : '<span class="muted">—</span>';
+    case "progress": return `<span class="row" style="flex-wrap:nowrap;gap:6px">${progBar(stagePos(d).pct)}</span>`;
+    case "hiprio": return hiBadge(d) || '<span class="muted">—</span>';
+    case "block": return isBlocked(d) ? `${blockTag(d)} <span class="muted" style="font-size:12px">${h(d.block.cat || "")}</span>` : '<span class="muted">—</span>';
+    case "compliance": return inCompliance(d) ? `${cmpChip(cmpStatus(d))} <span class="num muted" style="font-size:12px">${docSummary(d).validated}/${docSummary(d).total}</span>` : '<span class="muted">—</span>';
+    case "onedrive": return isURL(d.oneDriveUrl) ? `<span onclick="event.stopPropagation()">${odLink(d.oneDriveUrl, d.odNames, "folder", "Ouvrir")}</span>` : '<span class="muted">—</span>';
   }
   return "";
 }
@@ -963,7 +984,7 @@ function listView(ds) {
 function kanbanView(ds) {
   const wfs = S.ui.wf && S.ui.wf !== "all" ? [wfById(S.ui.wf)] : S.cfg.workflows.filter(w => ds.some(d => d.workflowId === w.id));
   if (!wfs.length || !ds.length) return `<div class="empty"><b>Aucun dossier ne correspond aux filtres</b></div>`;
-  return wfs.map(w => `<div class="panel"><header>${chip(w.name, w.color)}<span class="muted" style="font-size:12px">${ds.filter(d => d.workflowId === w.id).length} dossiers · glissez une carte pour changer d'étape</span></header><div class="body"><div class="kanban">${w.stages.map(s => { const cards = ds.filter(d => d.workflowId === w.id && d.stageId === s.id); return `<div class="col" data-col="${w.id}|${s.id}"><header><span>${h(s.name)}</span>${s.approval ? '<span class="lock" title="Validation requise pour sortir de cette étape">◆</span>' : ""}<span class="n">${cards.length}</span></header><div class="cards">${cards.map(d => `<div class="card" draggable="true" data-drag="${d.id}" data-open="${d.id}"><span class="ref">${h(d.code)}${d.pendingApproval ? ' · <span class="lock">À VALIDER</span>' : ""}</span><span class="ttl">${h(d.name)}</span><div class="meta">${prio(d.priority)}${d.amount ? "· " + money(d.amount) : ""}</div><div class="meta">${av(d.ownerId)}${avs((d.members || []).filter(x => x !== d.ownerId).slice(0, 3))}<span class="spacer"></span>${due(d.dueDate)}</div></div>`).join("")}</div></div>`; }).join("")}</div></div></div>`).join("");
+  return wfs.map(w => `<div class="panel"><header>${chip(w.name, w.color)}<span class="muted" style="font-size:12px">${ds.filter(d => d.workflowId === w.id).length} dossiers · glissez une carte pour changer d'étape</span></header><div class="body"><div class="kanban">${w.stages.map(s => { const cards = ds.filter(d => d.workflowId === w.id && d.stageId === s.id); return `<div class="col" data-col="${w.id}|${s.id}"><header><span>${h(s.name)}</span>${s.approval ? '<span class="lock" title="Validation requise pour sortir de cette étape">◆</span>' : ""}<span class="n">${cards.length}</span></header><div class="cards">${cards.map(d => `<div class="card" draggable="true" data-drag="${d.id}" data-open="${d.id}"><span class="ref">${h(d.code)}${d.pendingApproval ? ' · <span class="lock">À VALIDER</span>' : ""}${blockTag(d)}</span><span class="ttl">${h(d.name)}</span><div class="meta">${prio(d.priority)}${d.amount ? "· " + money(d.amount) : ""}</div><div class="meta">${progBar(stagePos(d).pct)}${hiBadge(d)}</div><div class="meta">${av(d.ownerId)}${avs((d.members || []).filter(x => x !== d.ownerId).slice(0, 3))}<span class="spacer"></span>${due(d.dueDate)}</div></div>`).join("")}</div></div>`; }).join("")}</div></div></div>`).join("");
 }
 function timelineView(ds) {
   const items = ds.filter(d => d.startDate || d.dueDate);
@@ -1031,11 +1052,11 @@ function vOneDrive() {
 }
 
 /* ---------- settings ---------- */
-const STABS = [["general","Général & charte","settings"],["roles","Rôles & permissions","roles"],["members","Membres & équipes","members"],["externals","Accès externes","externals"],["funds","Fonds & architecture","funds"],["workflows","Workflows & étapes","workflows"],["fields","Champs personnalisés","workflows"],["lists","Statuts, priorités & listes","workflows"],["automations","Automatisations","automations"],["onedrive","OneDrive","onedrive"],["notify","Notifications","settings"],["data","Données & sauvegarde","export"]];
+const STABS = [["general","Général & charte","settings"],["roles","Rôles & permissions","roles"],["members","Membres & équipes","members"],["externals","Accès externes","externals"],["funds","Fonds & architecture","funds"],["workflows","Workflows & étapes","workflows"],["fields","Champs personnalisés","workflows"],["lists","Statuts, priorités & listes","workflows"],["automations","Automatisations","automations"],["onedrive","OneDrive","onedrive"],["notify","Notifications","settings"],["compliance","Conformité & documents","settings"],["data","Données & sauvegarde","export"]];
 function vSettings() {
   const tabs = STABS.filter(t => can(t[2])); if (!tabs.length) return `<div class="empty"><b>Accès réservé</b></div>`;
   if (!tabs.some(t => t[0] === S.ui.stab)) S.ui.stab = tabs[0][0];
-  const body = { externals: sExternals, funds: sFunds, general: () => sGeneral() + sTmm() + sCopilot(), roles: sRoles, members: sMembers, workflows: sWorkflows, fields: () => sFields() + sKpis(), lists: sLists, automations: sAutomations, onedrive: sOneDrive, notify: sNotify, data: sData }[S.ui.stab]();
+  const body = { externals: sExternals, funds: sFunds, general: () => sGeneral() + sTmm() + sCopilot(), roles: sRoles, members: sMembers, workflows: sWorkflows, fields: () => sFields() + sKpis(), lists: sLists, automations: sAutomations, onedrive: sOneDrive, notify: sNotify, compliance: sCompliance, data: sData }[S.ui.stab]();
   return `<div class="settings"><nav class="stabs">${tabs.map(t => `<button class="stab ${S.ui.stab === t[0] ? "on" : ""}" data-stab="${t[0]}">${t[1]}</button>`).join("")}</nav><div style="display:flex;flex-direction:column;gap:16px;min-width:0">${body}</div></div>`;
 }
 const inp = (path, val, type = "text", attrs = "") => `<input type="${type}" data-cfg="${path}" value="${h(val)}" ${attrs}>`;
@@ -1107,10 +1128,10 @@ function sFields() {
     <label class="f"><span>S'applique à</span><select data-cfg="customFields.${i}.scope"><option value="dossier" ${f.scope === "dossier" ? "selected" : ""}>Dossiers</option><option value="task" ${f.scope === "task" ? "selected" : ""}>Tâches</option></select></label></div>
     ${f.type === "select" ? `<label class="f"><span>Options (une par ligne)</span><textarea data-cfglines="customFields.${i}.options" rows="3">${h((f.options || []).join("\n"))}</textarea></label>` : ""}
     <div><div class="eyebrow" style="margin-bottom:4px">Workflows concernés (aucun = tous)</div><div class="row">${S.cfg.workflows.map(w => `<label class="chk"><input type="checkbox" data-fwf="${i}|${w.id}" ${(f.workflows || []).includes(w.id) ? "checked" : ""}>${h(w.name)}</label>`).join("")}</div></div>
-    <div class="row"><span class="spacer"></span><button class="btn sm ghost danger" data-field-del="${i}">Supprimer</button></div></div></div>`).join("") || '<p class="muted">Aucun champ personnalisé.</p>'}</div></div>`;
+    <div class="row"><button class="btn sm" data-arr-mv="customFields|${i}|-1" ${i === 0 ? "disabled" : ""} aria-label="Monter">${ic("up")}</button><button class="btn sm" data-arr-mv="customFields|${i}|1" ${i === S.cfg.customFields.length - 1 ? "disabled" : ""} aria-label="Descendre">${ic("down")}</button><span class="spacer"></span><button class="btn sm ghost danger" data-field-del="${i}">Supprimer</button></div></div></div>`).join("") || '<p class="muted">Aucun champ personnalisé.</p>'}</div></div>`;
 }
 function sLists() {
-  const rowEd = (key, arr, extra) => `<div style="display:flex;flex-direction:column;gap:6px">${arr.map((x, i) => `<div class="row"><input type="color" data-cfg="${key}.${i}.color" value="${h(x.color)}"><input type="text" data-cfg="${key}.${i}.label" value="${h(x.label)}" style="max-width:240px">${extra ? extra(x, i) : ""}<button class="btn sm" data-arr-mv="${key}|${i}|-1" ${i === 0 ? "disabled" : ""}>${ic("up")}</button><button class="btn sm ghost danger" data-arr-del="${key}|${i}">${ic("trash")}</button></div>`).join("")}<div><button class="btn sm" data-arr-add="${key}">${ic("plus")}Ajouter</button></div></div>`;
+  const rowEd = (key, arr, extra) => `<div style="display:flex;flex-direction:column;gap:6px">${arr.map((x, i) => `<div class="row"><input type="color" data-cfg="${key}.${i}.color" value="${h(x.color)}"><input type="text" data-cfg="${key}.${i}.label" value="${h(x.label)}" style="max-width:240px">${extra ? extra(x, i) : ""}<button class="btn sm" data-arr-mv="${key}|${i}|-1" ${i === 0 ? "disabled" : ""} aria-label="Monter">${ic("up")}</button><button class="btn sm" data-arr-mv="${key}|${i}|1" ${i === arr.length - 1 ? "disabled" : ""} aria-label="Descendre">${ic("down")}</button><button class="btn sm ghost danger" data-arr-del="${key}|${i}">${ic("trash")}</button></div>`).join("")}<div><button class="btn sm" data-arr-add="${key}">${ic("plus")}Ajouter</button></div></div>`;
   return `<div class="panel"><header><h2>Statuts des tâches</h2></header><div class="body">${rowEd("statuses", S.cfg.statuses, (x, i) => `<label class="chk"><input type="checkbox" data-cfgbool="statuses.${i}.done" ${x.done ? "checked" : ""}>Clôture la tâche</label>`)}</div></div>
     <div class="panel"><header><h2>Types d'échéances et de reportings</h2></header><div class="body">${rowEd("deadlineTypes", S.cfg.deadlineTypes || [])}</div></div>
     <div class="panel"><header><h2>Types de réunions</h2></header><div class="body">${rowEd("meetingTypes", S.cfg.meetingTypes || [])}</div></div>
@@ -1181,15 +1202,18 @@ function cfInput(f, val, prefix) {
   const t = { number: "number", currency: "number", date: "date", url: "url" }[f.type] || "text";
   return `<input id="${id}" type="${t}" data-cf="${f.id}" value="${h(val ?? "")}">`;
 }
-function openDossier(id, tab) { S.openDossier = id; S.dTab = tab || "overview"; renderDrawer(); }
+function openDossier(id, tab) { S.openDossier = id; S.dTab = tab || "overview"; S.dStageView = null; renderDrawer(); }
 function renderDrawer() {
   const d = dossierById(S.openDossier); const L = $("#layer");
   if (!d) { L.innerHTML = ""; return; }
   const w = wfById(d.workflowId), s = stageOf(d), ed = canEditDossier(d), idx = w.stages.indexOf(s);
   const tks = S.tasks.filter(t => t.dossierId === d.id);
-  const tabs = [["overview","Synthèse"],["tasks",`Tâches (${tks.length})`],["onedrive","OneDrive & documents"],["history","Historique"]];
+  const tabs = [["overview","Synthèse"],["tasks",`Tâches (${tks.length})`],["compliance",`Documents & conformité${(d.docReqs || []).length ? ` (${docSummary(d).validated}/${docSummary(d).total})` : ""}`],["onedrive","OneDrive"],["history","Historique"]];
   let body = "";
+  if (S.dTab === "compliance") body = cmpTab(d);
   if (S.dTab === "overview") body = `
+    ${blockBanner(d, ed)}
+    ${(() => { const hp = hiPrioTasks(d); return hp.length ? `<div class="panel"><header><h2>Tâches prioritaires</h2><span class="hi-badge">⚑ ${hp.length}</span></header><div class="body list">${hp.slice(0, 6).map(taskLine).join("")}</div></div>` : ""; })()}
     ${d.pendingApproval ? `<div class="banner warn"><b>Validation en attente</b> pour passer à « ${h(w.stages.find(x => x.id === d.pendingApproval.to)?.name)} » · demandée par ${h(mname(d.pendingApproval.by))}${can("stage_approve") ? `<span class="spacer"></span><button class="btn sm pri" data-approve="${d.id}">Valider</button><button class="btn sm" data-reject="${d.id}">Refuser</button>` : ""}</div>` : ""}
     <div class="panel"><div class="body" style="display:flex;flex-direction:column;gap:12px">
       <div class="grid2"><label class="f"><span>Nom du dossier</span><input type="text" id="d-name" value="${h(d.name)}" ${ed ? "" : "disabled"}></label>
@@ -1208,8 +1232,9 @@ function renderDrawer() {
       ${ed ? `<div class="row"><button class="btn pri" data-act="d-save">Enregistrer</button>${can("dossier_delete") ? `<span class="spacer"></span><button class="btn" data-act="d-archive">${d.archived ? "Désarchiver" : "Archiver"}</button><button class="btn danger" data-act="d-delete">Supprimer</button>` : ""}</div>` : '<p class="muted" style="margin:0">Lecture seule pour votre rôle.</p>'}
     </div></div>
     ${!isExt(me()) && (can("externals") || grantsOn("dossier", d.id).length) ? accessPanel("dossier", d.id, null) : ""}`;
-  if (S.dTab === "tasks") body = `<div class="row">${can("task_create") ? `<button class="btn pri" data-act="new-task-d">${ic("plus")}Tâche dans ce dossier</button>` : ""}<span class="muted" style="font-size:12px">Les tâches de checklist sont créées à l'entrée de chaque étape${w.autoTasks ? "" : " (désactivé pour ce workflow)"}.</span></div>
-    <div class="panel"><div class="body list">${tks.length ? tks.sort((a, b) => (a.due || "9") < (b.due || "9") ? -1 : 1).map(taskLine).join("") : '<p class="muted">Aucune tâche.</p>'}</div></div>`;
+  if (S.dTab === "tasks") body = `<div class="row">${can("task_create") ? `<button class="btn pri" data-act="new-task-d">${ic("plus")}Tâche dans ce dossier</button>` : ""}${hiPrioTasks(d).length ? `<span class="hi-badge">⚑ ${hiPrioTasks(d).length} prioritaire(s) en tête de liste</span>` : ""}<span class="muted" style="font-size:12px">Les tâches de checklist sont créées à l'entrée de chaque étape${w.autoTasks ? "" : " (désactivé pour ce workflow)"}.</span></div>
+    ${tks.some(t => t.ord != null) ? `<div class="row"><span class="muted" style="font-size:12px">Ordre personnalisé (glissez ⠿ pour réordonner)</span><button class="btn sm ghost" data-act12="task-order-reset" data-d="${d.id}">Revenir à l'ordre automatique</button></div>` : ""}
+    <div class="panel"><div class="body list" data-sortlist="dtasks|${d.id}">${tks.length ? dTasksOrdered(d).map((t, i) => taskLine(t, i)).join("") : '<p class="muted">Aucune tâche.</p>'}</div></div>`;
   if (S.dTab === "onedrive") {
     const rootWf = S.cfg.onedrive.perWorkflowRoot?.[w.id] || S.cfg.onedrive.rootUrl; const folders = w.folders || []; const fname = folderName(d);
     const base = (S.cfg.onedrive.syncPath || "").replace(/[\\/]+$/, "");
@@ -1218,31 +1243,33 @@ function renderDrawer() {
     const canOD = can("onedrive") && (ed || can("onedrive")); const canDocs = canOD || extGrant(d)?.level === "contribute";
     body = `<div class="panel"><header>${ic("cloud")}<h2>Dossier OneDrive</h2><span class="spacer"></span>${window.INMA?.graph?.available() && canOD ? `<button class="btn" data-act2="od-create" title="Crée le dossier et son arborescence type dans OneDrive / SharePoint et enregistre les liens">${isURL(d.oneDriveUrl) ? "Créer les sous-dossiers dans OneDrive" : "Créer le dossier dans OneDrive"}</button>` : ""}${isURL(d.oneDriveUrl) ? `<a class="btn pri" href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir le dossier</a>` : isURL(rootWf) ? `<a class="btn" href="${h(rootWf)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir le dossier du workflow</a>` : ""}</header>
       <div class="body" style="display:flex;flex-direction:column;gap:10px">
+        ${isURL(d.oneDriveUrl) ? `<div class="row" style="gap:8px"><span class="muted">Dossier lié :</span>${odLink(d.oneDriveUrl, d.odNames, "folder", "Dossier OneDrive (nom inconnu)")}${window.INMA?.graph?.available?.() ? `<button class="btn sm ghost" data-act12="od-names" data-id="${d.id}" title="Lire les noms réels dans OneDrive / SharePoint">Actualiser les noms</button>` : ""}</div>` : ""}
         <div class="row"><span class="muted">Nom à utiliser :</span><span class="mono">${h(fname)}</span><button class="btn sm" data-copy="${h(fname)}">${ic("copy")}Copier</button></div>
         <label class="f"><span>Lien OneDrive / SharePoint du dossier</span><span class="row" style="flex-wrap:nowrap"><input type="url" id="od-url" value="${h(d.oneDriveUrl || "")}" placeholder="Collez le lien « Copier le lien » de OneDrive" ${canOD ? "" : "disabled"}>${canOD ? `<button class="btn" data-act="od-save">Lier</button>` : ""}</span></label>
         <div class="eyebrow">Arborescence type (${h(w.name)})</div>
-        <div>${folders.map((f, i) => { const sub = (d.subfolders || []).find(x => x.name === f); const depth = f.split("/").length - 1; return `<div class="folder" style="padding-left:${depth * 18}px">${ic("folder")}<span class="nm">${h(f.split("/").pop())}</span>${isURL(sub?.url) ? `<a class="btn sm" href="${h(sub.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>` : ""}${canOD ? `<input type="url" data-subf="${h(f)}" value="${h(sub?.url || "")}" placeholder="Lien (facultatif)" style="max-width:220px">` : ""}</div>`; }).join("") || '<p class="muted">Aucune arborescence définie pour ce workflow.</p>'}</div>
+        <div>${folders.map((f, i) => { const sub = (d.subfolders || []).find(x => x.name === f); const depth = f.split("/").length - 1; return `<div class="folder" style="padding-left:${depth * 18}px">${ic("folder")}<span class="nm">${h(f.split("/").pop())}</span>${isURL(sub?.url) ? odLink(sub.url, d.odNames, "folder", "Ouvrir") : ""}${canOD ? `<input type="url" data-subf="${h(f)}" value="${h(sub?.url || "")}" placeholder="Lien (facultatif)" style="max-width:220px">` : ""}</div>`; }).join("") || '<p class="muted">Aucune arborescence définie pour ce workflow.</p>'}</div>
         ${folders.length ? `<details><summary style="cursor:pointer;font-weight:600">Créer l'arborescence sur mon poste (OneDrive synchronisé)</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><span class="muted" style="font-size:12px">Windows PowerShell :</span><pre class="code">${h(ps)}</pre><button class="btn sm" data-copy="${h(ps)}">${ic("copy")}Copier le script PowerShell</button><span class="muted" style="font-size:12px">macOS (Terminal) :</span><pre class="code">${h(sh)}</pre><button class="btn sm" data-copy="${h(sh)}">${ic("copy")}Copier le script macOS</button></div></details>` : ""}
       </div></div>
-      <div class="panel"><header>${ic("file")}<h2>Documents du dossier</h2></header><div class="body">${docList(d.docs, canOD ? "d" : null)}
+      <div class="panel"><header>${ic("file")}<h2>Documents du dossier</h2>${(d.docs || []).length > 1 && canOD ? '<span class="muted" style="font-size:12px">glissez ⠿ pour réordonner</span>' : ""}</header><div class="body">${docList(d.docs, canOD ? "d" : null, canOD ? `ddocs|${d.id}` : null, d.odNames)}
         ${canDocs ? `<div class="grid3" style="margin-top:10px"><label class="f"><span>Nom du document</span><input type="text" id="doc-name" placeholder="Note d'investissement v2.docx"></label><label class="f"><span>Lien OneDrive / SharePoint</span><input type="url" id="doc-url" placeholder="https://…"></label><label class="f"><span>Sous-dossier</span><select id="doc-folder"><option value="">—</option>${folders.map(f => `<option>${h(f)}</option>`).join("")}</select></label></div><div style="margin-top:8px"><button class="btn" data-act="doc-add">${ic("plus")}Ajouter le document</button></div>` : ""}
         ${tks.some(t => (t.docs || []).length) ? `<div class="eyebrow" style="margin-top:14px">Documents attachés aux tâches</div>${tks.filter(t => (t.docs || []).length).map(t => `<div class="muted" style="font-size:12px;margin-top:6px">${h(t.title)}</div>${docList(t.docs, null)}`).join("")}` : ""}
       </div></div>`;
   }
   if (S.dTab === "history") body = `<div class="panel"><header><h2>Parcours des étapes</h2></header><div class="body list">${(d.history || []).slice().reverse().map(e => `<div class="li">${av(e.by)}<div class="grow"><div class="t1">${e.from ? h(e.from) + " → " : ""}${h(e.to)}${e.approved ? ' <span class="chip" style="background:var(--ok-bg)">Validé</span>' : ""}</div><div class="t2">${h(mname(e.by))} · ${new Date(e.at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}</div></div></div>`).join("") || '<p class="muted">—</p>'}</div></div>
     <div class="panel"><header><h2>Activité</h2></header><div class="body list">${S.activity.filter(e => e.dossierId === d.id).map(e => `<div class="li">${av(e.by)}<div class="grow"><div class="t1" style="white-space:normal;font-weight:500">${h(e.text)}</div><div class="t2">${new Date(e.at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}</div></div></div>`).join("") || '<p class="muted">—</p>'}</div></div>`;
+  if (S.dStageView) body = stageViewHTML(d, S.dStageView);
   const stageSince = d.stageSince ? daysBetween(d.stageSince, todayISO()) : null;
   L.innerHTML = `<div class="scrim" data-close="1"><aside class="drawer" role="dialog" aria-label="${h(d.name)}">
     <header><div class="row"><span class="mono muted" style="font-size:12px">${h(d.code)}</span>${chip(w.name, w.color)}${d.sample ? '<span class="tag">Exemple</span>' : ""}${d.archived ? '<span class="tag">Archivé</span>' : ""}<span class="spacer"></span>${cpOn() ? `<button class="btn sm cp-btn" data-cp="dossier|${d.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}<button class="btn sm ghost" data-close="1" aria-label="Fermer">${ic("x")}</button></div>
       <h2 style="font-size:20px">${h(d.name)}</h2>
-      <div class="stepper">${w.stages.map((x, i) => `<div class="step ${i < idx ? "done" : i === idx ? "cur" : ""}" data-stage="${x.id}" title="${can("stage_advance") ? "Aller à cette étape" : ""}"><span class="bar2"></span><span class="nm">${h(x.name)}${x.approval ? " ◆" : ""}</span></div>`).join("")}</div>
-      <div class="row" style="font-size:12px"><span class="muted">Étape actuelle :</span><b>${h(s?.name)}</b>${stageSince != null ? `<span class="muted">depuis ${stageSince} j${s?.sla ? " · délai cible " + s.sla + " j" : ""}</span>${s?.sla && stageSince > s.sla ? '<span class="chip" style="background:var(--bad-bg);color:var(--bad)">Hors délai</span>' : ""}` : ""}<span class="spacer"></span>${idx < w.stages.length - 1 && can("stage_advance") && ed ? `<button class="btn sm pri" data-stage="${w.stages[idx + 1].id}">Étape suivante →</button>` : ""}</div>
-      <div class="seg" style="align-self:flex-start">${tabs.map(t => `<button class="${S.dTab === t[0] ? "on" : ""}" data-dtab="${t[0]}">${t[1]}</button>`).join("")}</div>
+      <div class="stepper">${w.stages.map((x, i) => `<div class="step ${i < idx ? "done" : i === idx ? "cur" : ""}${S.dStageView === x.id ? " view" : ""}" data-vstage="${x.id}" title="Consulter cette étape (sans changer l'étape du dossier)" role="button" tabindex="0"><span class="bar2"></span><span class="nm">${h(x.name)}${x.approval ? " ◆" : ""}</span></div>`).join("")}</div>
+      <div class="row" style="font-size:12px"><span class="muted">Étape actuelle :</span><b>${h(s?.name)}</b>${stageSince != null ? `<span class="muted">depuis ${stageSince} j${s?.sla ? " · délai cible " + s.sla + " j" : ""}</span>${s?.sla && stageSince > s.sla ? '<span class="chip" style="background:var(--bad-bg);color:var(--bad)">Hors délai</span>' : ""}` : ""}<span class="row" style="gap:6px;flex-wrap:nowrap"><span class="muted">Avancement</span>${progBar(stagePos(d).pct, true)}<span class="muted">(${idx + 1}/${w.stages.length})</span></span>${blockTag(d)}<span class="spacer"></span>${ed && !isBlocked(d) && !isExt(me()) ? `<button class="btn sm" data-act11="block" data-id="${d.id}">Signaler un blocage</button>` : ""}${idx < w.stages.length - 1 && can("stage_advance") && ed ? `<button class="btn sm pri" data-stage="${w.stages[idx + 1].id}">Étape suivante →</button>` : ""}</div>
+      <div class="seg" style="align-self:flex-start">${tabs.map(t => `<button class="${S.dTab === t[0] && !S.dStageView ? "on" : ""}" data-dtab="${t[0]}">${t[1]}</button>`).join("")}</div>
     </header><div class="dbody">${body}</div></aside></div>`;
 }
-function docList(docs, kind) {
+function docList(docs, kind, sortKey, names) {
   if (!(docs || []).length) return '<p class="muted" style="margin:0">Aucun document lié.</p>';
-  return `<div>${docs.map((x, i) => `<div class="folder">${ic("file")}<span class="nm">${h(x.name)}${x.folder ? ` <span class="muted" style="font-size:11px">· ${h(x.folder)}</span>` : ""}</span><span class="muted" style="font-size:11px">${h(mname(x.by).split(" ")[0])} · ${h(fdate(x.at))}</span>${isURL(x.url) ? `<a class="btn sm" href="${h(x.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>` : ""}${kind ? `<button class="btn sm ghost danger" data-doc-del="${kind}|${i}" aria-label="Retirer">${ic("trash")}</button>` : ""}</div>`).join("")}</div>`;
+  return `<div${sortKey ? ` data-sortlist="${sortKey}"` : ""}>${docs.map((x, i) => `<div class="folder"${sortKey ? ` data-si="${i}"` : ""}>${sortKey ? dh() : ""}${ic("file")}<span class="nm">${h(x.name)}${(() => { const n = odName(x.url, names); return n && n !== x.name ? ` <span class="muted" style="font-size:11px">· ${h(n)}</span>` : ""; })()}${x.folder ? ` <span class="muted" style="font-size:11px">· ${h(x.folder)}</span>` : ""}</span><span class="muted" style="font-size:11px">${h(mname(x.by).split(" ")[0])} · ${h(fdate(x.at))}</span>${isURL(x.url) ? `<a class="btn sm" href="${h(x.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>` : ""}${kind ? `<button class="btn sm ghost danger" data-doc-del="${kind}|${i}" aria-label="Retirer">${ic("trash")}</button>` : ""}</div>`).join("")}</div>`;
 }
 
 /* ---------- modals ---------- */
@@ -1278,8 +1305,9 @@ function newDossierModal() {
     };
   });
 }
-function taskModal(t, presetDossier) {
-  const isNew = !t; t = t ? clone(t) : { title: "", description: "", dossierId: presetDossier || "", assignees: me() ? [me().id] : [], status: S.cfg.statuses[0].id, priority: S.cfg.priorities[2]?.id || S.cfg.priorities[0].id, due: "", recurring: "", dependsOn: [], checklist: [], docs: [], comments: [], custom: {} };
+const tkCheckHTML = (list, dis) => (list || []).map((c, i) => `<div class="tkc" data-si="${i}">${dis ? "" : dh()}<label class="chk" style="display:flex;margin:3px 0;flex:1"><input type="checkbox" class="cb" data-ci="${i}" ${c.done ? "checked" : ""} ${dis}>${h(c.text)}</label>${dis ? "" : `<button class="btn sm ghost danger" type="button" data-ck-del="${i}" aria-label="Retirer">${ic("x")}</button>`}</div>`).join("");
+function taskModal(t, presetDossier, presetProject) {
+  const isNew = !t; t = t ? clone(t) : { title: "", description: "", dossierId: presetDossier || "", projectId: presetProject || "", assignees: me() ? [me().id] : [], status: S.cfg.statuses[0].id, priority: S.cfg.priorities[2]?.id || S.cfg.priorities[0].id, due: "", recurring: "", dependsOn: [], checklist: [], docs: [], comments: [], custom: {} };
   const ed = isNew ? can("task_create") : canEditTask(t);
   const dis = ed ? "" : "disabled";
   const others = S.tasks.filter(x => x.id !== t.id && (!t.dossierId || x.dossierId === t.dossierId));
@@ -1287,6 +1315,7 @@ function taskModal(t, presetDossier) {
   const inner = `
     <label class="f"><span>Titre</span><input type="text" id="tk-title" value="${h(t.title)}" ${dis}></label>
     <div class="grid3"><label class="f"><span>Dossier</span><select id="tk-dossier" ${dis}><option value="">Sans dossier</option>${visDossiers().map(d => `<option value="${d.id}" ${t.dossierId === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
+      ${!isExt(me()) ? `<label class="f"><span>Projet</span><select id="tk-project" ${dis}><option value="">Aucun projet</option>${visProjects().map(p => `<option value="${p.id}" ${t.projectId === p.id ? "selected" : ""}>${h(p.title)}</option>`).join("")}</select></label>` : ""}
       <label class="f"><span>Statut</span><select id="tk-status" ${dis}>${S.cfg.statuses.map(s => `<option value="${s.id}" ${t.status === s.id ? "selected" : ""}>${h(s.label)}</option>`).join("")}</select></label>
       <label class="f"><span>Priorité</span><select id="tk-prio" ${dis}>${S.cfg.priorities.map(p => `<option value="${p.id}" ${t.priority === p.id ? "selected" : ""}>${h(p.label)}</option>`).join("")}</select></label>
       <label class="f"><span>Échéance</span><input type="date" id="tk-due" value="${h(t.due || "")}" ${dis}></label>
@@ -1295,13 +1324,17 @@ function taskModal(t, presetDossier) {
     <div><div class="eyebrow" style="margin-bottom:6px">Responsables (une ou plusieurs personnes)</div><div class="row">${S.cfg.members.map(m => `<label class="chk"><input type="checkbox" data-tka="${m.id}" ${(t.assignees || []).includes(m.id) ? "checked" : ""} ${dis}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
     ${fieldsFor("task", wfId).length ? `<div class="grid3">${fieldsFor("task", wfId).map(f => `<label class="f"><span>${h(f.label)}</span>${cfInput(f, t.custom?.[f.id], "tcf")}</label>`).join("")}</div>` : ""}
     <label class="f"><span>Description</span><textarea id="tk-desc" ${dis}>${h(t.description || "")}</textarea></label>
-    <div><div class="eyebrow" style="margin-bottom:6px">Checklist</div><div id="tk-check">${(t.checklist || []).map((c, i) => `<label class="chk" style="display:flex;margin:3px 0"><input type="checkbox" class="cb" data-ci="${i}" ${c.done ? "checked" : ""} ${dis}>${h(c.text)}</label>`).join("")}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-newcheck" placeholder="Ajouter un élément…" style="max-width:320px"><button class="btn sm" id="tk-addcheck">Ajouter</button></div>` : ""}</div>
-    <div><div class="eyebrow" style="margin-bottom:6px">Documents OneDrive</div><div id="tk-docs">${docList(t.docs, null)}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-docname" placeholder="Nom" style="max-width:200px"><input type="url" id="tk-docurl" placeholder="Lien OneDrive" style="max-width:260px"><button class="btn sm" id="tk-adddoc">Lier</button></div>` : ""}</div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Checklist</div><div id="tk-check" data-sortlist="tkcheck|x">${tkCheckHTML(t.checklist, dis)}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-newcheck" placeholder="Ajouter un élément…" style="max-width:320px"><button class="btn sm" id="tk-addcheck">Ajouter</button></div>` : ""}</div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Documents OneDrive</div><div id="tk-docs">${docList(t.docs, ed ? "tkm" : null, ed ? "tkdocs|x" : null)}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-docname" placeholder="Nom" style="max-width:200px"><input type="url" id="tk-docurl" placeholder="Lien OneDrive" style="max-width:260px"><button class="btn sm" id="tk-adddoc">Lier</button></div>` : ""}</div>
     ${!isNew ? `<div><div class="eyebrow" style="margin-bottom:6px">Commentaires</div>${(t.comments || []).map(c => `<div class="comment">${av(c.by)}<div class="bubble"><span class="who">${h(mname(c.by))}<span class="when">${new Date(c.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</span></span><div>${h(c.text).replace(/@([\wÀ-ÿ-]+)/g, '<span class="mention">@$1</span>')}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun commentaire.</p>'}<div class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" id="tk-comment" placeholder="Écrire un commentaire… (@Prénom pour mentionner)"><button class="btn sm" id="tk-send">Envoyer</button></div></div>` : ""}`;
   modal(isNew ? "Nouvelle tâche" : "Tâche", inner, `${!isNew && ed ? `<button class="btn danger" id="tk-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="tk-save">${isNew ? "Créer la tâche" : "Enregistrer"}</button>` : ""}`, L => {
-    const collect = () => { t.title = $("#tk-title", L).value.trim(); t.dossierId = $("#tk-dossier", L).value || null; t.status = $("#tk-status", L).value; t.priority = $("#tk-prio", L).value; t.due = $("#tk-due", L).value; t.recurring = $("#tk-rec", L).value; t.dependsOn = $("#tk-dep", L).value ? [$("#tk-dep", L).value] : []; t.assignees = $$("[data-tka]", L).filter(x => x.checked).map(x => x.dataset.tka); t.description = $("#tk-desc", L).value; t.checklist = (t.checklist || []).map((c, i) => ({ ...c, done: $(`[data-ci="${i}"]`, L)?.checked || false })); t.custom = { ...(t.custom || {}) }; $$("[data-cf]", L).forEach(x => t.custom[x.dataset.cf] = x.value); };
-    $("#tk-addcheck", L) && ($("#tk-addcheck", L).onclick = () => { const v = $("#tk-newcheck", L).value.trim(); if (!v) return; collect(); t.checklist.push({ text: v, done: false }); $("#tk-check", L).innerHTML = t.checklist.map((c, i) => `<label class="chk" style="display:flex;margin:3px 0"><input type="checkbox" class="cb" data-ci="${i}" ${c.done ? "checked" : ""}>${h(c.text)}</label>`).join(""); $("#tk-newcheck", L).value = ""; });
-    $("#tk-adddoc", L) && ($("#tk-adddoc", L).onclick = () => { const n = $("#tk-docname", L).value.trim(), u = $("#tk-docurl", L).value.trim(); if (!isURL(u)) { toast("Collez un lien https:// valide."); return; } t.docs = [...(t.docs || []), { name: n || u.split("/").pop().split("?")[0] || "Document", url: u, by: me()?.id || null, at: todayISO() }]; $("#tk-docs", L).innerHTML = docList(t.docs, null); $("#tk-docname", L).value = $("#tk-docurl", L).value = ""; });
+    const collect = () => { t.title = $("#tk-title", L).value.trim(); t.dossierId = $("#tk-dossier", L).value || null; if ($("#tk-project", L)) t.projectId = $("#tk-project", L).value || null; t.status = $("#tk-status", L).value; t.priority = $("#tk-prio", L).value; t.due = $("#tk-due", L).value; t.recurring = $("#tk-rec", L).value; t.dependsOn = $("#tk-dep", L).value ? [$("#tk-dep", L).value] : []; t.assignees = $$("[data-tka]", L).filter(x => x.checked).map(x => x.dataset.tka); t.description = $("#tk-desc", L).value; t.checklist = (t.checklist || []).map((c, i) => ({ ...c, done: $(`[data-ci="${i}"]`, L)?.checked || false })); t.custom = { ...(t.custom || {}) }; $$("[data-cf]", L).forEach(x => t.custom[x.dataset.cf] = x.value); };
+    $("#tk-addcheck", L) && ($("#tk-addcheck", L).onclick = () => { const v = $("#tk-newcheck", L).value.trim(); if (!v) return; collect(); t.checklist.push({ text: v, done: false }); $("#tk-check", L).innerHTML = tkCheckHTML(t.checklist, ""); $("#tk-newcheck", L).value = ""; });
+    L.addEventListener("click", e => { const b = e.target.closest("[data-ck-del]"); if (!b) return; collect(); t.checklist.splice(+b.dataset.ckDel, 1); $("#tk-check", L).innerHTML = tkCheckHTML(t.checklist, dis); });
+    SORTERS.tkcheck = (_, f, to) => { collect(); moveArr(t.checklist, f, to); $("#tk-check", L).innerHTML = tkCheckHTML(t.checklist, dis); };
+    SORTERS.tkdocs = (_, f, to) => { moveArr(t.docs, f, to); $("#tk-docs", L).innerHTML = docList(t.docs, "tkm", "tkdocs|x"); };
+    L.addEventListener("click", e => { const b = e.target.closest('[data-doc-del^="tkm|"]'); if (!b) return; e.stopPropagation(); t.docs.splice(+b.dataset.docDel.split("|")[1], 1); $("#tk-docs", L).innerHTML = docList(t.docs, "tkm", "tkdocs|x"); });
+    $("#tk-adddoc", L) && ($("#tk-adddoc", L).onclick = () => { const n = $("#tk-docname", L).value.trim(), u = $("#tk-docurl", L).value.trim(); if (!isURL(u)) { toast("Collez un lien https:// valide."); return; } t.docs = [...(t.docs || []), { name: n || u.split("/").pop().split("?")[0] || "Document", url: u, by: me()?.id || null, at: todayISO() }]; $("#tk-docs", L).innerHTML = docList(t.docs, "tkm", "tkdocs|x"); $("#tk-docname", L).value = $("#tk-docurl", L).value = ""; });
     $("#tk-save", L) && ($("#tk-save", L).onclick = async () => {
       const prevStatus = isNew ? null : S.tasks.find(x => x.id === t.id)?.status; const prevAss = isNew ? [] : (S.tasks.find(x => x.id === t.id)?.assignees || []);
       collect(); if (!t.title) { toast("Indiquez un titre."); return; }
@@ -1309,7 +1342,7 @@ function taskModal(t, presetDossier) {
       L.remove();
       if (isNew) { const nt = await createTask(t); await log(`Tâche créée : « ${nt.title} »`, { taskId: nt.id, dossierId: nt.dossierId }); }
       else { await putDoc("tasks", t); const added = t.assignees.filter(x => !prevAss.includes(x)); if (added.length && S.cfg.notify.onAssign) await log(`Tâche assignée : « ${t.title} »`, { taskId: t.id, dossierId: t.dossierId, notify: added }); if (prevStatus !== t.status) { if (statusById(t.status).done) { t.status = prevStatus; await completeTask(t, true); } else await runAutomations("task_status", { task: t }); } }
-      render(); renderDrawer();
+      render(); renderDrawer(); { const pt = document.getElementById("pj-tasks"); const pp = pt && (S.projects || []).find(x => x.id === pt.dataset.pjt); if (pp) pt.innerHTML = prjTasksHTML(pp); }
     });
     $("#tk-del", L) && ($("#tk-del", L).onclick = () => { L.remove(); confirmBox(`Supprimer la tâche « ${t.title} » ?`, "Supprimer", async () => { await delDoc("tasks", t.id); await log(`Tâche supprimée : « ${t.title} »`, { dossierId: t.dossierId }); render(); renderDrawer(); }); });
     $("#tk-send", L) && ($("#tk-send", L).onclick = async () => {
@@ -1681,7 +1714,7 @@ function extModal(m0, preset) {
 }
 function prefsModal() {
   const p = store.get(PREF_KEY, {});
-  modal("Mes préférences", `<p class="muted" style="margin:0">Ces réglages ne concernent que vous, sur cet appareil.</p>
+  modal("Mes préférences", `<p class="muted" style="margin:0">Ces réglages ne concernent que vous, sur cet appareil.</p><div class="row"><button class="btn sm" type="button" data-act11="notif-prefs" data-mclose="1">${ic("bell")}Mes notifications (dans l'outil et par e-mail)</button></div>
     <div class="grid3"><label class="f"><span>Thème</span><select id="pf-theme"><option value="">Comme l'application</option><option value="light" ${p.theme === "light" ? "selected" : ""}>Clair</option><option value="dark" ${p.theme === "dark" ? "selected" : ""}>Sombre</option></select></label>
       <label class="f"><span>Densité</span><select id="pf-density"><option value="">Comme la charte</option><option value="0.75" ${p.density === "0.75" ? "selected" : ""}>Compacte</option><option value="1" ${p.density === "1" ? "selected" : ""}>Standard</option><option value="1.3" ${p.density === "1.3" ? "selected" : ""}>Aérée</option></select></label>
       <label class="f"><span>Page d'accueil</span><select id="pf-home"><option value="">Comme l'application</option>${NAV.filter(n => navAllowed(n[0])).map(n => `<option value="${n[0]}" ${p.home === n[0] ? "selected" : ""}>${n[1]}</option>`).join("")}</select></label></div>`,
@@ -1691,7 +1724,7 @@ function prefsModal() {
 }
 function sFunds() {
   const r = S.cfg.fundRoot || {}, v = S.cfg.fundView || {};
-  const rowEdit = (key, arr) => `<div style="display:flex;flex-direction:column;gap:6px">${arr.map((x, i) => `<div class="row"><input type="color" data-cfg="${key}.${i}.color" value="${h(x.color)}" aria-label="Couleur"><input type="text" data-cfg="${key}.${i}.label" value="${h(x.label)}" style="max-width:240px"><button class="btn sm" data-arr-mv="${key}|${i}|-1" ${i === 0 ? "disabled" : ""} aria-label="Monter">${ic("up")}</button><button class="btn sm ghost danger" data-arr-del="${key}|${i}" aria-label="Supprimer">${ic("trash")}</button></div>`).join("")}<div><button class="btn sm" data-arr-add="${key}">${ic("plus")}Ajouter</button></div></div>`;
+  const rowEdit = (key, arr) => `<div style="display:flex;flex-direction:column;gap:6px">${arr.map((x, i) => `<div class="row"><input type="color" data-cfg="${key}.${i}.color" value="${h(x.color)}" aria-label="Couleur"><input type="text" data-cfg="${key}.${i}.label" value="${h(x.label)}" style="max-width:240px"><button class="btn sm" data-arr-mv="${key}|${i}|-1" ${i === 0 ? "disabled" : ""} aria-label="Monter">${ic("up")}</button><button class="btn sm" data-arr-mv="${key}|${i}|1" ${i === arr.length - 1 ? "disabled" : ""} aria-label="Descendre">${ic("down")}</button><button class="btn sm ghost danger" data-arr-del="${key}|${i}" aria-label="Supprimer">${ic("trash")}</button></div>`).join("")}<div><button class="btn sm" data-arr-add="${key}">${ic("plus")}Ajouter</button></div></div>`;
   return `<div class="panel"><header><h2>Société de gestion (haut de l'organigramme)</h2></header><div class="body grid3"><label class="f"><span>Nom</span>${inp("fundRoot.name", r.name)}</label><label class="f"><span>Sous-titre</span>${inp("fundRoot.subtitle", r.subtitle)}</label><label class="f"><span>Lien OneDrive / SharePoint</span>${inp("fundRoot.url", r.url || "", "url")}</label></div></div>
   <div class="panel"><header><h2>Affichage de l'onglet Fonds</h2></header><div class="body row"><label class="f" style="max-width:220px"><span>Vue par défaut</span><select data-cfg="fundView.mode"><option value="org" ${v.mode !== "list" ? "selected" : ""}>Organigramme</option><option value="list" ${v.mode === "list" ? "selected" : ""}>Tableau</option></select></label><label class="chk"><input type="checkbox" data-cfgbool="fundView.showDossiers" ${v.showDossiers !== false ? "checked" : ""}>Afficher les dossiers de travail dans l'architecture</label></div></div>
   <div class="panel"><header><h2>Statuts des fonds</h2></header><div class="body">${rowEdit("fundStatuses", S.cfg.fundStatuses || [])}</div></div>
@@ -2157,10 +2190,12 @@ function prjCard(p) {
   const pr = prjProgress(p), st = prjStatus(p.status); const nx = (p.milestones || []).find(m => !m.done);
   const late = p.due && p.due < todayISO() && p.status !== "done";
   return `<div class="prj" data-prj="${p.id}" tabindex="0" role="button" aria-label="${h(p.title)}">
-    <div class="row" style="gap:8px;flex-wrap:nowrap">${hdot(p.health)}<b class="prj-t">${h(p.title)}</b><span class="spacer"></span>${chip(st[1], st[2])}</div>
+    <div class="row" style="gap:8px;flex-wrap:nowrap">${hdot(p.health)}<b class="prj-t">${h(p.title)}</b>${chip(st[1], st[2])}</div>
     <div class="row" style="gap:6px"><span class="tag">${h(p.category || "Projet")}</span><span class="muted" style="font-size:12px">${h(scopeName(p.scope))}</span></div>
     <div class="row" style="gap:8px;flex-wrap:nowrap"><span class="msbar"><span style="width:${pr}%;background:${p.health === "red" ? "var(--bad)" : p.health === "amber" ? "var(--warn)" : "var(--ok)"}"></span></span><span class="num" style="font-size:12px">${pr} %</span></div>
     <div class="t2" style="font-size:12.5px;line-height:1.4"><span class="muted">Prochaine étape :</span> ${h(p.nextStep || nx?.text || "—")}</div>
+    ${isURL(p.url) ? `<div onclick="event.stopPropagation()">${odLink(p.url, p.odNames, "folder", "Dossier du projet")}</div>` : ""}
+    ${(() => { const ts = visTasks().filter(t => t.projectId === p.id && !isDone(t)); const late = ts.filter(t => t.due && t.due < todayISO()).length; const hp = ts.filter(isHiPrio).length; return ts.length ? `<div class="row" style="gap:6px;font-size:12px"><span class="muted">${ts.length} tâche${ts.length > 1 ? "s" : ""} en cours</span>${late ? `<span class="chip sm" style="background:var(--bad-bg);color:var(--bad)">${late} en retard</span>` : ""}${hp ? `<span class="hi-badge">⚑ ${hp}</span>` : ""}</div>` : ""; })()}
     <div class="row" style="gap:8px">${av(p.ownerId)}${avs((p.members || []).filter(x => x !== p.ownerId).slice(0, 3))}<span class="spacer"></span>${p.due ? `<span class="due ${late ? "late" : dueCls(p.due, p.status === "done")}">${late ? "En retard · " : "Échéance "}${fdate(p.due)}</span>` : ""}</div></div>`;
 }
 function vProjects() {
@@ -2177,7 +2212,7 @@ function vProjects() {
 function prjModal(p0, scope0) {
   const isNew = !p0; const p = isNew ? { id: uid("prj"), title: "", scope: scope0 || S.ui.pj?.scope || "inma", category: (S.cfg.projectCategories || [])[0] || "", ownerId: me()?.id || "", members: [], status: "todo", health: "green", progress: 0, start: todayISO(), due: "", nextStep: "", description: "", url: "", milestones: [], createdAt: new Date().toISOString() } : clone(p0);
   const ed = isNew ? can("projects") : canEditProject(p), full = can("projects"), dis = ed ? "" : "disabled", dfull = full ? "" : "disabled";
-  const msHtml = () => (p.milestones || []).map((m, i) => `<div class="li"><input type="checkbox" class="cb" data-pm-done="${i}" ${m.done ? "checked" : ""} ${dis} aria-label="Fait"><div class="grow"><div class="t1" style="white-space:normal;${m.done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(m.text)}</div></div>${m.due ? due(m.due, m.done) : ""}${ed ? `<button class="btn sm ghost danger" data-pm-del="${i}" aria-label="Supprimer">${ic("trash")}</button>` : ""}</div>`).join("") || '<p class="muted" style="margin:0">Aucun jalon : l\'avancement se saisit à la main.</p>';
+  const msHtml = () => (p.milestones || []).map((m, i) => `<div class="li" data-si="${i}">${ed ? dh() : ""}<input type="checkbox" class="cb" data-pm-done="${i}" ${m.done ? "checked" : ""} ${dis} aria-label="Fait"><div class="grow"><div class="t1" style="white-space:normal;${m.done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(m.text)}</div></div>${m.due ? due(m.due, m.done) : ""}${ed ? `<button class="btn sm ghost danger" data-pm-del="${i}" aria-label="Supprimer">${ic("trash")}</button>` : ""}</div>`).join("") || '<p class="muted" style="margin:0">Aucun jalon : l\'avancement se saisit à la main.</p>';
   const inner = `<label class="f"><span>Intitulé</span><input type="text" id="pj-title" value="${h(p.title)}" ${dfull} placeholder="Ex. Démarche ESG"></label>
     <div class="grid3"><label class="f"><span>Périmètre</span><select id="pj-scope" ${dfull}><option value="inma" ${p.scope === "inma" ? "selected" : ""}>${h(scopeName("inma"))} (transverse)</option>${(S.cfg.funds || []).map(x => `<option value="${x.id}" ${p.scope === x.id ? "selected" : ""}>${h(x.name)} (corporate)</option>`).join("")}</select></label>
       <label class="f"><span>Catégorie</span><select id="pj-cat" ${dfull}>${(S.cfg.projectCategories || []).map(c => `<option ${p.category === c ? "selected" : ""}>${h(c)}</option>`).join("")}</select></label>
@@ -2190,20 +2225,27 @@ function prjModal(p0, scope0) {
     <div><div class="eyebrow" style="margin-bottom:6px">Équipe projet</div><div class="row">${S.cfg.members.filter(m => !m.external).map(m => `<label class="chk"><input type="checkbox" data-pj-member="${m.id}" ${(p.members || []).includes(m.id) ? "checked" : ""} ${dfull}>${h(m.name.split(" ")[0])}</label>`).join("")}</div></div>
     <label class="f"><span>Prochaine étape</span><input type="text" id="pj-next" value="${h(p.nextStep || "")}" ${dis} placeholder="Ce qui doit être fait d'ici la prochaine réunion"></label>
     <label class="f"><span>Description / objectifs</span><textarea id="pj-desc" rows="3" ${dis}>${h(p.description || "")}</textarea></label>
-    <label class="f"><span>Dossier OneDrive / SharePoint</span><input type="url" id="pj-url" value="${h(p.url || "")}" ${dis}></label>
-    <div><div class="eyebrow" style="margin-bottom:4px">Jalons</div><div class="list" id="pj-ms">${msHtml()}</div>
+    <label class="f"><span>Dossier OneDrive / SharePoint principal</span><input type="url" id="pj-url" value="${h(p.url || "")}" ${dis}></label>
+    <div id="pj-docs">${prjDocsHTML(p, ed)}</div>
+    ${!isNew ? `<div class="pj-tasks" id="pj-tasks" data-pjt="${p.id}">${prjTasksHTML(p)}</div>` : ""}
+    <div><div class="eyebrow" style="margin-bottom:4px">Jalons</div><div class="list" id="pj-ms" data-sortlist="pms|x">${msHtml()}</div>
     ${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="pj-newms" placeholder="Nouveau jalon" style="max-width:300px"><input type="date" id="pj-newms-due" style="width:auto" aria-label="Échéance du jalon"><button class="btn sm" id="pj-addms">Ajouter</button></div>` : ""}</div>`;
   modal(isNew ? "Nouveau projet" : p.title, inner, `${!isNew && full ? `<button class="btn danger" id="pj-del">Supprimer</button>` : ""}${!isNew && cpOn() ? `<button class="btn cp-btn" data-cp="project|${p.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${!isNew ? `<span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="pj-save">${isNew ? "Créer le projet" : "Enregistrer"}</button>` : ""}`, L => {
     const sync = () => { p.milestones = (p.milestones || []).map((m, i) => ({ ...m, done: L.querySelector(`[data-pm-done="${i}"]`)?.checked ?? m.done })); };
+    SORTERS.pms = (_, f, to) => { sync(); moveArr(p.milestones, f, to); $("#pj-ms", L).innerHTML = msHtml(); };
+    SORTERS.pdocs = (_, f, to) => { moveArr(p.docs, f, to); $("#pj-docs", L).innerHTML = prjDocsHTML(p, ed); };
+    L.addEventListener("click", async e => { const del = e.target.closest("[data-pdoc-del]"); if (del) { p.docs.splice(+del.dataset.pdocDel, 1); $("#pj-docs", L).innerHTML = prjDocsHTML(p, ed); return; }
+      if (e.target.closest("#pj-adddoc")) { const u = $("#pj-docurl", L).value.trim(); if (!isURL(u)) { toast("Collez un lien https:// valide."); return; } const n = $("#pj-docname", L).value.trim() || await odResolve(u) || odNameFromUrl(u) || "Lien";
+        p.docs = [...(p.docs || []), { name: n, url: u, by: me()?.id || null, at: todayISO() }]; $("#pj-docs", L).innerHTML = prjDocsHTML(p, ed); } });
     L.addEventListener("click", e => { const d = e.target.closest("[data-pm-del]"); if (!d) return; sync(); p.milestones.splice(+d.dataset.pmDel, 1); $("#pj-ms", L).innerHTML = msHtml(); });
     const add = $("#pj-addms", L); add && (add.onclick = () => { const t = $("#pj-newms", L).value.trim(); if (!t) return; sync(); p.milestones = [...(p.milestones || []), { text: t, done: false, due: $("#pj-newms-due", L).value }]; $("#pj-ms", L).innerHTML = msHtml(); $("#pj-newms", L).value = ""; });
     const sb = $("#pj-save", L); sb && (sb.onclick = async () => {
       sync(); const title = $("#pj-title", L).value.trim(); if (!title) { toast("Indiquez l'intitulé du projet."); return; }
       const u = $("#pj-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
-      const live = isNew ? p : { ...((S.projects || []).find(x => x.id === p.id) || p), milestones: p.milestones };
+      const live = isNew ? p : { ...((S.projects || []).find(x => x.id === p.id) || p), milestones: p.milestones, docs: p.docs || [] };
       const prevStatus = live.status;
-      Object.assign(live, { title, scope: $("#pj-scope", L).value, category: $("#pj-cat", L).value, ownerId: $("#pj-owner", L).value, members: $$("[data-pj-member]", L).filter(x => x.checked).map(x => x.dataset.pjMember), status: $("#pj-status", L).value, health: $("#pj-health", L).value, progress: +$("#pj-progress", L).value || 0, start: $("#pj-start", L).value, due: $("#pj-due", L).value, nextStep: $("#pj-next", L).value.trim(), description: $("#pj-desc", L).value, url: u, milestones: p.milestones, updatedAt: new Date().toISOString() });
-      await putDoc("projects", live);
+      Object.assign(live, { title, scope: $("#pj-scope", L).value, category: $("#pj-cat", L).value, ownerId: $("#pj-owner", L).value, members: $$("[data-pj-member]", L).filter(x => x.checked).map(x => x.dataset.pjMember), status: $("#pj-status", L).value, health: $("#pj-health", L).value, progress: +$("#pj-progress", L).value || 0, start: $("#pj-start", L).value, due: $("#pj-due", L).value, nextStep: $("#pj-next", L).value.trim(), description: $("#pj-desc", L).value, url: u, milestones: p.milestones, docs: p.docs || [], updatedAt: new Date().toISOString() });
+      await putDoc("projects", live); odFillNames(live, "projects", [live.url, ...(live.docs || []).map(x => x.url)]);
       await log(isNew ? `Projet créé : « ${title} »` : prevStatus !== live.status ? `Projet « ${title} » : ${prjStatus(live.status)[1].toLowerCase()}` : `Projet mis à jour : « ${title} »`, { notify: isNew ? [live.ownerId].filter(id => id && id !== me()?.id) : [] });
       L.remove(); toast(isNew ? "Projet créé" : "Projet enregistré"); render();
     });
@@ -2618,6 +2660,9 @@ function cpDossierBlock(d, o, full) {
     if (occ.length) base.push(`\nÉchéances liées :\n${occ.map(x => `- ${x.o.title} : ${cpD(x.due)}${x.late ? " (EN RETARD)" : ""}`).join("\n")}`);
     const act = S.activity.filter(e => e.dossierId === d.id).slice(0, 12); if (act.length) base.push(`\nActivité récente :\n${act.map(e => `- ${cpD(e.at.slice(0, 10))} : ${e.text}`).join("\n")}`);
     const docs = (d.docs || []).filter(x => x.name); if (docs.length) base.push(`\nDocuments référencés : ${docs.map(x => x.name).join(", ")}`);
+    base.push(`\nAvancement des étapes : ${stagePos(d).pct} %`);
+    if (isBlocked(d)) base.push(`DOSSIER BLOQUÉ depuis le ${cpD(d.block.since)} — ${d.block.cat || ""} : ${d.block.reason || ""}${d.block.actions ? " · Actions nécessaires : " + d.block.actions.replace(/\n/g, " ; ") : ""}${d.block.ownerId ? " · levée : " + mname(d.block.ownerId) : ""}`);
+    if ((d.docReqs || []).length) base.push(`Conformité (${cmpCfg().label}) : ${CMP_ST[cmpStatus(d)][0]} · ${(d.docReqs || []).map(x => `${x.name} = ${DOC_ST[x.status]?.[0] || x.status}${x.status === "update" && x.note ? " (" + x.note + ")" : ""}`).join(" ; ")}`);
     const mts = visMeetings().filter(m => (m.decisions || []).some(x => x.refId === d.id) || (m.points || []).some(p => p.refId === d.id)).slice(0, 4);
     if (mts.length) base.push(`\nÉchanges en réunion :\n${mts.map(m => [`- ${cpD(m.date)} (${m.title}) :`, ...(m.points || []).filter(p => p.refId === d.id && p.text).map(p => `  · ${p.text.replace(/\n/g, " ")}`), ...(m.decisions || []).filter(x => x.refId === d.id).map(x => `  · Décision : ${x.text}`)].join("\n")).join("\n")}`);
   }
@@ -3434,7 +3479,7 @@ document.addEventListener("click", async e => {
 /* ---------- réunion d'équipe personnalisable (modèles de réunion) ---------- */
 const MB_BUILTIN = { summary: "Synthèse INMA Capital", followup: "Suivi des actions de la dernière réunion", dossiers: "Avancement des dossiers (une diapositive par workflow)", funds: "Vue par fonds (portefeuille, pipeline, projets)", projects: "Projets transverses", deadlines: "Échéances et reportings", decisions: "Points de décision et d'attention" };
 const MB_TYPES = { text: "Texte libre (ordre du jour, message, consignes…)", kpis: "Indicateurs choisis", dossiers: "Liste de dossiers filtrée", tasks: "Liste de tâches filtrée", deadlines: "Échéances filtrées", projects: "Projets filtrés", schedules: "Remboursements et impayés (échéanciers)", link: "Lien vers un document (OneDrive, SharePoint, PowerPoint…)", ai: "Analyse de l'assistant IA (question préparée)" };
-const MB_KPIS = { dossiers: "Dossiers actifs", amount: "Montants en cours (dossiers en suivi)", study: "Montant total des dossiers en étude", pending: "Validations en attente", openTasks: "Tâches ouvertes", lateTasks: "Tâches en retard", doneSince: "Tâches terminées depuis la date", stagesSince: "Étapes franchies depuis la date", dl30: "Échéances à 30 jours", dlLate: "Échéances en retard", projects: "Projets en cours", projRed: "Projets en difficulté", positions: "Lignes en portefeuille", crd: "Capital restant dû (échéanciers)", cash30: "À encaisser sous 30 jours", unpaid: "Impayés (échéanciers)" };
+const MB_KPIS = { blocked: "Dossiers bloqués", cmpReview: "Dossiers en contrôle de conformité", cmpCorr: "Conformité : corrections demandées", hiPrio: "Tâches prioritaires ouvertes", dossiers: "Dossiers actifs", amount: "Montants en cours (dossiers en suivi)", study: "Montant total des dossiers en étude", pending: "Validations en attente", openTasks: "Tâches ouvertes", lateTasks: "Tâches en retard", doneSince: "Tâches terminées depuis la date", stagesSince: "Étapes franchies depuis la date", dl30: "Échéances à 30 jours", dlLate: "Échéances en retard", projects: "Projets en cours", projRed: "Projets en difficulté", positions: "Lignes en portefeuille", crd: "Capital restant dû (échéanciers)", cash30: "À encaisser sous 30 jours", unpaid: "Impayés (échéanciers)" };
 const mbDefault = () => ({ id: "mb_default", name: "Réunion d'équipe", slides: Object.keys(MB_BUILTIN).map(k => ({ id: "b_" + k, type: "b:" + k, on: true, title: "" })) });
 const mbBoards = () => (S.cfg.meetingBoards && S.cfg.meetingBoards.length) ? S.cfg.meetingBoards : [mbDefault()];
 const mbCurrent = () => { const l = mbBoards(); return l.find(b => b.id === S.ui.mt?.board) || l[0]; };
@@ -3442,6 +3487,11 @@ const mbCanEdit = () => can("meetings") || can("settings");
 const mbFund = (mt, def) => def.fund || mt.fund || "";
 function mbKpiValue(k, mt, fundId) {
   if (String(k).startsWith("ck_")) return ckValue(k, { fundId });
+  if (["blocked", "cmpReview", "cmpCorr", "hiPrio"].includes(k)) { const fn = fundId ? fundById(fundId)?.name : ""; const ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn));
+    if (k === "blocked") { const n = ds.filter(isBlocked).length; return [String(n), n > 0]; }
+    if (k === "cmpReview") return [String(ds.filter(d => cmpStatus(d) === "review").length), false];
+    if (k === "cmpCorr") { const n = ds.filter(d => cmpStatus(d) === "corrections").length; return [String(n), n > 0]; }
+    const n = visTasks().filter(t => !isDone(t) && isHiPrio(t) && (!fn || dossierById(t.dossierId)?.vehicle === fn)).length; return [String(n), false]; }
   const t = todayISO(), since = mt.since || addDays(t, -7), fn = fundId ? fundById(fundId)?.name : "";
   const ds = visDossiers().filter(d => !d.archived && (!fn || d.vehicle === fn)); const tk = visTasks().filter(x => !fn || dossierById(x.dossierId)?.vehicle === fn);
   const occ = () => dlOccAll(addDays(t, -200), addDays(t, 31)).filter(x => x.status !== "sent" && (!fn || x.o.fund === fn));
@@ -3571,7 +3621,7 @@ document.addEventListener("change", e => { if (e.target.id === "mt-board") { S.u
 /* ---------- indicateurs personnalisés (sans code) ---------- */
 const CK_SOURCES = { dossiers: "Dossiers", tasks: "Tâches", deadlines: "Échéances et reportings", installments: "Échéances de remboursement (échéanciers)", positions: "Participations et financements", projects: "Projets" };
 const CK_FIELDS = () => ({
-  dossiers: { amount: "Montant du dossier", daysInStage: "Jours dans l'étape actuelle", ...Object.fromEntries((S.cfg.customFields || []).filter(f => f.type === "number" || f.type === "currency").map(f => ["cf:" + f.id, f.label])) },
+  dossiers: { amount: "Montant du dossier", daysInStage: "Jours dans l'étape actuelle", progress: "Avancement des étapes (%)", docsPct: "Documents validés (%)", ...Object.fromEntries((S.cfg.customFields || []).filter(f => f.type === "number" || f.type === "currency").map(f => ["cf:" + f.id, f.label])) },
   tasks: { lateDays: "Jours de retard" },
   deadlines: { amount: "Montant" },
   installments: { total: "Montant de l'échéance", p: "Capital", i: "Intérêts", v: "Part variable (CA)", paid: "Montant reçu" },
@@ -3592,7 +3642,7 @@ function ckItems(def, ctx) {
       && (!F.phase || (F.phase === "study" ? inStudy(d) : F.phase === "portfolio" ? inPortfolio(d) : true)) && (!F.owners?.length || dOwners(d).some(o => F.owners.includes(o)))
       && (!F.sector || d.sector === F.sector) && (!F.priority || d.priority === F.priority) && (!F.tag || (d.tags || []).includes(F.tag)) && (!F.pending || d.pendingApproval)
       && (!F.late || S.tasks.some(x => x.dossierId === d.id && !isDone(x) && x.due && x.due < t)) && (!num(F.createdDays) || String(d.createdAt || "") >= addDays(t, -num(F.createdDays))))
-      .map(d => ({ amount: num(d.amount), daysInStage: d.stageSince ? daysBetween(d.stageSince, t) : 0, ...Object.fromEntries(Object.entries(d.custom || {}).map(([k, v]) => ["cf:" + k, num(v)])) }));
+      .filter(d => (!F.blocked || isBlocked(d)) && (!F.cmp || cmpStatus(d) === F.cmp)).map(d => ({ progress: stagePos(d).pct, docsPct: docSummary(d).pct, amount: num(d.amount), daysInStage: d.stageSince ? daysBetween(d.stageSince, t) : 0, ...Object.fromEntries(Object.entries(d.custom || {}).map(([k, v]) => ["cf:" + k, num(v)])) }));
     case "tasks": return visTasks().filter(x => { const dn = dossierById(x.dossierId); const st = F.status || "open";
       return (!fn || dn?.vehicle === fn) && (!F.assignees?.length || (x.assignees || []).some(a => F.assignees.includes(a))) && (!F.priority || x.priority === F.priority)
         && (st === "all" || (st === "open" ? !isDone(x) : st === "late" ? !isDone(x) && x.due && x.due < t : st === "soon" ? !isDone(x) && within(x.due, num(F.days) || 7) : st === "done" ? isDone(x) && (!num(F.days) || String(x.completedAt || "") >= addDays(t, -num(F.days))) : true)); })
@@ -3617,7 +3667,7 @@ function ckEval(def, ctx = {}, depth = 0) {
   }
   const items = ckItems(def, ctx); const fld = def.field; const vals = def.measure === "count" ? [] : items.map(x => num(x[fld]));
   const v = def.measure === "count" ? items.length : !vals.length ? (def.measure === "sum" ? 0 : NaN) : def.measure === "sum" ? vals.reduce((s, x) => s + x, 0) : def.measure === "avg" ? vals.reduce((s, x) => s + x, 0) / vals.length : def.measure === "min" ? Math.min(...vals) : Math.max(...vals);
-  const fmt = def.format && def.format !== "auto" ? def.format : def.measure === "count" ? "number" : ckIsMoneyField(def.source, fld) ? "money" : (fld === "stake" || fld === "progress") ? "percent" : "number";
+  const fmt = def.format && def.format !== "auto" ? def.format : def.measure === "count" ? "number" : ckIsMoneyField(def.source, fld) ? "money" : (fld === "stake" || fld === "progress" || fld === "docsPct") ? "percent" : "number";
   return { v, fmt, n: items.length };
 }
 function ckRaw(id, ctx, depth) { const c = ckList().find(k => k.id === id); if (c) return ckEval(c, ctx, depth).v; const r = mbKpiValue(id, { since: addDays(todayISO(), -7) }, ctx.fundId || "")[0]; return num(String(r).replace(/<[^>]+>/g, "").replace(/[^\d,.-]/g, "")); }
@@ -3639,7 +3689,8 @@ function ckFiltersForm(src, F) {
     <div><div class="eyebrow">Workflows</div>${multi("workflows", S.cfg.workflows.map(w => [w.id, w.name]))}</div>
     <div><div class="eyebrow">Étapes (vide = toutes)</div>${S.cfg.workflows.filter(w => !(F.workflows || []).length || F.workflows.includes(w.id)).map(w => `<div style="margin:4px 0"><span class="muted" style="font-size:11.5px">${h(w.name)}</span>${multi("stages", w.stages.map(s => [s.id, s.name]))}</div>`).join("")}</div>
     <div><div class="eyebrow">Responsables (vide = tous)</div>${multi("owners", internals().map(m => [m.id, m.name.split(" ")[0]]))}</div>
-    <div class="row"><label class="chk"><input type="checkbox" data-ckb="pending" ${F.pending ? "checked" : ""}>En attente de validation</label><label class="chk"><input type="checkbox" data-ckb="late" ${F.late ? "checked" : ""}>Avec des tâches en retard</label><label class="chk"><input type="checkbox" data-ckb="archived" ${F.archived ? "checked" : ""}>Inclure les archivés</label></div>`;
+    <div class="row"><label class="chk"><input type="checkbox" data-ckb="pending" ${F.pending ? "checked" : ""}>En attente de validation</label><label class="chk"><input type="checkbox" data-ckb="late" ${F.late ? "checked" : ""}>Avec des tâches en retard</label><label class="chk"><input type="checkbox" data-ckb="archived" ${F.archived ? "checked" : ""}>Inclure les archivés</label><label class="chk"><input type="checkbox" data-ckb="blocked" ${F.blocked ? "checked" : ""}>Dossiers bloqués uniquement</label></div>
+    <label class="f" style="max-width:260px"><span>Statut de conformité</span><select data-ckf="cmp"><option value="">Tous</option>${Object.entries(CMP_ST).map(([k, x]) => `<option value="${k}" ${F.cmp === k ? "selected" : ""}>${x[0]}</option>`).join("")}</select></label>`;
   if (src === "tasks") return `<div class="grid3">${fund}${f("Lesquelles", `<select data-ckf="status">${[["open", "Ouvertes"], ["late", "En retard"], ["soon", "À échéance sous N jours"], ["done", "Terminées (sur N jours)"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${(F.status || "open") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("N jours", `<input type="number" data-ckf="days" value="${v("days")}" placeholder="7">`)}${prio}</div><div><div class="eyebrow">Responsables (vide = tous)</div>${multi("assignees", internals().map(m => [m.id, m.name.split(" ")[0]]))}</div>`;
   if (src === "deadlines") return `<div class="grid3">${fund}${f("Lesquelles", `<select data-ckf="status">${[["open", "À traiter (retards + horizon)"], ["late", "En retard"], ["sent", "Remises"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${(F.status || "open") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("Horizon (jours)", `<input type="number" data-ckf="days" value="${v("days")}" placeholder="30">`)}${f("Type", `<select data-ckf="dtype"><option value="">Tous</option>${(S.cfg.deadlineTypes || []).map(x => `<option value="${x.id}" ${F.dtype === x.id ? "selected" : ""}>${h(x.label)}</option>`).join("")}</select>`)}</div><label class="chk"><input type="checkbox" data-ckb="noSched" ${F.noSched ? "checked" : ""}>Exclure les remboursements des échéanciers</label>`;
   if (src === "installments") return `<div class="grid3">${fund}${f("Lesquelles", `<select data-ckf="status">${[["todo", "Non payées"], ["upcoming", "À échoir"], ["late", "Impayées (en retard)"], ["paid", "Payées"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${(F.status || "todo") === k ? "selected" : ""}>${l}</option>`).join("")}</select>`)}${f("Sur N jours (à venir, ou passés pour « payées »)", `<input type="number" data-ckf="days" value="${v("days")}" placeholder="toutes">`)}</div>`;
@@ -3712,6 +3763,455 @@ document.addEventListener("click", e => {
   if (A === "ck-edit") ckEditor(ckList().find(x => x.id === el.dataset.id));
 });
 
+/* ---------- avancement, tâches prioritaires, blocages ---------- */
+const stagePos = d => { const w = wfById(d.workflowId); if (!w || !w.stages.length) return { i: 0, n: 0, pct: 0 }; const i = Math.max(0, w.stages.findIndex(s => s.id === d.stageId)); const n = w.stages.length; return { i, n, pct: n > 1 ? Math.round(i / (n - 1) * 100) : 100 }; };
+const progBar = (pct, wide) => `<span class="pgr${wide ? " wide" : ""}" title="Avancement des étapes : ${pct} %"><span style="width:${pct}%"></span></span><span class="num pgr-n">${pct} %</span>`;
+const prioRank = id => { const i = (S.cfg.priorities || []).findIndex(p => p.id === id); return i < 0 ? 99 : i; };
+const isHiPrio = t => prioRank(t.priority) <= 1;
+const hiPrioTasks = d => S.tasks.filter(t => t.dossierId === d.id && !isDone(t) && isHiPrio(t)).sort((a, b) => prioRank(a.priority) - prioRank(b.priority) || (a.due || "9").localeCompare(b.due || "9"));
+const hiBadge = d => { const n = hiPrioTasks(d).length; return n ? `<span class="hi-badge" title="${n} tâche(s) prioritaire(s) ouverte(s)">⚑ ${n} prioritaire${n > 1 ? "s" : ""}</span>` : ""; };
+const BLOCK_CATS_DEFAULT = ["Documents manquants", "En attente du client / promoteur", "Validation interne", "Garanties / sûretés", "Juridique / réglementaire", "Montage / financement", "Autre"];
+const blockCats = () => (S.cfg.blockReasons && S.cfg.blockReasons.length ? S.cfg.blockReasons : BLOCK_CATS_DEFAULT);
+const isBlocked = d => !!d.block?.on;
+const blockTag = d => isBlocked(d) ? `<span class="blk-tag" title="${h((d.block.cat ? d.block.cat + " — " : "") + (d.block.reason || ""))}">BLOQUÉ</span>` : "";
+const dTeam = d => [...new Set([...dOwners(d), ...(d.members || [])])].filter(Boolean);
+function blockModal(d0) {
+  const d = dossierById(d0.id); if (!d) return; const b = { ...(d.block || {}) }; const isNew = !b.on;
+  modal(isNew ? `Signaler un blocage — ${d.code}` : `Blocage — ${d.code}`, `<div class="grid2"><label class="f"><span>Nature du blocage</span><select id="bk-cat">${blockCats().map(c => `<option ${b.cat === c ? "selected" : ""}>${h(c)}</option>`).join("")}</select></label>
+      <label class="f"><span>Responsable de la levée</span><select id="bk-owner"><option value="">—</option>${internals().map(m => `<option value="${m.id}" ${(b.ownerId || dOwners(d)[0]) === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select></label></div>
+    <label class="f"><span>Motif de blocage</span><textarea id="bk-reason" rows="3" placeholder="Ce qui empêche le dossier d'avancer">${h(b.reason || "")}</textarea></label>
+    <label class="f"><span>Actions nécessaires pour le débloquer</span><textarea id="bk-actions" rows="3" placeholder="Une action par ligne">${h(b.actions || "")}</textarea></label>
+    <label class="f" style="max-width:220px"><span>Levée prévue le</span><input type="date" id="bk-due" value="${h(b.due || "")}"></label>
+    ${!isNew ? `<p class="muted" style="margin:0;font-size:12px">Bloqué depuis le ${fdate(b.since)} (${daysBetween(b.since, todayISO())} j) · signalé par ${h(mname(b.by))}</p>` : ""}`,
+    `${!isNew ? `<button class="btn" id="bk-off">Débloquer le dossier</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="bk-ok">${isNew ? "Signaler le blocage" : "Enregistrer"}</button>`, L => {
+      $("#bk-ok", L).onclick = async () => { const reason = $("#bk-reason", L).value.trim(); if (!reason) { toast("Décrivez le motif du blocage."); return; }
+        const live = dossierById(d.id); live.block = { on: true, cat: $("#bk-cat", L).value, reason, actions: $("#bk-actions", L).value.trim(), ownerId: $("#bk-owner", L).value, due: $("#bk-due", L).value, since: b.on ? b.since : todayISO(), by: b.on ? b.by : (me()?.id || null), updatedAt: new Date().toISOString() };
+        L.remove(); await putDoc("dossiers", live);
+        await log(isNew ? `${live.code} bloqué : ${live.block.cat} — ${reason.slice(0, 90)}` : `${live.code} : blocage mis à jour`, { dossierId: live.id, kind: "block", notify: [...new Set([...dTeam(live), live.block.ownerId])].filter(x => x && x !== me()?.id) });
+        toast(isNew ? "Blocage signalé" : "Blocage mis à jour"); render(); renderDrawer(); };
+      const off = $("#bk-off", L); off && (off.onclick = async () => { const live = dossierById(d.id); const days = daysBetween(live.block.since, todayISO());
+        live.blockHistory = [...(live.blockHistory || []), { ...live.block, on: false, liftedAt: todayISO(), liftedBy: me()?.id || null }].slice(-20); live.block = { on: false };
+        L.remove(); await putDoc("dossiers", live); await log(`${live.code} débloqué après ${days} j`, { dossierId: live.id, kind: "block", notify: dTeam(live).filter(x => x !== me()?.id) }); toast("Dossier débloqué"); render(); renderDrawer(); });
+    });
+}
+function blockBanner(d, ed) {
+  if (!isBlocked(d)) return "";
+  const b = d.block, days = daysBetween(b.since || todayISO(), todayISO());
+  return `<div class="banner bad blk-banner"><div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0"><b>Dossier bloqué${b.cat ? " · " + h(b.cat) : ""}</b><span>${h(b.reason || "")}</span>${b.actions ? `<span><b>Actions :</b> ${h(b.actions).replace(/\n/g, " · ")}</span>` : ""}<span class="muted" style="font-size:12px">Depuis ${days} j${b.ownerId ? " · levée : " + h(mname(b.ownerId)) : ""}${b.due ? " · prévue le " + fdate(b.due) : ""}</span></div>${ed ? `<button class="btn sm" data-act11="block" data-id="${d.id}">Mettre à jour / débloquer</button>` : ""}</div>`;
+}
+
+/* ---------- conformité & suivi des documents ---------- */
+const DOC_ST = { missing: ["Manquant", "#C2413A", "var(--bad-bg)"], received: ["Reçu · à vérifier", "#2F6FB0", "#E3EEF9"], update: ["À actualiser", "#B7791F", "var(--warn-bg)"], validated: ["Validé", "#2F8A5B", "var(--ok-bg)"], na: ["Non applicable", "#7B8794", "#EEF0F2"] };
+const CMP_ST = { none: ["Non lancé", "#7B8794"], collecting: ["Collecte des documents", "#2F6FB0"], review: ["En vérification", "#7A5BB0"], corrections: ["Corrections demandées", "#B7791F"], validated: ["Conforme", "#2F8A5B"] };
+const docChip = s => { const x = DOC_ST[s] || DOC_ST.missing; return `<span class="chip" style="background:${x[2]};color:${x[1]}">${x[0]}</span>`; };
+const cmpChip = s => { const x = CMP_ST[s] || CMP_ST.none; return chip(x[0], x[1]); };
+const CMP_TEMPLATES_DEFAULT = [
+  { id: "tpl_kyc_pm", name: "KYC — Personne morale", docs: ["Identité|Extrait du Registre National des Entreprises (RNE)", "Identité|Statuts à jour", "Identité|Carte d'identification fiscale", "Gouvernance|PV de nomination des dirigeants", "Gouvernance|CIN / passeport des dirigeants", "Gouvernance|Déclaration des bénéficiaires effectifs", "Fiscal & social|Attestation de régularité fiscale", "Fiscal & social|Attestation d'affiliation CNSS", "Financier|Derniers états financiers certifiés", "Bancaire|Relevé d'identité bancaire"] },
+  { id: "tpl_kyc_pp", name: "KYC — Personne physique", docs: ["Identité|CIN / passeport", "Identité|Justificatif de domicile de moins de 3 mois", "Origine des fonds|Déclaration d'origine des fonds", "Bancaire|Relevé d'identité bancaire"] },
+  { id: "tpl_fin", name: "Demande de financement — INMA Finance", docs: ["Financier|États financiers des 3 derniers exercices", "Financier|Situation intermédiaire de l'exercice en cours", "Financier|Business plan et prévisionnel", "Financier|État de l'endettement bancaire", "Garanties|Liste des garanties proposées", "Juridique|Contrats commerciaux significatifs"] },
+];
+const CMP_MESSAGE_DEFAULT = `Objet : {dossier} — documents à nous transmettre
+
+Bonjour {contact},
+
+Dans le cadre de l'étude du dossier {dossier} ({societe}), merci de nous transmettre les documents suivants avant le {echeance} :
+
+{liste}
+
+Vous pouvez les déposer dans le dossier partagé : {lien}
+
+Nous restons à votre disposition pour toute question.
+
+Bien cordialement,
+{signature}`;
+function cmpCfg() { const c = S.cfg.compliance || {}; return { label: c.label || "TAEF", reviewers: c.reviewers || [], templates: c.templates && c.templates.length ? c.templates : CMP_TEMPLATES_DEFAULT, message: c.message || CMP_MESSAGE_DEFAULT, delay: +c.delay || 10 }; }
+const cmpReviewers = () => { const c = cmpCfg(); const l = c.reviewers.filter(id => member(id)); return l.length ? l : internals().filter(m => role(m.roleId)?.perms?.compliance).map(m => m.id); };
+const canReview = () => can("compliance") || cmpCfg().reviewers.includes(me()?.id);
+const canCollect = d => canEditDossier(d) || can("onedrive");
+const extDeposit = d => isExt(me()) && extGrant(d)?.level === "contribute";
+function docSummary(d) {
+  const r = (d.docReqs || []).filter(x => x.status !== "na"); const c = k => r.filter(x => x.status === k).length;
+  return { total: r.length, validated: c("validated"), received: c("received"), update: c("update"), missing: c("missing"), pct: r.length ? Math.round(c("validated") / r.length * 100) : 0 };
+}
+const cmpStatus = d => d.compliance?.status || ((d.docReqs || []).length ? "collecting" : "none");
+const inCompliance = d => (d.docReqs || []).length || (d.compliance?.status && d.compliance.status !== "none");
+function docReqFromLine(line) { const [a, b] = String(line).includes("|") ? line.split("|") : ["", line]; return { id: uid("dr"), name: (b || a).trim(), cat: b ? a.trim() : "", status: "missing", url: "", note: "", required: true, history: [], requestedAt: "" }; }
+async function cmpSave(d, text, notify, kind = "compliance") { await putDoc("dossiers", d); if (text) await log(text, { dossierId: d.id, kind, notify: (notify || []).filter(x => x && x !== me()?.id) }); render(); renderDrawer(); }
+function docHist(x, status, note) { x.history = [...(x.history || []), { at: new Date().toISOString(), by: me()?.id || null, status, note: note || "" }].slice(-30); }
+
+function cmpTab(d) {
+  const sm = docSummary(d), st = cmpStatus(d), c = cmpCfg(), rv = canReview(), col = canCollect(d) || extDeposit(d), ext = isExt(me());
+  const reqs = d.docReqs || []; const cats = [...new Set(reqs.map(x => x.cat || "Autres documents"))];
+  const allOk = sm.total > 0 && sm.validated === sm.total;
+  const actions = [];
+  if (!ext && canCollect(d)) { actions.push(`<button class="btn sm" data-act11="cmp-tpl" data-id="${d.id}">${ic("plus")}Appliquer un modèle</button>`, `<button class="btn sm" data-act11="cmp-add" data-id="${d.id}">${ic("plus")}Document</button>`, `<button class="btn sm" data-act11="cmp-request" data-id="${d.id}">${ic("file")}Demande de documents</button>`);
+    if (["none", "collecting", "corrections"].includes(st) && reqs.length) actions.push(`<button class="btn sm pri" data-act11="cmp-submit" data-id="${d.id}">Soumettre au contrôle ${h(c.label)}</button>`); }
+  if (!ext && rv && reqs.length && st !== "validated") actions.push(`<button class="btn sm pri" data-act11="cmp-validate" data-id="${d.id}" ${allOk ? "" : `disabled title="Tous les documents doivent être validés (ou non applicables)"`}>Valider la conformité</button>`);
+  if (!ext && rv && st === "validated") actions.push(`<button class="btn sm" data-act11="cmp-reopen" data-id="${d.id}">Rouvrir le contrôle</button>`);
+  if (window.INMA?.graph?.available?.() && reqs.some(x => x.status === "update" && isURL(x.url))) actions.push(`<button class="btn sm" data-act11="cmp-share" data-id="${d.id}" title="Repère les documents modifiés dans OneDrive/SharePoint depuis la demande de correction">${ic("cloud")}Vérifier le share</button>`);
+  const gi = x => reqs.indexOf(x); const srt = !ext && canCollect(d);
+  const row = x => { const last = (x.history || []).slice(-1)[0]; const histTxt = (x.history || []).slice(-6).map(e => `${fdate(e.at.slice(0, 10))} · ${mname(e.by)} · ${(DOC_ST[e.status] || [e.status])[0]}${e.note ? " — " + e.note : ""}`).join("\n");
+    const btn = []; if (isURL(x.url)) btn.push(`<a class="btn sm" href="${h(x.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>`);
+    if (col && x.status !== "validated") btn.push(`<button class="btn sm" data-act11="doc-deposit" data-id="${d.id}" data-doc="${x.id}">${x.status === "update" ? "Déposer la version corrigée" : x.status === "received" ? "Remplacer" : "Déposer"}</button>`);
+    if (!ext && rv && (x.status === "received" || x.status === "update")) btn.push(`<button class="btn sm pri" data-act11="doc-ok" data-id="${d.id}" data-doc="${x.id}">Valider</button>`);
+    if (!ext && rv && x.status !== "missing" && x.status !== "na") btn.push(`<button class="btn sm" data-act11="doc-fix" data-id="${d.id}" data-doc="${x.id}">Corrections</button>`);
+    if (!ext && (canCollect(d) || rv)) btn.push(`<button class="btn sm ghost" data-act11="doc-menu" data-id="${d.id}" data-doc="${x.id}" aria-label="Plus d'actions">⋯</button>`);
+    return `<tr data-si="${gi(x)}"><td>${srt ? dh() : ""}<b>${h(x.name)}</b>${isURL(x.url) && odName(x.url, d.odNames) ? `<div class="t2" style="font-size:11.5px">${ic("file")} ${h(odName(x.url, d.odNames))}</div>` : ""}${x.required === false ? ' <span class="tag">facultatif</span>' : ""}${x.note ? `<div class="t2 doc-note">${x.status === "update" ? "Correction demandée : " : ""}${h(x.note)}</div>` : ""}</td><td>${docChip(x.status)}</td><td class="muted" style="font-size:12px" title="${h(histTxt)}">${last ? `${h(mname(last.by).split(" ")[0])} · ${fdate(last.at.slice(0, 10))}` : "—"}${x.due && x.status !== "validated" ? `<br>${due(x.due)}` : ""}</td><td><div class="row" style="gap:4px;justify-content:flex-end">${btn.join("")}</div></td></tr>`; };
+  return `<div class="panel"><header>${ic("shield")}<h2>Contrôle de conformité</h2>${cmpChip(st)}<span class="spacer"></span><span class="muted" style="font-size:12px">Contrôle : ${h(c.label)}${cmpReviewers().length ? " (" + cmpReviewers().map(id => h(mname(id).split(" ")[0])).join(", ") + ")" : ""}</span></header>
+    <div class="body" style="display:flex;flex-direction:column;gap:10px">
+      <div class="row" style="gap:10px">${progBar(sm.pct, true)}<span class="muted" style="font-size:12.5px">${sm.validated}/${sm.total} validés</span>${sm.missing ? `<span class="chip" style="background:var(--bad-bg);color:var(--bad)">${sm.missing} manquant${sm.missing > 1 ? "s" : ""}</span>` : ""}${sm.received ? `<span class="chip" style="background:#E3EEF9;color:#2F6FB0">${sm.received} à vérifier</span>` : ""}${sm.update ? `<span class="chip" style="background:var(--warn-bg);color:#B7791F">${sm.update} à actualiser</span>` : ""}</div>
+      ${d.compliance?.note && st !== "validated" ? `<div class="banner warn" style="margin:0"><span><b>Note du contrôle :</b> ${h(d.compliance.note)}</span></div>` : ""}
+      ${st === "validated" ? `<div class="banner ok" style="margin:0"><span><b>Dossier conforme</b> · validé par ${h(mname(d.compliance.by))} le ${fdate((d.compliance.at || "").slice(0, 10))}</span></div>` : ""}
+      ${actions.length ? `<div class="row" style="gap:6px">${actions.join("")}</div>` : ""}
+    </div></div>
+    ${reqs.length ? cats.map(cat => `<div class="panel tablewrap"><header><h2 style="font-size:14px">${h(cat)}</h2></header><table class="t doc-t"><thead><tr><th>Document</th><th>Statut</th><th>Dernière action</th><th></th></tr></thead><tbody data-sortlist="dreqs|${d.id}">${reqs.filter(x => (x.cat || "Autres documents") === cat).map(row).join("")}</tbody></table></div>`).join("")
+      : `<div class="empty"><b>Aucun document suivi pour ce dossier</b><span>Appliquez un modèle (KYC, RNE, états financiers…) pour suivre les documents reçus, manquants, à actualiser et validés, puis soumettez le dossier au contrôle ${h(c.label)}.</span>${!ext && canCollect(d) ? `<div class="row"><button class="btn pri" data-act11="cmp-tpl" data-id="${d.id}">Appliquer un modèle</button></div>` : ""}</div>`}`;
+}
+function cmpTplModal(d) {
+  const c = cmpCfg();
+  modal(`Modèle de documents — ${d.code}`, `<p class="muted" style="margin:0">Les documents du modèle sont ajoutés à la liste du dossier (les documents déjà présents sont conservés).</p>
+    <div class="list">${c.templates.map((t, i) => `<label class="li" style="cursor:pointer"><input type="radio" name="cmp-tpl" value="${i}" ${i === 0 ? "checked" : ""}><div class="grow"><div class="t1">${h(t.name)}</div><div class="t2" style="white-space:normal">${t.docs.map(x => h(x.split("|").pop())).join(" · ")}</div></div></label>`).join("")}</div>
+    <label class="f" style="max-width:220px"><span>À fournir avant le</span><input type="date" id="cmp-due" value="${addDays(todayISO(), c.delay)}"></label>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="cmp-ok">Ajouter les documents</button>`, L => {
+      $("#cmp-ok", L).onclick = async () => { const t = c.templates[+($('input[name="cmp-tpl"]:checked', L)?.value || 0)]; const due = $("#cmp-due", L).value; const live = dossierById(d.id);
+        const have = new Set((live.docReqs || []).map(x => x.name.toLowerCase())); const add = t.docs.map(docReqFromLine).filter(x => !have.has(x.name.toLowerCase())).map(x => ({ ...x, due, tpl: t.id }));
+        live.docReqs = [...(live.docReqs || []), ...add]; if (!live.compliance || live.compliance.status === "none") live.compliance = { ...(live.compliance || {}), status: "collecting", startedAt: todayISO() };
+        L.remove(); await cmpSave(live, `${live.code} : ${add.length} document(s) à collecter (${t.name})`, []); toast(`${add.length} document(s) ajouté(s)`); };
+    });
+}
+function cmpAddModal(d) {
+  modal(`Ajouter un document — ${d.code}`, `<div class="grid2"><label class="f"><span>Document</span><input type="text" id="ca-name" placeholder="Ex. Attestation de non-faillite"></label><label class="f"><span>Catégorie</span><input type="text" id="ca-cat" list="ca-cats" placeholder="Identité, Financier…"><datalist id="ca-cats">${[...new Set(cmpCfg().templates.flatMap(t => t.docs.filter(x => x.includes("|")).map(x => x.split("|")[0])))].map(x => `<option value="${h(x)}">`).join("")}</datalist></label></div>
+    <div class="grid2"><label class="f"><span>À fournir avant le</span><input type="date" id="ca-due" value="${addDays(todayISO(), cmpCfg().delay)}"></label><label class="chk" style="align-self:end"><input type="checkbox" id="ca-req" checked>Obligatoire pour valider la conformité</label></div>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="ca-ok">Ajouter</button>`, L => {
+      $("#ca-ok", L).onclick = async () => { const n = $("#ca-name", L).value.trim(); if (!n) { toast("Nommez le document."); return; } const live = dossierById(d.id);
+        live.docReqs = [...(live.docReqs || []), { ...docReqFromLine(($("#ca-cat", L).value.trim() ? $("#ca-cat", L).value.trim() + "|" : "") + n), due: $("#ca-due", L).value, required: $("#ca-req", L).checked }];
+        if (!live.compliance || live.compliance.status === "none") live.compliance = { ...(live.compliance || {}), status: "collecting", startedAt: todayISO() };
+        L.remove(); await cmpSave(live, "", []); };
+    });
+}
+function docDepositModal(d, x) {
+  const live0 = dossierById(d.id); const fix = x.status === "update";
+  modal(`${fix ? "Version corrigée" : "Dépôt"} — ${x.name}`, `${fix && x.note ? `<div class="banner warn" style="margin:0"><span><b>Correction demandée :</b> ${h(x.note)}</span></div>` : ""}
+    <label class="f"><span>Lien du document dans le share (OneDrive / SharePoint)</span><input type="url" id="dd-url" value="${h(x.url || live0.oneDriveUrl || "")}" placeholder="https://…"></label>
+    <label class="f"><span>Commentaire (facultatif)</span><input type="text" id="dd-note" placeholder="${fix ? "Ce qui a été corrigé" : "Précision pour le contrôle"}"></label>
+    <p class="muted" style="margin:0;font-size:12px">${h(cmpCfg().label)} ${["review", "corrections"].includes(cmpStatus(live0)) ? "sera notifié pour vérifier ce document" : "sera notifié quand vous soumettrez le dossier au contrôle"}.</p>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="dd-ok">${fix ? "Déposer et notifier" : "Marquer comme reçu"}</button>`, L => {
+      $("#dd-ok", L).onclick = async () => { const u = $("#dd-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
+        const live = dossierById(d.id); const it = (live.docReqs || []).find(y => y.id === x.id); if (!it) return; const note = $("#dd-note", L).value.trim();
+        it.url = u; it.status = "received"; it.receivedAt = new Date().toISOString(); if (note) it.depositNote = note; docHist(it, "received", note || (fix ? "version corrigée" : ""));
+        const inReview = ["review", "corrections"].includes(cmpStatus(live));
+        L.remove(); await cmpSave(live, fix ? `${live.code} : « ${it.name} » corrigé et redéposé — à revérifier` : `${live.code} : « ${it.name} » reçu${inReview ? " — à vérifier" : ""}`, inReview || fix ? cmpReviewers() : []);
+        toast(fix || inReview ? `Déposé · ${cmpCfg().label} est notifié` : "Document marqué comme reçu"); };
+    });
+}
+function docFixModal(d, x) {
+  modal(`Demander une correction — ${x.name}`, `<label class="f"><span>Corrections à apporter</span><textarea id="df-note" rows="4" placeholder="Ex. RNE de plus de 3 mois : fournir un extrait récent">${h(x.status === "update" ? x.note || "" : "")}</textarea></label>
+    <label class="f" style="max-width:220px"><span>À redéposer avant le</span><input type="date" id="df-due" value="${addDays(todayISO(), 5)}"></label>
+    <p class="muted" style="margin:0;font-size:12px">Le chargé du dossier est notifié ; dès qu'il redépose le document dans le share, vous êtes notifié pour le revérifier.</p>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="df-ok">Demander la correction</button>`, L => {
+      $("#df-ok", L).onclick = async () => { const note = $("#df-note", L).value.trim(); if (!note) { toast("Précisez la correction attendue."); return; }
+        const live = dossierById(d.id); const it = (live.docReqs || []).find(y => y.id === x.id); if (!it) return;
+        it.status = "update"; it.note = note; it.due = $("#df-due", L).value; it.fixAt = new Date().toISOString(); docHist(it, "update", note);
+        live.compliance = { ...(live.compliance || {}), status: "corrections" };
+        L.remove(); await cmpSave(live, `${live.code} : correction demandée sur « ${it.name} » — ${note.slice(0, 80)}`, dOwners(live).length ? dOwners(live) : dTeam(live)); toast("Correction demandée · le chargé est notifié"); };
+    });
+}
+function docMenu(d, x) {
+  const rv = canReview(), col = canCollect(d);
+  modal(x.name, `<div class="list">
+      ${col || rv ? `<button class="li btn ghost" style="justify-content:flex-start" data-dm="na">${x.status === "na" ? "Rétablir (à fournir)" : "Marquer « non applicable »"}</button>` : ""}
+      ${col || rv ? `<button class="li btn ghost" style="justify-content:flex-start" data-dm="req">${x.required === false ? "Rendre obligatoire" : "Rendre facultatif"}</button>` : ""}
+      ${rv && x.status === "validated" ? `<button class="li btn ghost" style="justify-content:flex-start" data-dm="unval">Annuler la validation</button>` : ""}
+      ${col ? `<button class="li btn ghost" style="justify-content:flex-start" data-dm="ren">Renommer / changer la date</button>` : ""}
+      ${col ? `<button class="li btn ghost danger" style="justify-content:flex-start" data-dm="del">Retirer de la liste</button>` : ""}</div>
+    ${(x.history || []).length ? `<div class="eyebrow" style="margin-top:6px">Historique</div><div class="list">${x.history.slice().reverse().map(e => `<div class="li"><div class="grow"><div class="t1" style="white-space:normal">${(DOC_ST[e.status] || [e.status])[0]}${e.note ? " — " + h(e.note) : ""}</div><div class="t2">${h(mname(e.by))} · ${new Date(e.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</div></div></div>`).join("")}</div>` : ""}`,
+    `<button class="btn" data-mclose="1">Fermer</button>`, L => {
+      L.addEventListener("click", async e => { const b = e.target.closest("[data-dm]"); if (!b) return; const live = dossierById(d.id); const it = (live.docReqs || []).find(y => y.id === x.id); if (!it) return; const a = b.dataset.dm;
+        if (a === "na") { it.status = it.status === "na" ? "missing" : "na"; docHist(it, it.status); }
+        if (a === "req") it.required = it.required === false;
+        if (a === "unval") { it.status = "received"; docHist(it, "received", "validation annulée"); if (live.compliance?.status === "validated") live.compliance.status = "review"; }
+        if (a === "ren") { L.remove(); modal("Modifier le document", `<label class="f"><span>Nom</span><input type="text" id="rn-n" value="${h(it.name)}"></label><div class="grid2"><label class="f"><span>Catégorie</span><input type="text" id="rn-c" value="${h(it.cat || "")}"></label><label class="f"><span>À fournir avant le</span><input type="date" id="rn-d" value="${h(it.due || "")}"></label></div>`, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="rn-ok">Enregistrer</button>`, M => { $("#rn-ok", M).onclick = async () => { const l2 = dossierById(d.id); const i2 = (l2.docReqs || []).find(y => y.id === x.id); if (!i2) return; i2.name = $("#rn-n", M).value.trim() || i2.name; i2.cat = $("#rn-c", M).value.trim(); i2.due = $("#rn-d", M).value; M.remove(); await cmpSave(l2, "", []); }; }); return; }
+        if (a === "del") { live.docReqs = live.docReqs.filter(y => y.id !== it.id); }
+        L.remove(); await cmpSave(live, "", []); });
+    });
+}
+function cmpRequestModal(d) {
+  const c = cmpCfg(); const reqs = (d.docReqs || []).filter(x => x.status === "missing" || x.status === "update");
+  const build = (L) => { const sel = $$("[data-rq]", L).filter(i => i.checked).map(i => (d.docReqs || []).find(x => x.id === i.dataset.rq)).filter(Boolean);
+    const liste = sel.map(x => `- ${x.name}${x.status === "update" && x.note ? " (à actualiser : " + x.note + ")" : ""}`).join("\n");
+    const m = me(); const vars = { dossier: `${d.code} · ${d.name}`, societe: d.company || d.name, contact: $("#rq-contact", L).value.trim() || "Madame, Monsieur", echeance: fdate($("#rq-due", L).value) || "—", liste: liste || "-", lien: isURL(d.oneDriveUrl) ? d.oneDriveUrl : "(lien communiqué séparément)", signature: m ? `${m.name}${m.title ? "\n" + m.title : ""}\n${S.cfg.fundRoot?.name || "INMA Capital"}` : (S.cfg.fundRoot?.name || "INMA Capital") };
+    const txt = c.message.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`); const lines = txt.split("\n"); let subject = `${d.code} — documents à transmettre`, body = txt;
+    if (/^objet\s*:/i.test(lines[0])) { subject = lines[0].replace(/^objet\s*:\s*/i, ""); body = lines.slice(1).join("\n").replace(/^\n+/, ""); }
+    $("#rq-subj", L).value = subject; $("#rq-body", L).value = body; };
+  modal(`Demande de documents — ${d.code}`, `<div class="grid3"><label class="f"><span>Destinataire (nom)</span><input type="text" id="rq-contact" value="${h(d.contactName || "")}" placeholder="Ex. M. Ben Salah"></label><label class="f"><span>E-mail du destinataire</span><input type="email" id="rq-mail" value="${h(d.contactEmail || "")}" placeholder="contact@societe.tn"></label><label class="f"><span>À fournir avant le</span><input type="date" id="rq-due" value="${addDays(todayISO(), c.delay)}"></label></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Documents demandés</div><div class="row" style="gap:4px 12px">${reqs.map(x => `<label class="chk"><input type="checkbox" data-rq="${x.id}" checked>${h(x.name)}${x.status === "update" ? " (à actualiser)" : ""}</label>`).join("") || '<span class="muted">Aucun document manquant ni à actualiser.</span>'}</div></div>
+    <label class="f"><span>Objet</span><input type="text" id="rq-subj"></label><label class="f"><span>Message</span><textarea id="rq-body" rows="12"></textarea></label>
+    <p class="muted" style="margin:0;font-size:12px">Modèle modifiable dans Paramètres › Conformité & documents.</p>`,
+    `<button class="btn" id="rq-copy">${ic("copy")}Copier</button><button class="btn" id="rq-mailto">Ouvrir dans Outlook</button><span class="spacer"></span><button class="btn" data-mclose="1">Fermer</button><button class="btn pri" id="rq-done">Marquer comme envoyée</button>`, L => {
+      build(L); L.addEventListener("change", e => { if (e.target.matches("[data-rq],#rq-due")) build(L); }); L.addEventListener("input", e => { if (e.target.id === "rq-contact") build(L); });
+      $("#rq-copy", L).onclick = () => copyText(`${$("#rq-subj", L).value}\n\n${$("#rq-body", L).value}`);
+      $("#rq-mailto", L).onclick = () => { const a = document.createElement("a"); a.href = `mailto:${encodeURIComponent($("#rq-mail", L).value.trim())}?subject=${encodeURIComponent($("#rq-subj", L).value)}&body=${encodeURIComponent($("#rq-body", L).value)}`; a.click(); };
+      $("#rq-done", L).onclick = async () => { const live = dossierById(d.id); const ids = $$("[data-rq]", L).filter(i => i.checked).map(i => i.dataset.rq); const dd = $("#rq-due", L).value;
+        for (const it of live.docReqs || []) if (ids.includes(it.id)) { it.requestedAt = todayISO(); if (dd) it.due = dd; }
+        live.contactName = $("#rq-contact", L).value.trim(); const em = $("#rq-mail", L).value.trim(); if (em) live.contactEmail = em;
+        L.remove(); await cmpSave(live, `${live.code} : demande de ${ids.length} document(s) envoyée${live.contactName ? " à " + live.contactName : ""}`, []); toast("Demande enregistrée"); };
+    }, true);
+}
+async function cmpShareCheck(d, silent) {
+  const g = window.INMA?.graph; if (!g?.info) { if (!silent) toast("Disponible dans la version connectée à Microsoft 365."); return; }
+  const live = dossierById(d.id); let n = 0;
+  for (const it of (live.docReqs || []).filter(x => x.status === "update" && isURL(x.url))) {
+    try { const inf = await g.info(it.url); if (inf?.modified && inf.modified > (it.fixAt || "")) { it.status = "received"; it.receivedAt = new Date().toISOString(); docHist(it, "received", `modifié dans le share le ${fdate(inf.modified.slice(0, 10))}${inf.by ? " par " + inf.by : ""}`); n++; } } catch (e) { if (!silent) { toast("Share : " + (e.message || "accès impossible")); return; } }
+  }
+  S.shareOk = true;
+  if (n) await cmpSave(live, `${live.code} : ${n} document(s) mis à jour dans le share après correction — à revérifier`, cmpReviewers());
+  if (!silent) toast(n ? `${n} document(s) mis à jour détecté(s) · ${cmpCfg().label} est notifié` : "Aucune modification dans le share depuis les demandes de correction");
+}
+function vCompliance() {
+  const f = S.ui.cmp = { st: "", owner: "", fund: "", mine: false, q: "", ...(S.ui.cmp || {}) }; const c = cmpCfg(), rv = canReview(), m = me();
+  const all = visDossiers().filter(d => !d.archived);
+  const inC = all.filter(inCompliance);
+  const list = inC.filter(d => (!f.st || cmpStatus(d) === f.st) && (!f.owner || dOwners(d).includes(f.owner === "_me" ? m?.id : f.owner)) && (!f.fund || d.vehicle === f.fund) && (!f.q || (d.code + " " + d.name).toLowerCase().includes(f.q.toLowerCase()))
+    && (!f.mine || (rv ? ["review", "corrections"].includes(cmpStatus(d)) && (d.docReqs || []).some(x => x.status === "received") : dOwners(d).includes(m?.id) && (d.docReqs || []).some(x => x.status === "missing" || x.status === "update"))));
+  const k = (l, v, a) => `<div class="kpi ${a ? "alert" : ""}"><span class="l">${l}</span><span class="v">${v}</span></div>`;
+  const toCheck = inC.reduce((s, d) => s + docSummary(d).received, 0), missing = inC.reduce((s, d) => s + docSummary(d).missing + docSummary(d).update, 0);
+  const tb = `<div class="toolbar"><select id="cmp-f-st" aria-label="Statut"><option value="">Tous statuts</option>${Object.entries(CMP_ST).filter(([s]) => s !== "none").map(([s, x]) => `<option value="${s}" ${f.st === s ? "selected" : ""}>${x[0]}</option>`).join("")}</select>
+    <select id="cmp-f-owner" aria-label="Chargé de dossier"><option value="">Tous chargés</option><option value="_me" ${f.owner === "_me" ? "selected" : ""}>Mes dossiers</option>${internals().map(x => `<option value="${x.id}" ${f.owner === x.id ? "selected" : ""}>${h(x.name)}</option>`).join("")}</select>
+    <select id="cmp-f-fund" aria-label="Fonds"><option value="">Tous les fonds</option>${vehicles().map(x => `<option ${f.fund === x ? "selected" : ""}>${h(x)}</option>`).join("")}</select>
+    <input type="search" id="cmp-f-q" placeholder="Rechercher…" value="${h(f.q)}"><label class="chk"><input type="checkbox" id="cmp-f-mine" ${f.mine ? "checked" : ""}>${rv ? "À vérifier" : "À compléter par moi"}</label>
+    <span class="spacer"></span>${all.some(d => !inCompliance(d) && canCollect(d)) ? `<button class="btn pri" data-act11="cmp-start">${ic("plus")}Lancer un contrôle</button>` : ""}</div>`;
+  const kp = `<div class="kpis">${k("Dossiers suivis", inC.length)}${k("En vérification", inC.filter(d => cmpStatus(d) === "review").length)}${k("Corrections demandées", inC.filter(d => cmpStatus(d) === "corrections").length, inC.some(d => cmpStatus(d) === "corrections"))}${k("Documents à vérifier", toCheck, rv && toCheck)}${k("Manquants / à actualiser", missing)}${k("Conformes", inC.filter(d => cmpStatus(d) === "validated").length)}</div>`;
+  const rows = list.sort((a, b) => ({ corrections: 0, review: 1, collecting: 2, validated: 3 }[cmpStatus(a)] ?? 4) - ({ corrections: 0, review: 1, collecting: 2, validated: 3 }[cmpStatus(b)] ?? 4)).map(d => { const sm = docSummary(d); const last = (d.docReqs || []).flatMap(x => x.history || []).map(e => e.at).sort().pop();
+    const nextDue = (d.docReqs || []).filter(x => x.due && ["missing", "update"].includes(x.status)).map(x => x.due).sort()[0];
+    return `<tr class="click" data-open="${d.id}" data-tab="compliance"><td><span class="mono muted" style="font-size:11px">${h(d.code)}</span><br><b>${h(d.name)}</b>${blockTag(d)}</td><td>${avs(dOwners(d))}</td><td>${h(d.vehicle || "—")}</td><td>${cmpChip(cmpStatus(d))}</td>
+      <td style="min-width:200px">${progBar(sm.pct)}<div class="row" style="gap:4px;margin-top:4px">${sm.missing ? `<span class="chip sm" style="background:var(--bad-bg);color:var(--bad)">${sm.missing} manq.</span>` : ""}${sm.received ? `<span class="chip sm" style="background:#E3EEF9;color:#2F6FB0">${sm.received} à vérif.</span>` : ""}${sm.update ? `<span class="chip sm" style="background:var(--warn-bg);color:#B7791F">${sm.update} à actual.</span>` : ""}</div></td>
+      <td>${nextDue ? due(nextDue) : "—"}</td><td class="muted" style="font-size:12px">${last ? fdate(last.slice(0, 10)) : "—"}</td></tr>`; }).join("");
+  return tb + kp + (inC.length ? `<div class="panel tablewrap"><table class="t"><thead><tr><th>Dossier</th><th>Chargé</th><th>Fonds</th><th>Statut</th><th>Documents</th><th>Prochaine échéance</th><th>Dernière action</th></tr></thead><tbody>${rows || `<tr><td colspan="7" class="muted">Aucun dossier ne correspond aux filtres.</td></tr>`}</tbody></table></div>`
+    : `<div class="empty"><b>Aucun dossier en contrôle de conformité</b><span>Lancez un contrôle sur un dossier : choisissez un modèle (KYC personne morale, personne physique, financement…), le chargé de dossier collecte les documents dans le share, puis ${h(c.label)} les vérifie et valide la conformité.</span></div>`);
+}
+function cmpStartModal() {
+  const ds = visDossiers().filter(d => !d.archived && !inCompliance(d) && canCollect(d)); const c = cmpCfg();
+  modal("Lancer un contrôle de conformité", `<label class="f"><span>Dossier</span><select id="cs-d">${ds.map(d => `<option value="${d.id}">${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
+    <label class="f"><span>Modèle de documents</span><select id="cs-t">${c.templates.map((t, i) => `<option value="${i}">${h(t.name)} (${t.docs.length} documents)</option>`).join("")}</select></label>
+    <label class="f" style="max-width:220px"><span>À fournir avant le</span><input type="date" id="cs-due" value="${addDays(todayISO(), c.delay)}"></label>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="cs-ok">Lancer</button>`, L => {
+      $("#cs-ok", L).onclick = async () => { const d = dossierById($("#cs-d", L).value); if (!d) return; const t = c.templates[+$("#cs-t", L).value]; const due = $("#cs-due", L).value;
+        d.docReqs = t.docs.map(docReqFromLine).map(x => ({ ...x, due, tpl: t.id })); d.compliance = { status: "collecting", startedAt: todayISO() };
+        L.remove(); await cmpSave(d, `${d.code} : contrôle de conformité lancé (${t.name})`, dOwners(d)); S.openDossier = d.id; S.dTab = "compliance"; renderDrawer(); };
+    });
+}
+function sCompliance() {
+  const c = cmpCfg(); const ed = can("settings") || can("compliance");
+  return `<div class="panel"><header><h2>Contrôle de conformité</h2></header><div class="body" style="display:flex;flex-direction:column;gap:12px">
+    <div class="grid3"><label class="f"><span>Nom du contrôle (équipe ou prestataire)</span><input type="text" id="cs-label" value="${h(c.label)}" ${ed ? "" : "disabled"}></label><label class="f"><span>Délai de fourniture par défaut (jours)</span><input type="number" id="cs-delay" value="${h(c.delay)}" min="1" ${ed ? "" : "disabled"}></label></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Vérificateurs notifiés (vide = tous les rôles ayant le droit « Contrôle conformité »)</div><div class="row">${internals().map(m => `<label class="chk"><input type="checkbox" data-cs-rv="${m.id}" ${c.reviewers.includes(m.id) ? "checked" : ""} ${ed ? "" : "disabled"}>${h(m.name)}</label>`).join("")}</div></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Modèles de documents (un document par ligne, « Catégorie | Document »)</div>
+      <div id="cs-tpls" style="display:flex;flex-direction:column;gap:10px">${c.templates.map((t, i) => `<div class="stagecard"><span class="ix">${String(i + 1).padStart(2, "0")}</span><div style="display:flex;flex-direction:column;gap:6px;flex:1"><input type="text" data-cs-tn="${i}" value="${h(t.name)}" ${ed ? "" : "disabled"} aria-label="Nom du modèle"><textarea data-cs-td="${i}" rows="5" ${ed ? "" : "disabled"} aria-label="Documents du modèle">${h(t.docs.join("\n"))}</textarea>${ed ? `<button class="btn sm ghost danger" data-act11="cs-tpl-del" data-i="${i}" style="align-self:flex-end">Supprimer ce modèle</button>` : ""}</div></div>`).join("")}</div>
+      ${ed ? `<button class="btn sm" data-act11="cs-tpl-add" style="margin-top:8px">${ic("plus")}Nouveau modèle</button>` : ""}</div>
+    <label class="f"><span>Modèle de demande de documents (variables : {dossier} {societe} {contact} {echeance} {liste} {lien} {signature} ; 1re ligne « Objet : … »)</span><textarea id="cs-msg" rows="12" ${ed ? "" : "disabled"}>${h(c.message)}</textarea></label>
+    <label class="f"><span>Motifs de blocage proposés (un par ligne)</span><textarea id="cs-blk" rows="5" ${ed ? "" : "disabled"}>${h(blockCats().join("\n"))}</textarea></label>
+    ${ed ? `<div class="row"><button class="btn pri" data-act11="cs-save">Enregistrer</button></div>` : ""}</div></div>`;
+}
+function readCmpSettings() {
+  const c = cmpCfg(); const tpls = c.templates.map((t, i) => ({ id: t.id || uid("tpl"), name: ($(`[data-cs-tn="${i}"]`)?.value || t.name).trim(), docs: ($(`[data-cs-td="${i}"]`)?.value ?? t.docs.join("\n")).split("\n").map(x => x.trim()).filter(Boolean) })).filter(t => t.name);
+  return { label: $("#cs-label").value.trim() || "TAEF", delay: +$("#cs-delay").value || 10, reviewers: $$("[data-cs-rv]").filter(x => x.checked).map(x => x.dataset.csRv), templates: tpls, message: $("#cs-msg").value || CMP_MESSAGE_DEFAULT };
+}
+
+/* ---------- préférences de notification (par personne) ---------- */
+const NOTIF_KINDS = [["assign", "Nouvelles tâches qui me sont assignées"], ["mention", "Mentions et commentaires"], ["stage", "Changements d'étape et validations"], ["compliance", "Conformité : documents à vérifier ou à corriger"], ["block", "Dossiers bloqués / débloqués"], ["deadline", "Échéances, reportings et remboursements"], ["meeting", "Comptes rendus de réunion"], ["project", "Projets"], ["other", "Autres (accès, automatisations…)"]];
+function notifKind(e) {
+  if (e.kind) return e.kind; const t = e.text || "";
+  if (/^Tâche assignée/.test(t)) return "assign"; if (/^Commentaire/.test(t)) return "mention";
+  if (/étape|Validation demandée|passage d'étape/i.test(t)) return "stage"; if (/conformit|document/i.test(t)) return "compliance"; if (/bloqué|débloqué|blocage/i.test(t)) return "block";
+  if (/Échéance|échéance|reporting|payée|remis/.test(t)) return "deadline"; if (/Compte rendu/.test(t)) return "meeting"; if (/Projet/.test(t)) return "project"; return "other";
+}
+const NOTIF_DEFAULT = () => ({ inapp: Object.fromEntries(NOTIF_KINDS.map(k => [k[0], true])), reminders: true, email: { on: false, kinds: { assign: true, compliance: true, block: true, stage: false, mention: true, deadline: false, meeting: false, project: false, other: false } } });
+function myNotifPrefs() { const id = me()?.id; const p = (S.prefs || []).find(x => x.id === id) || {}; const d = NOTIF_DEFAULT(); return { inapp: { ...d.inapp, ...(p.inapp || {}) }, reminders: p.reminders ?? d.reminders, email: { on: !!p.email?.on, kinds: { ...d.email.kinds, ...(p.email?.kinds || {}) } } }; }
+function notifPrefsModal() {
+  const m = me(); if (!m) { toast("Associez d'abord votre compte à un membre de l'équipe."); return; }
+  const p = myNotifPrefs(); const mailOk = !!window.INMA?.mailReady?.();
+  const rowK = ([k, l]) => `<tr><td>${h(l)}</td><td class="c"><input type="checkbox" class="cb" data-np-in="${k}" ${p.inapp[k] ? "checked" : ""} aria-label="Dans l'outil : ${h(l)}"></td><td class="c"><input type="checkbox" class="cb" data-np-mail="${k}" ${p.email.kinds[k] ? "checked" : ""} aria-label="Par e-mail : ${h(l)}"></td></tr>`;
+  modal("Mes notifications", `<p class="muted" style="margin:0">Choisissez ce que vous recevez dans la cloche de l'outil et par e-mail (${h(m.email || "adresse à renseigner par l'administrateur")}). Réglage personnel, valable sur tous vos appareils.</p>
+    <div class="row" style="gap:6px"><span class="muted" style="font-size:12px">Raccourcis :</span><button class="btn sm" data-np-preset="assign">E-mail : seulement les nouvelles tâches assignées</button><button class="btn sm" data-np-preset="assign-in">Cloche : seulement les tâches assignées</button><button class="btn sm" data-np-preset="all">Tout</button><button class="btn sm" data-np-preset="none">Rien par e-mail</button></div>
+    <label class="chk"><input type="checkbox" id="np-mail-on" ${p.email.on ? "checked" : ""} ${mailOk ? "" : "disabled"}>Recevoir aussi un e-mail${mailOk ? "" : " (envoi d'e-mails non disponible dans cette version)"}</label>
+    <div class="panel tablewrap" style="margin:0"><table class="t"><thead><tr><th>Type de notification</th><th class="c">Dans l'outil</th><th class="c">Par e-mail</th></tr></thead><tbody>${NOTIF_KINDS.map(rowK).join("")}</tbody></table></div>
+    <label class="chk"><input type="checkbox" id="np-rem" ${p.reminders ? "checked" : ""}>Rappels des tâches en retard et des échéances proches (dans l'outil)</label>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="np-ok">Enregistrer</button>`, L => {
+      L.addEventListener("click", e => { const b = e.target.closest("[data-np-preset]"); if (!b) return; const v = b.dataset.npPreset;
+        if (["all", "assign"].includes(v)) $$("[data-np-mail]", L).forEach(x => x.checked = v === "all" || x.dataset.npMail === "assign");
+        if (v === "assign" && !$("#np-mail-on", L).disabled) $("#np-mail-on", L).checked = true;
+        if (v === "assign-in") $$("[data-np-in]", L).forEach(x => x.checked = x.dataset.npIn === "assign");
+        if (v === "all") $$("[data-np-in]", L).forEach(x => x.checked = true); if (v === "none") $("#np-mail-on", L).checked = false; });
+      $("#np-ok", L).onclick = async () => { const doc = { id: m.id, inapp: Object.fromEntries($$("[data-np-in]", L).map(x => [x.dataset.npIn, x.checked])), reminders: $("#np-rem", L).checked, email: { on: $("#np-mail-on", L).checked, kinds: Object.fromEntries($$("[data-np-mail]", L).map(x => [x.dataset.npMail, x.checked])) }, updatedAt: new Date().toISOString() };
+        S.prefs = [...(S.prefs || []).filter(x => x.id !== m.id), doc]; L.remove();
+        if (S.mode === "cloud") { try { await S.db.collection("prefs").doc(m.id).set(clone(doc)); } catch (e) { toast(errMsg(e)); return; } } else localSave();
+        toast("Préférences de notification enregistrées"); renderTop(); };
+    }, true);
+}
+
+/* ---------- événements ---------- */
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-act11]"); if (!el) return; const A = el.dataset.act11; const d = el.dataset.id ? dossierById(el.dataset.id) : null; const x = d && el.dataset.doc ? (d.docReqs || []).find(y => y.id === el.dataset.doc) : null;
+  if (el.tagName === "A") e.preventDefault();
+  if (A === "block" && d) return blockModal(d);
+  if (A === "cmp-tpl" && d) return cmpTplModal(d);
+  if (A === "cmp-add" && d) return cmpAddModal(d);
+  if (A === "cmp-request" && d) return cmpRequestModal(d);
+  if (A === "cmp-share" && d) return cmpShareCheck(d, false);
+  if (A === "cmp-start") return cmpStartModal();
+  if (A === "doc-deposit" && x) return docDepositModal(d, x);
+  if (A === "doc-fix" && x) return docFixModal(d, x);
+  if (A === "doc-menu" && x) return docMenu(d, x);
+  if (A === "doc-ok" && x) { x.status = "validated"; x.validatedAt = new Date().toISOString(); x.note = ""; docHist(x, "validated"); const sm = docSummary(d);
+    const done = sm.total && sm.validated === sm.total; await cmpSave(d, `${d.code} : « ${x.name} » validé par ${cmpCfg().label}${done ? " — tous les documents sont validés" : ""}`, done ? dOwners(d) : []); return; }
+  if (A === "cmp-submit" && d) { const sm = docSummary(d); const go = async () => { const live = dossierById(d.id); live.compliance = { ...(live.compliance || {}), status: "review", submittedAt: new Date().toISOString(), submittedBy: me()?.id || null, note: "" };
+      await cmpSave(live, `${live.code} soumis au contrôle ${cmpCfg().label} : ${docSummary(live).received} document(s) à vérifier`, cmpReviewers()); toast(`Soumis · ${cmpCfg().label} est notifié`); };
+    if (sm.missing) confirmBox(`${sm.missing} document(s) encore manquant(s). Soumettre quand même au contrôle ${cmpCfg().label} ?`, "Soumettre", go); else await go(); return; }
+  if (A === "cmp-validate" && d) { d.compliance = { ...(d.compliance || {}), status: "validated", at: new Date().toISOString(), by: me()?.id || null, note: "" }; await cmpSave(d, `${d.code} : conformité validée par ${mname(me()?.id)} (${cmpCfg().label})`, dTeam(d)); toast("Conformité validée"); return; }
+  if (A === "cmp-reopen" && d) { d.compliance = { ...(d.compliance || {}), status: "review" }; await cmpSave(d, `${d.code} : contrôle de conformité rouvert`, dOwners(d)); return; }
+  if (A === "cs-save") { S.cfg.compliance = readCmpSettings(); S.cfg.blockReasons = $("#cs-blk").value.split("\n").map(x => x.trim()).filter(Boolean); saveCfg("Paramètres de conformité enregistrés"); render(); return; }
+  if (A === "cs-tpl-add") { S.cfg.compliance = readCmpSettings(); S.cfg.compliance.templates.push({ id: uid("tpl"), name: "Nouveau modèle", docs: ["Catégorie|Document"] }); render(); return; }
+  if (A === "cs-tpl-del") { const c = readCmpSettings(); c.templates.splice(+el.dataset.i, 1); S.cfg.compliance = c; render(); return; }
+  if (A === "notif-prefs") { S.inboxOpen = false; renderTop(); return notifPrefsModal(); }
+  if (A === "prj-task") { const p = (S.projects || []).find(y => y.id === el.dataset.id); if (p) taskModal(null, null, p.id); return; }
+});
+document.addEventListener("change", e => {
+  const id = e.target.id; if (!id || !id.startsWith("cmp-f-")) return; const f = S.ui.cmp || {};
+  if (id === "cmp-f-st") f.st = e.target.value; if (id === "cmp-f-owner") f.owner = e.target.value; if (id === "cmp-f-fund") f.fund = e.target.value; if (id === "cmp-f-mine") f.mine = e.target.checked;
+  S.ui.cmp = f; saveUI(); render();
+});
+document.addEventListener("input", e => { if (e.target.id !== "cmp-f-q") return; S.ui.cmp = { ...(S.ui.cmp || {}), q: e.target.value }; clearTimeout(S._cmpq); S._cmpq = setTimeout(() => { render(); const i = $("#cmp-f-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); });
+/* ---------- tâches des projets ---------- */
+function prjTasksHTML(p) {
+  const ts = pTasksOrdered(p);
+  const open = ts.filter(t => !isDone(t));
+  return `<div class="row" style="gap:8px"><b style="font-size:13px">Tâches en cours (${open.length})</b>${ts.length - open.length ? `<span class="muted" style="font-size:12px">${ts.length - open.length} terminée(s)</span>` : ""}<span class="spacer"></span>${can("task_create") ? `<button class="btn sm" type="button" data-act11="prj-task" data-id="${p.id}">${ic("plus")}Tâche</button>` : ""}</div>
+    <div class="list" data-sortlist="ptasks|${p.id}">${ts.length ? ts.slice(0, 40).map((t, i) => taskLine(t, i)).join("") : '<p class="muted" style="margin:0">Aucune tâche liée à ce projet.</p>'}</div>${ts.some(t => t.ord != null) ? `<button class="btn sm ghost" type="button" data-act12="task-order-reset" data-p="${p.id}" style="align-self:flex-start">Revenir à l'ordre automatique</button>` : ""}`;
+}
+
+/* ---------- réordonner n'importe quelle liste (glisser-déposer ou flèches du clavier) ---------- */
+const SORTERS = {};
+const dh = () => `<span class="dh" draggable="true" tabindex="0" role="button" aria-label="Réordonner : glisser, ou flèches haut et bas" title="Glisser pour réordonner (ou flèches ↑ ↓)">⠿</span>`;
+const moveArr = (arr, from, to) => { if (!arr || from === to || from < 0 || to < 0 || from >= arr.length || to >= arr.length) return arr; const [x] = arr.splice(from, 1); arr.splice(to, 0, x); return arr; };
+let SDRAG = null;
+async function runSort(key, from, to) {
+  const [kind, ref] = String(key).split("|"); if (from === to || to < 0) return false; const fn = SORTERS[kind]; if (!fn) return false;
+  await fn(ref, from, to); return true;
+}
+document.addEventListener("dragstart", e => {
+  const hd = e.target.closest?.(".dh"); if (!hd) return; const it = hd.closest("[data-si]"), ls = hd.closest("[data-sortlist]"); if (!it || !ls) return;
+  e.stopPropagation(); SDRAG = { ls, from: +it.dataset.si, it }; e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", "sort");
+  try { e.dataTransfer.setDragImage(it, 16, 12); } catch {} setTimeout(() => it.classList.add("s-dragging"), 0);
+}, true);
+document.addEventListener("dragover", e => {
+  if (!SDRAG) return; const it = e.target.closest?.("[data-si]"); if (!it || it.closest("[data-sortlist]") !== SDRAG.ls) return;
+  e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = "move";
+  $$(".s-before,.s-after", SDRAG.ls).forEach(x => x.classList.remove("s-before", "s-after"));
+  const r = it.getBoundingClientRect(); it.classList.add(e.clientY < r.top + r.height / 2 ? "s-before" : "s-after");
+}, true);
+document.addEventListener("drop", async e => {
+  if (!SDRAG) return; const it = e.target.closest?.("[data-si]"); const S0 = SDRAG; SDRAG = null;
+  $$(".s-before,.s-after,.s-dragging").forEach(x => x.classList.remove("s-before", "s-after", "s-dragging"));
+  if (!it || it.closest("[data-sortlist]") !== S0.ls) return; e.preventDefault(); e.stopPropagation();
+  const r = it.getBoundingClientRect(); let to = +it.dataset.si + (e.clientY < r.top + r.height / 2 ? 0 : 1); if (S0.from < to) to--;
+  await runSort(S0.ls.dataset.sortlist, S0.from, to);
+}, true);
+document.addEventListener("dragend", () => { if (!SDRAG) return; SDRAG = null; $$(".s-before,.s-after,.s-dragging").forEach(x => x.classList.remove("s-before", "s-after", "s-dragging")); }, true);
+document.addEventListener("keydown", async e => {
+  const hd = e.target.closest?.(".dh"); if (!hd || !["ArrowUp", "ArrowDown"].includes(e.key)) return; const it = hd.closest("[data-si]"), ls = hd.closest("[data-sortlist]"); if (!it || !ls) return;
+  e.preventDefault(); const key = ls.dataset.sortlist, from = +it.dataset.si; const sibs = $$("[data-si]", ls).map(x => +x.dataset.si); const pos = sibs.indexOf(from); const to = sibs[pos + (e.key === "ArrowUp" ? -1 : 1)];
+  if (to == null) return; if (await runSort(key, from, to)) setTimeout(() => { const n = document.querySelector(`[data-sortlist="${CSS.escape(key)}"] [data-si="${to}"] .dh`); n && n.focus(); }, 60);
+});
+document.addEventListener("click", e => { if (e.target.closest?.(".dh")) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+/* ordre manuel des tâches (dossier, projet) */
+const taskDefaultCmp = (a, b) => isDone(a) - isDone(b) || (isHiPrio(b) - isHiPrio(a)) || prioRank(a.priority) - prioRank(b.priority) || (a.due || "9").localeCompare(b.due || "9");
+const sortTasks = ts => ts.some(t => t.ord != null) ? ts.sort((a, b) => (a.ord ?? 1e9) - (b.ord ?? 1e9) || taskDefaultCmp(a, b)) : ts.sort(taskDefaultCmp);
+const dTasksOrdered = d => sortTasks(S.tasks.filter(t => t.dossierId === d.id));
+const pTasksOrdered = p => sortTasks(visTasks().filter(t => t.projectId === p.id));
+async function saveTaskOrder(list) { const ch = []; list.forEach((t, i) => { if (t.ord !== i) { t.ord = i; ch.push(t); } }); for (const t of ch) await putDoc("tasks", t); }
+SORTERS.dtasks = async (id, f, to) => { const d = dossierById(id); if (!d) return; const l = dTasksOrdered(d); moveArr(l, f, to); await saveTaskOrder(l); renderDrawer(); };
+SORTERS.ptasks = async (id, f, to) => { const p = (S.projects || []).find(x => x.id === id); if (!p) return; const l = pTasksOrdered(p); moveArr(l, f, to); await saveTaskOrder(l); const pt = document.getElementById("pj-tasks"); if (pt) pt.innerHTML = prjTasksHTML(p); render(); };
+SORTERS.ddocs = async (id, f, to) => { const d = dossierById(id); if (!d) return; moveArr(d.docs, f, to); await putDoc("dossiers", d); renderDrawer(); };
+SORTERS.dreqs = async (id, f, to) => { const d = dossierById(id); if (!d) return; moveArr(d.docReqs, f, to); await putDoc("dossiers", d); renderDrawer(); };
+async function resetTaskOrder(list) { for (const t of list.filter(t => t.ord != null)) { delete t.ord; await putDoc("tasks", t); } }
+
+/* ---------- noms des dossiers et fichiers OneDrive liés ---------- */
+function odNameFromUrl(url) {
+  if (!isURL(url)) return ""; let u; try { u = new URL(url); } catch { return ""; }
+  const id = u.searchParams.get("id") || u.searchParams.get("RootFolder"); const dec = s => { try { return decodeURIComponent(s); } catch { return s; } };
+  if (id) { const seg = dec(id).split("/").filter(Boolean).pop(); if (seg) return seg; }
+  if (/\/:[a-z]:\//i.test(u.pathname) || /^\/[a-z]\//i.test(u.pathname)) return "";
+  const segs = u.pathname.split("/").filter(Boolean).map(dec); const last = segs.pop() || "";
+  if (!last || /\.aspx$/i.test(last) || /^(redir|embed|edit|view|personal|sites)$/i.test(last) || last.length > 120) return "";
+  return last;
+}
+const odName = (url, map) => (map && map[url]) || S.odCache?.[url] || odNameFromUrl(url);
+const odLink = (url, map, kind = "folder", fallback = "Lien OneDrive") => isURL(url) ? `<a class="odl" href="${h(url)}" target="_blank" rel="noopener" title="${h(url)}">${ic(kind === "file" ? "file" : "folder")}<span>${h(odName(url, map) || fallback)}</span>${ic("ext")}</a>` : "";
+async function odResolve(url) {
+  if (!isURL(url)) return ""; S.odCache = S.odCache || {}; if (S.odCache[url]) return S.odCache[url];
+  const g = window.INMA?.graph; if (!g?.resolve || !g.signedIn?.()) return "";
+  try { const it = await g.resolve(url); if (it?.name) { S.odCache[url] = it.name; return it.name; } } catch {} return "";
+}
+// Complète les noms manquants d'un dossier ou d'un projet (connexion Microsoft requise), sans bloquer l'interface.
+async function odFillNames(obj, coll, urls) {
+  if (!obj || !window.INMA?.graph?.signedIn?.()) return; obj.odNames = obj.odNames || {}; let ch = false;
+  for (const u of [...new Set(urls.filter(isURL))]) { if (obj.odNames[u]) continue; const n = await odResolve(u); if (n) { obj.odNames[u] = n; ch = true; } }
+  if (ch) { const live = (S[coll] || []).find(x => x.id === obj.id); if (live) { live.odNames = { ...(live.odNames || {}), ...obj.odNames }; await putDoc(coll, live); } if (coll === "dossiers") renderDrawer(); else render(); }
+}
+const dossierUrls = d => [d.oneDriveUrl, ...(d.subfolders || []).map(x => x.url), ...(d.docs || []).map(x => x.url), ...(d.docReqs || []).map(x => x.url)];
+
+/* ---------- consulter une étape passée ou future sans changer d'étape ---------- */
+function stageVisits(d, s) {
+  const hs = (d.history || []).map(e => ({ ...e })).sort((a, b) => String(a.at).localeCompare(String(b.at))); const out = [];
+  hs.forEach((e, i) => { if (e.toId ? e.toId === s.id : e.to === s.name) out.push({ from: e.at, to: hs[i + 1]?.at || null, by: e.by, approved: e.approved, next: hs[i + 1] || null, prevName: e.from }); });
+  return out;
+}
+function stageViewHTML(d, sid) {
+  const w = wfById(d.workflowId), s = w.stages.find(x => x.id === sid); if (!s) return "";
+  const idx = w.stages.indexOf(s), cur = w.stages.indexOf(stageOf(d)); const visits = stageVisits(d, s);
+  const inWin = iso => visits.some(v => iso >= v.from && (!v.to || iso <= v.to));
+  const tks = S.tasks.filter(t => t.dossierId === d.id && (t.stageId === s.id || (!t.stageId && t.createdAt && inWin(t.createdAt))));
+  const ck = (s.checklist || []).map(c => { const t = S.tasks.find(x => x.dossierId === d.id && normTitle(x.title) === normTitle(c)); return { c, t }; });
+  const acts = S.activity.filter(e => e.dossierId === d.id && inWin(e.at)).slice(0, 40);
+  const docs = (d.docs || []).filter(x => x.at && visits.some(v => x.at >= v.from.slice(0, 10) && (!v.to || x.at <= v.to.slice(0, 10))));
+  const state = idx < cur ? ["Étape terminée", "var(--ok-bg)"] : idx === cur ? ["Étape en cours", "var(--info-bg)"] : ["Étape à venir", "var(--surface-2)"];
+  const dur = v => daysBetween(v.from.slice(0, 10), (v.to || new Date().toISOString()).slice(0, 10));
+  const canGo = can("stage_advance") && canEditDossier(d) && idx !== cur;
+  return `<div class="banner info sv-banner"><span><b>Consultation de l'étape « ${h(s.name)} »</b> — lecture seule, le dossier reste à l'étape « ${h(stageOf(d)?.name || "—")} ».</span><span class="spacer"></span><button class="btn sm" data-vstage="">Revenir à la synthèse</button></div>
+    <div class="panel"><header><h2>${h(s.name)}</h2><span class="chip" style="background:${state[1]}">${state[0]}</span>${s.approval ? '<span class="tag">Validation requise</span>' : ""}<span class="spacer"></span><span class="muted" style="font-size:12px">Étape ${idx + 1}/${w.stages.length}${s.sla ? " · délai cible " + s.sla + " j" : ""}${s.roleId ? " · " + h(role(s.roleId)?.name || "") : ""}</span></header>
+      <div class="body list">${visits.length ? visits.map(v => `<div class="li"><div class="grow"><div class="t1">Du ${new Date(v.from).toLocaleDateString("fr-FR", { dateStyle: "medium" })} ${v.to ? "au " + new Date(v.to).toLocaleDateString("fr-FR", { dateStyle: "medium" }) : "à aujourd'hui"} · ${dur(v)} j${s.sla && dur(v) > s.sla ? ' <span class="chip sm" style="background:var(--bad-bg);color:var(--bad)">hors délai</span>' : ""}</div><div class="t2">Entrée par ${h(mname(v.by))}${v.prevName ? " depuis « " + h(v.prevName) + " »" : ""}${v.next ? ` · sortie vers « ${h(v.next.to)} » par ${h(mname(v.next.by))}${v.next.approved ? " (validée)" : ""}` : ""}</div></div></div>`).join("") : `<p class="muted" style="margin:0">${idx > cur ? "Le dossier n'a pas encore atteint cette étape." : "Aucun passage enregistré pour cette étape (dossier créé avant le suivi de l'historique)."}</p>`}</div></div>
+    ${ck.length ? `<div class="panel"><header><h2>Checklist de l'étape</h2><span class="muted" style="font-size:12px">${ck.filter(x => x.t && isDone(x.t)).length}/${ck.length} faits</span></header><div class="body list">${ck.map(({ c, t }) => `<div class="li"><span class="ckd ${t && isDone(t) ? "ok" : ""}">${t && isDone(t) ? "✓" : "○"}</span><div class="grow"${t ? ` data-open-task="${t.id}" style="cursor:pointer"` : ""}><div class="t1" style="white-space:normal">${h(c)}</div><div class="t2">${t ? `${h(statusById(t.status)?.label || "")}${t.completedAt ? " · terminée le " + fdate(t.completedAt.slice(0, 10)) : ""}${(t.assignees || []).length ? " · " + t.assignees.map(a => h(mname(a).split(" ")[0])).join(", ") : ""}` : "Pas de tâche créée"}</div></div></div>`).join("")}</div></div>` : ""}
+    <div class="panel"><header><h2>Tâches de l'étape (${tks.length})</h2></header><div class="body list">${tks.length ? sortTasks(tks).map(t => taskLine(t)).join("") : '<p class="muted" style="margin:0">Aucune tâche rattachée à cette étape.</p>'}</div></div>
+    ${docs.length ? `<div class="panel"><header><h2>Documents ajoutés pendant l'étape</h2></header><div class="body">${docList(docs, null)}</div></div>` : ""}
+    <div class="panel"><header><h2>Activité pendant l'étape</h2></header><div class="body list">${acts.length ? acts.map(e => `<div class="li">${av(e.by)}<div class="grow"><div class="t1" style="white-space:normal;font-weight:500">${h(e.text)}</div><div class="t2">${new Date(e.at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}</div></div></div>`).join("") : '<p class="muted" style="margin:0">Aucune activité enregistrée sur cette période.</p>'}</div></div>
+    ${canGo ? `<div class="row"><span class="muted" style="font-size:12px">Pour replacer réellement le dossier à cette étape :</span><button class="btn sm" data-act12="stage-go" data-id="${d.id}" data-stage-id="${s.id}">${idx < cur ? "Revenir à cette étape" : "Passer à cette étape"}</button></div>` : ""}`;
+}
+const normTitle = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+const taskExists = (dossierId, title) => !!dossierId && S.tasks.some(t => t.dossierId === dossierId && normTitle(t.title) === normTitle(title));
+
+/* ---------- documents et liens d'un projet ---------- */
+function prjDocsHTML(p, ed) {
+  const docs = p.docs || [];
+  return `<div class="eyebrow" style="margin-bottom:4px">Liens OneDrive / SharePoint du projet</div>
+    ${isURL(p.url) ? `<div class="row" style="gap:6px;margin-bottom:6px"><span class="muted" style="font-size:12px">Dossier principal :</span>${odLink(p.url, p.odNames)}</div>` : ""}
+    <div data-sortlist="pdocs|x">${docs.map((x, i) => `<div class="folder" data-si="${i}">${ed ? dh() : ""}${ic(odNameFromUrl(x.url).includes(".") ? "file" : "folder")}<span class="nm">${h(x.name || odName(x.url, p.odNames) || "Lien")}${odName(x.url, p.odNames) && x.name && odName(x.url, p.odNames) !== x.name ? ` <span class="muted" style="font-size:11px">· ${h(odName(x.url, p.odNames))}</span>` : ""}</span>${isURL(x.url) ? `<a class="btn sm" href="${h(x.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>` : ""}${ed ? `<button class="btn sm ghost danger" type="button" data-pdoc-del="${i}" aria-label="Retirer">${ic("trash")}</button>` : ""}</div>`).join("") || '<p class="muted" style="margin:0">Aucun lien ajouté.</p>'}</div>
+    ${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="pj-docname" placeholder="Nom (facultatif)" style="max-width:200px"><input type="url" id="pj-docurl" placeholder="Lien OneDrive / SharePoint" style="max-width:300px"><button class="btn sm" type="button" id="pj-adddoc">Ajouter</button></div>` : ""}`;
+}
+
+document.addEventListener("click", async e => {
+  const el = e.target.closest("[data-act12],[data-vstage]"); if (!el) return;
+  if (el.dataset.vstage != null && !el.dataset.act12) { e.stopPropagation(); S.dStageView = el.dataset.vstage || null; if (!S.dStageView && S.dTab === "stage") S.dTab = "overview"; renderDrawer(); $(".dbody")?.scrollTo?.(0, 0); return; }
+  const A = el.dataset.act12;
+  if (A === "stage-go") { const d = dossierById(el.dataset.id); const w = wfById(d.workflowId); const s = w.stages.find(x => x.id === el.dataset.stageId); const back = w.stages.indexOf(s) < w.stages.indexOf(stageOf(d));
+    confirmBox(back ? `Replacer réellement ${d.code} à l'étape « ${s.name} » ? Aucune tâche automatique ne sera recréée.` : `Faire passer ${d.code} à l'étape « ${s.name} » ?`, back ? "Revenir à cette étape" : "Passer à cette étape", async () => { S.dStageView = null; await moveStage(d, s.id); renderDrawer(); }); return; }
+  if (A === "task-order-reset") { const d = el.dataset.d ? dossierById(el.dataset.d) : null; const p = el.dataset.p ? (S.projects || []).find(x => x.id === el.dataset.p) : null;
+    await resetTaskOrder(d ? S.tasks.filter(t => t.dossierId === d.id) : p ? S.tasks.filter(t => t.projectId === p.id) : []); toast("Ordre automatique rétabli"); renderDrawer(); const pt = document.getElementById("pj-tasks"); if (pt && p) pt.innerHTML = prjTasksHTML(p); render(); return; }
+  if (A === "od-names") { const d = dossierById(el.dataset.id); if (!window.INMA?.graph?.available?.()) { toast("Disponible dans la version connectée à Microsoft 365."); return; }
+    if (!window.INMA.graph.signedIn()) { toast("Connectez-vous à Microsoft (bouton OneDrive) puis réessayez."); return; }
+    toast("Lecture des noms dans OneDrive…"); d.odNames = {}; await odFillNames(d, "dossiers", dossierUrls(d)); toast("Noms des dossiers liés mis à jour"); return; }
+});
+
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
 document.addEventListener("click", async e => {
@@ -3726,7 +4226,7 @@ document.addEventListener("click", async e => {
   if (ds.tview) { S.ui.tView = ds.tview; saveUI(); render(); return; }
   if (ds.stab) { S.ui.stab = ds.stab; saveUI(); render(); return; }
   if (ds.stabGo) { S.view = "settings"; S.ui.stab = ds.stabGo; render(); return; }
-  if (ds.dtab) { S.dTab = ds.dtab; renderDrawer(); return; }
+  if (ds.dtab) { S.dTab = ds.dtab; S.dStageView = null; renderDrawer(); return; }
   if (ds.stage && S.openDossier) { const d = dossierById(S.openDossier); await moveStage(d, ds.stage); renderDrawer(); return; }
   if (ds.approve) { const d = dossierById(ds.approve); const to = d.pendingApproval?.to; if (to) { const req = d.pendingApproval.by; d.pendingApproval = null; await enterStage(d, to, true); await log(`${d.code} : étape validée par ${mname(me()?.id)}`, { dossierId: d.id, notify: [req].filter(Boolean) }); } render(); renderDrawer(); return; }
   if (ds.reject) { const d = dossierById(ds.reject); const req = d.pendingApproval?.by; d.pendingApproval = null; await putDoc("dossiers", d); await log(`${d.code} : demande de passage d'étape refusée`, { dossierId: d.id, notify: [req].filter(Boolean) }); render(); renderDrawer(); return; }
@@ -3747,7 +4247,7 @@ document.addEventListener("click", async e => {
   if (ds.listDel) { const [k, i] = ds.listDel.split("|"); S.cfg[k].splice(+i, 1); saveCfg(); render(); return; }
   if (ds.arrAdd) { S.cfg[ds.arrAdd].push({ id: uid(ds.arrAdd === "statuses" ? "t" : "p"), label: "Nouveau", color: "#7B8794", done: false }); saveCfg(); render(); return; }
   if (ds.arrDel) { const [k, i] = ds.arrDel.split("|"); if (S.cfg[k].length <= 2) { toast("Gardez au moins deux valeurs."); return; } S.cfg[k].splice(+i, 1); saveCfg(); render(); return; }
-  if (ds.arrMv) { const [k, i, d] = ds.arrMv.split("|"); const a = S.cfg[k], x = +i, y = x + +d; [a[x], a[y]] = [a[y], a[x]]; saveCfg(); render(); return; }
+  if (ds.arrMv) { const [k, i, d] = ds.arrMv.split("|"); const a = S.cfg[k], x = +i, y = x + +d; if (!a || y < 0 || y >= a.length) return; [a[x], a[y]] = [a[y], a[x]]; saveCfg(); render(); return; }
   if (ds.fieldDel) { S.cfg.customFields.splice(+ds.fieldDel, 1); saveCfg(); render(); return; }
   if (ds.autoDel) { S.cfg.automations.splice(+ds.autoDel, 1); saveCfg(); render(); return; }
   if (ds.docDel) { const d = dossierById(S.openDossier); const [, i] = ds.docDel.split("|"); d.docs.splice(+i, 1); await putDoc("dossiers", d); renderDrawer(); return; }
@@ -3773,8 +4273,8 @@ document.addEventListener("click", async e => {
   if (A === "d-save") { const d = dossierById(S.openDossier); d.name = $("#d-name").value.trim() || d.name; { const ow = $$("[data-downer]").filter(x => x.checked).map(x => x.dataset.downer); if (ow.length) { d.ownerId = ow.includes(d.ownerId) ? d.ownerId : ow[0]; d.coOwners = ow.filter(x => x !== d.ownerId); } } { const nv = $("#d-vehicle").value; if (nv !== d.vehicle) d.fundNode = ""; else if ($("#d-node")) d.fundNode = $("#d-node").value; d.vehicle = nv; } d.sector = $("#d-sector").value; d.priority = $("#d-prio").value; if ($("#d-amount")) d.amount = $("#d-amount").value; d.startDate = $("#d-start").value; d.dueDate = $("#d-due").value; d.description = $("#d-desc").value; d.members = $$("[data-dmember]").filter(x => x.checked).map(x => x.dataset.dmember); for (const o of dOwners(d)) if (!d.members.includes(o)) d.members.push(o); d.tags = $$("[data-dtag]").filter(x => x.checked).map(x => x.dataset.dtag); d.custom = { ...(d.custom || {}) }; $$("#layer [data-cf]").forEach(x => d.custom[x.dataset.cf] = x.value); await putDoc("dossiers", d); await log(`Dossier mis à jour : ${d.code}`, { dossierId: d.id }); toast("Dossier enregistré"); render(); renderDrawer(); }
   if (A === "d-archive") { const d = dossierById(S.openDossier); d.archived = !d.archived; await putDoc("dossiers", d); await log(`${d.code} ${d.archived ? "archivé" : "désarchivé"}`, { dossierId: d.id }); render(); renderDrawer(); }
   if (A === "d-delete") { const d = dossierById(S.openDossier); confirmBox(`Supprimer définitivement ${d.code} et ses ${S.tasks.filter(t => t.dossierId === d.id).length} tâches ?`, "Supprimer", async () => { for (const t of S.tasks.filter(t => t.dossierId === d.id)) await delDoc("tasks", t.id); await delDoc("dossiers", d.id); await log(`Dossier supprimé : ${d.code} · ${d.name}`); S.openDossier = null; renderDrawer(); render(); }); }
-  if (A === "od-save") { const d = dossierById(S.openDossier); const u = $("#od-url").value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; } d.oneDriveUrl = u; d.subfolders = $$("[data-subf]").map(x => ({ name: x.dataset.subf, url: x.value.trim() })).filter(x => isURL(x.url)); await putDoc("dossiers", d); await log(`${d.code} : liens OneDrive mis à jour`, { dossierId: d.id }); toast("Liens OneDrive enregistrés"); renderDrawer(); render(); }
-  if (A === "doc-add") { const d = dossierById(S.openDossier); const u = $("#doc-url").value.trim(); if (!isURL(u)) { toast("Collez un lien https:// valide."); return; } d.docs = [...(d.docs || []), { name: $("#doc-name").value.trim() || u.split("/").pop().split("?")[0] || "Document", url: u, folder: $("#doc-folder").value, by: me()?.id || null, at: todayISO() }]; await putDoc("dossiers", d); await log(`${d.code} : document ajouté`, { dossierId: d.id }); renderDrawer(); }
+  if (A === "od-save") { const d = dossierById(S.openDossier); const u = $("#od-url").value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; } d.oneDriveUrl = u; d.subfolders = $$("[data-subf]").map(x => ({ name: x.dataset.subf, url: x.value.trim() })).filter(x => isURL(x.url)); await putDoc("dossiers", d); await log(`${d.code} : liens OneDrive mis à jour`, { dossierId: d.id }); toast("Liens OneDrive enregistrés"); renderDrawer(); render(); odFillNames(d, "dossiers", dossierUrls(d)); }
+  if (A === "doc-add") { const d = dossierById(S.openDossier); const u = $("#doc-url").value.trim(); if (!isURL(u)) { toast("Collez un lien https:// valide."); return; } const nm = $("#doc-name").value.trim() || await odResolve(u) || odNameFromUrl(u) || "Document"; d.docs = [...(d.docs || []), { name: nm, url: u, folder: $("#doc-folder").value, by: me()?.id || null, at: todayISO() }]; await putDoc("dossiers", d); await log(`${d.code} : document ajouté`, { dossierId: d.id }); renderDrawer(); }
   if (A === "cols") { modal("Colonnes de la liste", `<div class="grid2">${Object.entries(COLS).map(([k, v]) => `<label class="chk"><input type="checkbox" data-colk="${k}" ${S.ui.cols.includes(k) ? "checked" : ""}>${v}</label>`).join("")}</div>`, `<button class="btn pri" id="cols-ok">Appliquer</button>`, L => $("#cols-ok", L).onclick = () => { S.ui.cols = $$("[data-colk]", L).filter(x => x.checked).map(x => x.dataset.colk); saveUI(); L.remove(); render(); }); }
   if (A === "role-add") { S.cfg.roles.push({ id: uid("r"), name: "Nouveau rôle", color: "#4C6A88", perms: pset(["view_all","task_create"]) }); saveCfg("Rôle ajouté"); render(); }
   if (A === "member-add") { S.cfg.members.push({ id: uid("m"), name: "Nouveau membre", title: "", email: "", roleId: S.cfg.general.defaultRoleId, team: S.cfg.teams[0], userId: null, color: "#4C6A88" }); saveCfg("Membre ajouté"); render(); }
@@ -3859,13 +4359,13 @@ async function loadSamples() {
 function render() {
   if (S.view !== "settings" && !navAllowed(S.view)) S.view = NAV.find(n => navAllowed(n[0]))?.[0] || "dossiers";
   applyBranding(); renderRail(); renderTop();
-  const v = { meeting: vMeeting, projects: vProjects, deadlines: vDeadlines, funds: vFunds, dashboard: vDashboard, dossiers: vDossiers, tasks: vTasks, calendar: vCalendar, team: vTeam, onedrive: vOneDrive, settings: vSettings }[S.view] || vDashboard;
+  const v = { compliance: vCompliance, meeting: vMeeting, projects: vProjects, deadlines: vDeadlines, funds: vFunds, dashboard: vDashboard, dossiers: vDossiers, tasks: vTasks, calendar: vCalendar, team: vTeam, onedrive: vOneDrive, settings: vSettings }[S.view] || vDashboard;
   $("#content").innerHTML = banners() + v();
   if (S.ai?.open && !document.querySelector("#aipanel :focus") && !S.ai.busy) renderAI();
 }
 
 /* ---------- boot ---------- */
-function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.projects = d.projects || []; S.meetings = d.meetings || []; S.activity = d.activity || []; } }
+function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.projects = d.projects || []; S.meetings = d.meetings || []; S.prefs = d.prefs || []; S.activity = d.activity || []; } }
 async function boot() {
   S.view = homeView(); render();
   const use = (window.INMA && window.INMA.use) || (window.claude && window.claude.use);
@@ -3883,7 +4383,7 @@ async function boot() {
     S.cfgLoaded = true; if (snap.exists) migrateCfg(snap.data()); if (!document.querySelector("#content :focus")) render(); renderDrawer();
   }, () => {});
   const sub = (coll, sortKey) => db.collection(coll).onSnapshot(q => { S[coll] = q.docs.map(d => ({ ...d.data(), id: d.id })); if (sortKey) S[coll].sort((a, b) => String(b[sortKey]).localeCompare(String(a[sortKey]))); if (!document.querySelector("#content :focus") && !$("#modal")) render(); if (S.openDossier && !document.querySelector("#layer :focus")) renderDrawer(); }, () => {});
-  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null); sub("projects", null); sub("meetings", null);
+  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null); sub("projects", null); sub("meetings", null); sub("prefs", null);
   db.collection("activity").orderBy("at", "desc").limit(300).onSnapshot(q => { S.activity = q.docs.map(d => ({ ...d.data(), id: d.id })); if (!document.querySelector("#content :focus") && !$("#modal")) { renderTop(); if (S.view === "dashboard") render(); } }, () => {});
 }
 boot();
