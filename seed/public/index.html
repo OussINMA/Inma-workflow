@@ -97,7 +97,7 @@ h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-.01em}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn svg{width:15px;height:15px}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-input[type=text],input[type=url],input[type=email],input[type=number],input[type=date],input[type=search],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:calc(7px*var(--pad)) 9px;width:100%;min-width:0}
+input[type=text],input[type=url],input[type=email],input[type=number],input[type=date],input[type=time],input[type=search],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:calc(7px*var(--pad)) 9px;width:100%;min-width:0}
 textarea{resize:vertical;min-height:70px}
 input[type=color]{width:42px;height:32px;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:2px}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:600;min-width:0}
@@ -409,6 +409,45 @@ a.btn{text-decoration:none}
 a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoration-color:var(--line)}a.fh-open:hover{text-decoration-color:var(--accent)}
 .tree.fh-dos>li>.tnode{background:color-mix(in oklab,var(--accent) 4%,transparent)}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+
+.cal .cal-h{background:var(--surface-2);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 8px}
+.ag-tb .ag-title{min-width:170px;text-transform:capitalize}
+.ag-tog{gap:4px 14px;margin:-4px 0 8px;align-items:center}
+.ag-wrap{overflow:hidden;padding:0}
+.ag-head,.ag-ad,.ag-body{display:grid;grid-template-columns:52px repeat(var(--n),minmax(0,1fr))}
+.ag-head{border-bottom:1px solid var(--line)}
+.ag-dh{background:none;border:0;border-left:1px solid var(--line);padding:6px 4px;display:flex;flex-direction:column;align-items:center;cursor:pointer;color:var(--muted);font:inherit;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.ag-dh b{font-size:18px;color:var(--ink);letter-spacing:0;font-weight:600}
+.ag-dh.today b{color:var(--on-primary);background:var(--primary);border-radius:999px;min-width:30px;padding:0 6px}
+.ag-ad{border-bottom:1px solid var(--line);background:var(--surface-2)}
+.ag-ad .ag-gut{font-size:10.5px;padding:6px 4px;text-align:right}
+.ag-adc{border-left:1px solid var(--line);padding:3px;display:flex;flex-direction:column;gap:2px;min-width:0;min-height:26px}
+.ag-adc .ev,.cal .ev{font-size:11px;padding:2px 5px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border-left:3px solid var(--accent);background:var(--surface)}
+.ag-scroll{max-height:620px;overflow-y:auto}
+.ag-gut .ag-hl{font-size:10.5px;color:var(--muted);text-align:right;padding-right:6px;transform:translateY(-6px);font-family:var(--f-mono)}
+.ag-gut .ag-hl:first-child{transform:none}
+.ag-col{position:relative;border-left:1px solid var(--line);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 43px,var(--line) 43px,var(--line) 44px),repeating-linear-gradient(to bottom,transparent 0,transparent 21px,color-mix(in oklab,var(--line) 45%,transparent) 21px,color-mix(in oklab,var(--line) 45%,transparent) 22px);cursor:copy}
+.ag-col.we{background-color:var(--surface-2)}
+.ag-ev{position:absolute;border:0;border-left:3px solid var(--c);background:color-mix(in oklab,var(--c) 14%,var(--surface));color:var(--ink);border-radius:4px;padding:2px 5px;text-align:left;font:inherit;font-size:11.5px;line-height:1.25;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 0 0 1px var(--surface)}
+.ag-ev b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-ev span{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-ev:hover{background:color-mix(in oklab,var(--c) 24%,var(--surface))}
+.ag-ev.ol{background:repeating-linear-gradient(135deg,color-mix(in oklab,var(--c) 10%,var(--surface)) 0 6px,var(--surface) 6px 12px)}
+.ag-ev.pending{border-left-style:dashed}
+.ag-ev.declined b{text-decoration:line-through;opacity:.6}
+.ag-now{position:absolute;left:0;right:0;height:2px;background:var(--bad);z-index:2;pointer-events:none}
+.ag-now::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--bad)}
+.ag-mchip b{font-family:var(--f-mono);font-weight:600}
+.ag-time{display:flex;flex-direction:column;align-items:flex-end;min-width:52px;font-size:12px}
+.ag-time span{color:var(--muted);font-size:11px}
+.ag-form{display:flex;flex-direction:column;gap:12px}
+.ag-resp{display:flex;flex-wrap:wrap;gap:6px 14px}
+.ag-warn{display:flex;gap:8px;background:var(--warn-bg);color:var(--ink);border-radius:6px;padding:8px 10px;font-size:12.5px}
+.ag-warn b{color:var(--warn)}
+.ag-more{display:flex;gap:6px;flex-wrap:wrap}
+.tc-act{margin-left:8px;display:inline-flex;gap:8px;font-weight:400}
+.tc-act .linkish{font-size:11px}
+@media (max-width:760px){.ag-scroll{max-height:520px}.ag-ev span{display:none}.ag-head,.ag-ad,.ag-body{grid-template-columns:40px repeat(var(--n),minmax(0,1fr))}}
 </style>
 
 <div class="app" id="app">
@@ -597,7 +636,7 @@ const DEFAULT_CFG = () => fixIds({
 function fixIds(c) { c.workflows.forEach(w => w.stages.forEach((s, i) => s.id = w.id + "_s" + (i + 1))); c.automations.forEach((a, i) => a.id = "a_def_" + (i + 1)); return c; }
 /* ---------- state ---------- */
 const S = {
-  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [], projects: [], meetings: [], prefs: [], mtDraft: null,
+  cfg: DEFAULT_CFG(), cfgLoaded: false, dossiers: [], tasks: [], activity: [], claims: [], deadlines: [], projects: [], meetings: [], events: [], prefs: [], mtDraft: null,
   mode: "loading", db: null, user: null, uid: null, isOwner: false, canEditArtifact: false, downloads: null,
   view: "dashboard", sim: null, ui: store.get("inma-wf-ui", { dView: "kanban", tView: "list", wf: "all", calMonth: null, filters: {}, cols: ["code","name","stage","owner","amount","due","prio"], stab: "general" }),
   openDossier: null, inboxOpen: false
@@ -606,7 +645,7 @@ const saveUI = () => store.set("inma-wf-ui", S.ui);
 
 /* ---------- persistence ---------- */
 const LOCAL_KEY = "inma-wf-local-v1";
-function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, prefs: S.prefs, activity: S.activity.slice(0, 300) }); }
+function localSave() { if (S.mode !== "local") return; store.set(LOCAL_KEY, { cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, events: S.events, prefs: S.prefs, activity: S.activity.slice(0, 300) }); }
 let cfgTimer;
 function saveCfg(msg) {
   applyBranding();
@@ -626,7 +665,7 @@ async function delDoc(coll, id) {
   if (S.mode === "cloud") { try { await S.db.collection(coll).doc(id).delete(); } catch (e) { toast(errMsg(e)); } } else localSave();
 }
 async function log(text, opts = {}) {
-  const e = { id: uid("e"), at: new Date().toISOString(), by: me()?.id || null, text, dossierId: opts.dossierId || null, taskId: opts.taskId || null, notify: opts.notify || [] }; e.kind = opts.kind || notifKind(e);
+  const e = { id: uid("e"), at: new Date().toISOString(), by: me()?.id || null, text, dossierId: opts.dossierId || null, taskId: opts.taskId || null, ...(opts.meetingId ? { meetingId: opts.meetingId } : {}), ...(opts.eventId ? { eventId: opts.eventId } : {}), notify: opts.notify || [] }; e.kind = opts.kind || notifKind(e);
   S.activity.unshift(e); S.activity = S.activity.slice(0, 300);
   if (S.mode === "cloud") { try { await S.db.collection("activity").doc(e.id).set(e); } catch {} } else localSave();
 }
@@ -801,9 +840,16 @@ async function completeTask(t, done) {
 }
 
 /* ---------- notifications ---------- */
+// Retrouve le compte rendu visé par une notification (anciennes notifications : d'après le titre cité)
+function inboxMeeting(e) {
+  if (!/compte rendu/i.test(e.text || "")) return null;
+  const t = /« (.+) »/.exec(e.text || "")?.[1]; if (!t) return null;
+  const ms = (S.meetings || []).filter(m => m.title === t).sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")));
+  return ms[0]?.id || null;
+}
 function myInbox() {
   const m = me(); if (!m) return [];
-  const np = myNotifPrefs(); const items = S.activity.filter(e => (e.notify || []).includes(m.id) && np.inapp[notifKind(e)] !== false).slice(0, 40).map(e => ({ at: e.at, text: e.text, dossierId: e.dossierId, taskId: e.taskId }));
+  const np = myNotifPrefs(); const items = S.activity.filter(e => (e.notify || []).includes(m.id) && np.inapp[notifKind(e)] !== false).slice(0, 40).map(e => ({ at: e.at, text: e.text, dossierId: e.dossierId, taskId: e.taskId, meetingId: e.meetingId || inboxMeeting(e), eventId: e.eventId || null }));
   if (S.cfg.notify.overdue && np.reminders) for (const t of S.tasks.filter(t => (t.assignees || []).includes(m.id) && !isDone(t) && t.due)) {
     const n = daysBetween(todayISO(), t.due);
     if (n < 0) items.unshift({ at: t.due, text: `En retard de ${-n} j : « ${t.title} »`, taskId: t.id, alert: true });
@@ -868,7 +914,7 @@ function renderTop() {
 function renderInbox() {
   const items = myInbox();
   return `<div class="inbox"><div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><b>Notifications</b><span class="spacer"></span><button class="btn sm ghost" data-act11="notif-prefs">Régler</button><button class="btn sm ghost" data-act="inbox-read">Tout marquer comme lu</button></div>
-    ${!me() ? `<p class="muted">Associez votre compte à un membre de l'équipe pour recevoir vos notifications.</p>` : items.length ? `<div class="list">${items.map(i => `<div class="li" ${i.occ ? `data-occ="${i.occ}"` : i.taskId ? `data-open-task="${i.taskId}"` : i.dossierId ? `data-open="${i.dossierId}"` : ""} style="cursor:pointer"><div class="grow"><div class="t1" style="white-space:normal;${i.alert ? "color:var(--bad)" : ""}">${h(i.text)}</div><div class="t2">${h(fdate(String(i.at).slice(0, 10)))}</div></div></div>`).join("")}</div>` : `<p class="muted">Rien de nouveau.</p>`}</div>`;
+    ${!me() ? `<p class="muted">Associez votre compte à un membre de l'équipe pour recevoir vos notifications.</p>` : items.length ? `<div class="list">${items.map(i => `<div class="li" ${i.occ ? `data-occ="${i.occ}"` : i.taskId ? `data-open-task="${i.taskId}"` : i.meetingId ? `data-mt-open="${i.meetingId}"` : i.eventId ? `data-ag-ev="${i.eventId}"` : i.dossierId ? `data-open="${i.dossierId}"` : ""} style="cursor:pointer"><div class="grow"><div class="t1" style="white-space:normal;${i.alert ? "color:var(--bad)" : ""}">${h(i.text)}</div><div class="t2">${h(fdate(String(i.at).slice(0, 10)))}</div></div></div>`).join("")}</div>` : `<p class="muted">Rien de nouveau.</p>`}</div>`;
 }
 function banners() {
   let out = "";
@@ -907,6 +953,7 @@ function vDashboard() {
       <div class="body">${ds.length ? `<div class="bars">${per.map(([s, n]) => `<div class="bar"><span class="lbl" title="${h(s.name)}">${h(s.name)}${s.approval ? " ◆" : ""}</span><span class="track"><span class="fill" style="width:${n / maxPer * 100}%"></span></span><span class="num r">${n}</span></div>`).join("")}</div><p class="muted" style="font-size:11.5px;margin:10px 0 0">◆ étape soumise à validation</p>` : emptyDossiers()}</div></div>
     <div class="panel"><header><h2>Mes tâches</h2><span class="spacer"></span><button class="btn sm ghost" data-nav="tasks">Tout voir</button></header>
       <div class="body">${!m ? `<p class="muted">Associez votre compte pour voir vos tâches.</p>` : mine.length ? `<div class="list">${mine.map(taskLine).join("")}</div>` : `<p class="muted">Aucune tâche ouverte. Bon travail.</p>`}</div></div>
+    ${m && !isExt(m) ? `<div class="panel"><header><h2>Mes prochaines réunions</h2><span class="spacer"></span><button class="btn sm ghost" data-ag="new">${ic("plus")}Réunion</button><button class="btn sm ghost" data-nav="calendar">Agenda</button></header><div class="body">${agUpcomingHTML(agUpcoming(e => agInvolved(e, m.id), 5), "Aucune réunion prévue dans les 30 prochains jours.")}</div></div>` : ""}
     <div class="panel"><header><h2>Charge par collaborateur</h2></header><div class="body bars">${load.map(([mm, n]) => `<div class="bar"><span class="lbl row" style="flex-wrap:nowrap">${av(mm.id)}<span style="overflow:hidden;text-overflow:ellipsis">${h(mm.name.split(" ")[0])}</span></span><span class="track"><span class="fill" style="width:${n / maxLoad * 100}%;background:${h(mm.color)}"></span></span><span class="num r">${n}</span></div>`).join("")}</div></div>
     <div class="panel"><header><h2>Par fonds</h2></header><div class="body"><table class="t"><thead><tr><th>Fonds</th><th class="r">Dossiers</th><th class="r">Montant en cours</th></tr></thead><tbody>${byVeh.map(([v, a, n]) => `<tr><td>${h(v)}</td><td class="r num">${n}</td><td class="r">${money(a)}</td></tr>`).join("")}</tbody></table></div></div>
   </div>
@@ -1016,21 +1063,6 @@ function vTasks() {
   if (!visTasks().length) return tb + `<div class="empty"><b>Aucune tâche</b><span>Les tâches sont créées à la main, par les étapes des workflows, ou par les automatisations.</span>${can("task_create") ? `<button class="btn pri" data-act="new-task">${ic("plus")}Nouvelle tâche</button>` : ""}</div>`;
   if (v === "board") return tb + `<div class="kanban">${S.cfg.statuses.map(s => { const c = ts.filter(t => t.status === s.id); return `<div class="col" data-tcol="${s.id}"><header>${chip(s.label, s.color)}<span class="n">${c.length}</span></header><div class="cards">${c.map(t => { const d = dossierById(t.dossierId); return `<div class="card" draggable="true" data-tdrag="${t.id}" data-open-task="${t.id}">${d ? `<span class="ref">${h(d.code)}</span>` : ""}<span class="ttl">${h(t.title)}</span><div class="meta">${prio(t.priority)}<span class="spacer"></span>${due(t.due, s.done)}</div><div class="meta">${avs(t.assignees)}${(t.checklist || []).length ? `<span class="num">☑ ${(t.checklist || []).filter(c => c.done).length}/${t.checklist.length}</span>` : ""}${(t.docs || []).length ? `<span>${ic("file", "")}${t.docs.length}</span>` : ""}</div></div>`; }).join("")}</div></div>`; }).join("")}</div>`;
   return tb + (ts.length ? `<div class="panel"><div class="body list">${ts.map(taskLine).join("")}</div></div>` : `<div class="empty"><b>Aucune tâche ne correspond aux filtres</b></div>`);
-}
-
-function vCalendar() {
-  const base = S.ui.calMonth ? new Date(S.ui.calMonth + "-01T12:00:00") : new Date(); base.setDate(1);
-  const ym = base.toISOString().slice(0, 7); const ws = +S.cfg.general.weekStart;
-  const first = new Date(base); const off = (first.getDay() - ws + 7) % 7; first.setDate(1 - off);
-  const evs = [...visTasks().filter(t => t.due).map(t => ({ d: t.due, label: t.title, color: statusById(t.status).color, task: t.id, done: isDone(t) })),
-               ...visDossiers().filter(d => d.dueDate && !d.archived).map(d => ({ d: d.dueDate, label: "◼ " + d.code + " " + d.name, color: wfById(d.workflowId)?.color || "#999", dossier: d.id })),
-               ...dlOccAll(addDays(todayISO(), -400), addDays(todayISO(), 400)).map(x => ({ d: x.due, label: "◆ " + x.o.title + " · " + x.label, color: x.late ? "var(--bad)" : dlType(x.o.type).color, occ: x.o.id + "|" + x.key, done: x.status === "sent" }))];
-  const names = [...Array(7)].map((_, i) => ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][(i + ws) % 7]);
-  let cells = "";
-  for (let i = 0; i < 42; i++) { const d = new Date(first); d.setDate(first.getDate() + i); const iso = d.toISOString().slice(0, 10); const e = evs.filter(x => x.d === iso);
-    cells += `<div class="d ${iso.slice(0, 7) !== ym ? "out" : ""} ${iso === todayISO() ? "today" : ""}"><span class="n">${d.getDate()}</span>${e.slice(0, 4).map(x => `<span class="ev" style="border-left-color:${h(x.color)};${x.done ? "text-decoration:line-through;opacity:.6" : ""}" ${x.task ? `data-open-task="${x.task}"` : x.occ ? `data-occ="${x.occ}"` : `data-open="${x.dossier}"`} title="${h(x.label)}">${h(x.label)}</span>`).join("")}${e.length > 4 ? `<span class="muted" style="font-size:10.5px">+${e.length - 4}</span>` : ""}</div>`; }
-  return `<div class="toolbar"><button class="btn sm" data-cal="-1">‹</button><b style="min-width:150px;text-align:center;text-transform:capitalize">${base.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</b><button class="btn sm" data-cal="1">›</button><button class="btn sm ghost" data-cal="0">Aujourd'hui</button><span class="muted" style="font-size:12px">Tâches par statut · ◼ échéances de dossiers · ◆ échéances et reportings</span></div>
-  <div class="tablewrap"><div class="cal" style="min-width:640px">${names.map(n => `<div class="dh">${n}</div>`).join("")}${cells}</div></div>`;
 }
 
 function vTeam() {
@@ -1213,6 +1245,7 @@ function renderDrawer() {
   if (S.dTab === "compliance") body = cmpTab(d);
   if (S.dTab === "overview") body = `
     ${blockBanner(d, ed)}
+    ${!isExt(me()) ? (() => { const up = agUpcoming(e => e.dossierId === d.id, 3); return `<div class="panel"><header><h2>Réunions</h2><span class="spacer"></span><button class="btn sm" data-ag="new" data-dossier="${d.id}">${ic("plus")}Planifier une réunion</button></header><div class="body">${agUpcomingHTML(up, "Aucune réunion à venir pour ce dossier.")}</div></div>`; })() : ""}
     ${(() => { const hp = hiPrioTasks(d); return hp.length ? `<div class="panel"><header><h2>Tâches prioritaires</h2><span class="hi-badge">⚑ ${hp.length}</span></header><div class="body list">${hp.slice(0, 6).map(taskLine).join("")}</div></div>` : ""; })()}
     ${d.pendingApproval ? `<div class="banner warn"><b>Validation en attente</b> pour passer à « ${h(w.stages.find(x => x.id === d.pendingApproval.to)?.name)} » · demandée par ${h(mname(d.pendingApproval.by))}${can("stage_approve") ? `<span class="spacer"></span><button class="btn sm pri" data-approve="${d.id}">Valider</button><button class="btn sm" data-reject="${d.id}">Refuser</button>` : ""}</div>` : ""}
     <div class="panel"><div class="body" style="display:flex;flex-direction:column;gap:12px">
@@ -1326,7 +1359,7 @@ function taskModal(t, presetDossier, presetProject) {
     <label class="f"><span>Description</span><textarea id="tk-desc" ${dis}>${h(t.description || "")}</textarea></label>
     <div><div class="eyebrow" style="margin-bottom:6px">Checklist</div><div id="tk-check" data-sortlist="tkcheck|x">${tkCheckHTML(t.checklist, dis)}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-newcheck" placeholder="Ajouter un élément…" style="max-width:320px"><button class="btn sm" id="tk-addcheck">Ajouter</button></div>` : ""}</div>
     <div><div class="eyebrow" style="margin-bottom:6px">Documents OneDrive</div><div id="tk-docs">${docList(t.docs, ed ? "tkm" : null, ed ? "tkdocs|x" : null)}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-docname" placeholder="Nom" style="max-width:200px"><input type="url" id="tk-docurl" placeholder="Lien OneDrive" style="max-width:260px"><button class="btn sm" id="tk-adddoc">Lier</button></div>` : ""}</div>
-    ${!isNew ? `<div><div class="eyebrow" style="margin-bottom:6px">Commentaires</div>${(t.comments || []).map(c => `<div class="comment">${av(c.by)}<div class="bubble"><span class="who">${h(mname(c.by))}<span class="when">${new Date(c.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</span></span><div>${h(c.text).replace(/@([\wÀ-ÿ-]+)/g, '<span class="mention">@$1</span>')}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun commentaire.</p>'}<div class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" id="tk-comment" placeholder="Écrire un commentaire… (@Prénom pour mentionner)"><button class="btn sm" id="tk-send">Envoyer</button></div></div>` : ""}`;
+    ${!isNew ? `<div><div class="eyebrow" style="margin-bottom:6px">Commentaires</div>${(t.comments || []).map((c, ci) => `<div class="comment">${av(c.by)}<div class="bubble"><span class="who">${h(mname(c.by))}<span class="when">${new Date(c.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}${c.editedAt ? " · modifié" : ""}</span>${tcCanEdit(c) ? `<span class="tc-act"><button type="button" class="linkish" data-tc-edit="${ci}" data-task="${t.id}">Modifier</button><button type="button" class="linkish" data-tc-del="${ci}" data-task="${t.id}">Supprimer</button></span>` : ""}</span><div>${h(c.text).replace(/@([\wÀ-ÿ-]+)/g, '<span class="mention">@$1</span>')}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun commentaire.</p>'}<div class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" id="tk-comment" placeholder="Écrire un commentaire… (@Prénom pour mentionner)"><button class="btn sm" id="tk-send">Envoyer</button></div></div>` : ""}`;
   modal(isNew ? "Nouvelle tâche" : "Tâche", inner, `${!isNew && ed ? `<button class="btn danger" id="tk-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="tk-save">${isNew ? "Créer la tâche" : "Enregistrer"}</button>` : ""}`, L => {
     const collect = () => { t.title = $("#tk-title", L).value.trim(); t.dossierId = $("#tk-dossier", L).value || null; if ($("#tk-project", L)) t.projectId = $("#tk-project", L).value || null; t.status = $("#tk-status", L).value; t.priority = $("#tk-prio", L).value; t.due = $("#tk-due", L).value; t.recurring = $("#tk-rec", L).value; t.dependsOn = $("#tk-dep", L).value ? [$("#tk-dep", L).value] : []; t.assignees = $$("[data-tka]", L).filter(x => x.checked).map(x => x.dataset.tka); t.description = $("#tk-desc", L).value; t.checklist = (t.checklist || []).map((c, i) => ({ ...c, done: $(`[data-ci="${i}"]`, L)?.checked || false })); t.custom = { ...(t.custom || {}) }; $$("[data-cf]", L).forEach(x => t.custom[x.dataset.cf] = x.value); };
     $("#tk-addcheck", L) && ($("#tk-addcheck", L).onclick = () => { const v = $("#tk-newcheck", L).value.trim(); if (!v) return; collect(); t.checklist.push({ text: v, done: false }); $("#tk-check", L).innerHTML = tkCheckHTML(t.checklist, ""); $("#tk-newcheck", L).value = ""; });
@@ -2336,8 +2369,9 @@ function meetingSlides(mt) {
 const MT_SECTIONS = [["summary", "Synthèse"], ["followup", "Suivi des actions"], ["dossiers", "Avancement des dossiers"], ["funds", "Vue par fonds"], ["projects", "Projets transverses"], ["deadlines", "Échéances"], ["decisions", "Décisions"]];
 function vMeeting() {
   const tab = S.ui.mtTab || "board"; const nJ = visMeetings().length;
-  const tabs = `<div class="mt-tabs" role="tablist"><button role="tab" class="${tab === "board" ? "on" : ""}" data-act5="mt-tab" data-tab="board">Tableau de réunion</button><button role="tab" class="${tab !== "board" ? "on" : ""}" data-act5="mt-tab" data-tab="journal">Journal des réunions <span class="chip">${nJ}</span></button></div>`;
+  const tabs = `<div class="mt-tabs" role="tablist"><button role="tab" class="${tab === "board" ? "on" : ""}" data-act5="mt-tab" data-tab="board">Tableau de réunion</button><button role="tab" class="${tab === "agenda" ? "on" : ""}" data-act5="mt-tab" data-tab="agenda">Réunions planifiées</button><button role="tab" class="${tab !== "board" && tab !== "agenda" ? "on" : ""}" data-act5="mt-tab" data-tab="journal">Journal des réunions <span class="chip">${nJ}</span></button></div>`;
   if (tab === "journal") return tabs + vJournal();
+  if (tab === "agenda") return tabs + vAgendaTab();
   if (tab === "edit") return tabs + vMeetingEdit();
   if (tab.startsWith("view:")) return tabs + vMeetingView((S.meetings || []).find(x => x.id === tab.slice(5)));
   return tabs + vMeetingBoard();
@@ -2562,7 +2596,7 @@ async function saveMeeting(final) {
   m.status = final ? "final" : (m.status === "final" ? "final" : "draft"); m.updatedAt = new Date().toISOString(); m.updatedBy = me()?.id || null;
   await putDoc("meetings", clone(m));
   const notify = final ? [...new Set([...(m.participants || []), ...(m.absents || [])])].filter(id => id !== me()?.id) : [];
-  await log(m.visibility === "all" || !m.visibility ? `Compte rendu ${final ? "validé" : isNew ? "créé" : "mis à jour"} : « ${m.title} »` : `Compte rendu de réunion ${final ? "validé" : "enregistré"} (accès restreint)`, { notify });
+  await log(m.visibility === "all" || !m.visibility ? `Compte rendu ${final ? "validé" : isNew ? "créé" : "mis à jour"} : « ${m.title} »` : `Compte rendu de réunion ${final ? "validé" : "enregistré"} (accès restreint)`, { notify, meetingId: m.id, kind: "meeting" });
   S.ui.mtTab = "view:" + m.id; S.mtDraft = null; saveUI(); toast(final ? "Compte rendu validé et partagé" : "Brouillon enregistré"); render();
 }
 function meetingWord(m) {
@@ -3824,7 +3858,50 @@ Nous restons à votre disposition pour toute question.
 
 Bien cordialement,
 {signature}`;
-function cmpCfg() { const c = S.cfg.compliance || {}; return { label: c.label || "TAEF", reviewers: c.reviewers || [], templates: c.templates && c.templates.length ? c.templates : CMP_TEMPLATES_DEFAULT, message: c.message || CMP_MESSAGE_DEFAULT, delay: +c.delay || 10 }; }
+const CMP_MESSAGES_DEFAULT = () => [
+  { id: "msg_first", name: "Première demande", use: "first", text: CMP_MESSAGE_DEFAULT },
+  { id: "msg_remind", name: "Relance", use: "remind", text: `Objet : Relance — {dossier} — documents en attente
+
+Bonjour {contact},
+
+Nous revenons vers vous au sujet de notre demande du {date_demande} concernant le dossier {dossier} ({societe}).
+À ce jour, les documents suivants ne nous sont pas encore parvenus :
+
+{liste}
+
+Merci de nous les transmettre avant le {echeance}, en les déposant dans le dossier partagé : {lien}
+
+Sans ces pièces, nous ne pourrons pas poursuivre l'étude du dossier.
+
+Bien cordialement,
+{signature}` },
+  { id: "msg_fix", name: "Demande de corrections", use: "fix", text: `Objet : {dossier} — documents à actualiser
+
+Bonjour {contact},
+
+Après vérification, certains documents transmis pour le dossier {dossier} ({societe}) doivent être corrigés ou actualisés :
+
+{liste}
+
+Merci de déposer les versions corrigées avant le {echeance} dans le dossier partagé : {lien}
+
+Bien cordialement,
+{signature}` },
+  { id: "msg_en", name: "First request (English)", use: "", text: `Subject: {dossier} — documents required
+
+Dear {contact},
+
+As part of our review of {dossier} ({societe}), please send us the following documents by {echeance}:
+
+{liste}
+
+You can upload them to the shared folder: {lien}
+
+Kind regards,
+{signature}` }];
+const CMP_MSG_USES = [["first", "Première demande"], ["remind", "Relance"], ["fix", "Corrections"], ["", "Autre"]];
+function cmpMessages(c) { const l = Array.isArray(c.messages) && c.messages.length ? c.messages : null; if (l) return l; const d = CMP_MESSAGES_DEFAULT(); if (c.message) d[0] = { ...d[0], text: c.message }; return d; }
+function cmpCfg() { const c = S.cfg.compliance || {}; return { messages: cmpMessages(c), label: c.label || "TAEF", reviewers: c.reviewers || [], templates: c.templates && c.templates.length ? c.templates : CMP_TEMPLATES_DEFAULT, message: c.message || CMP_MESSAGE_DEFAULT, delay: +c.delay || 10 }; }
 const cmpReviewers = () => { const c = cmpCfg(); const l = c.reviewers.filter(id => member(id)); return l.length ? l : internals().filter(m => role(m.roleId)?.perms?.compliance).map(m => m.id); };
 const canReview = () => can("compliance") || cmpCfg().reviewers.includes(me()?.id);
 const canCollect = d => canEditDossier(d) || can("onedrive");
@@ -3850,7 +3927,7 @@ function cmpTab(d) {
   if (!ext && rv && st === "validated") actions.push(`<button class="btn sm" data-act11="cmp-reopen" data-id="${d.id}">Rouvrir le contrôle</button>`);
   if (window.INMA?.graph?.available?.() && reqs.some(x => x.status === "update" && isURL(x.url))) actions.push(`<button class="btn sm" data-act11="cmp-share" data-id="${d.id}" title="Repère les documents modifiés dans OneDrive/SharePoint depuis la demande de correction">${ic("cloud")}Vérifier le share</button>`);
   const gi = x => reqs.indexOf(x); const srt = !ext && canCollect(d);
-  const row = x => { const last = (x.history || []).slice(-1)[0]; const histTxt = (x.history || []).slice(-6).map(e => `${fdate(e.at.slice(0, 10))} · ${mname(e.by)} · ${(DOC_ST[e.status] || [e.status])[0]}${e.note ? " — " + e.note : ""}`).join("\n");
+  const row = x => { const last = (x.history || []).slice(-1)[0]; const histTxt = (x.history || []).slice(-6).map(e => `${fdate(e.at.slice(0, 10))} · ${mname(e.by)} · ${(DOC_ST[e.status] || [e.status === "requested" ? "Demandé" : e.status])[0]}${e.note ? " — " + e.note : ""}`).join("\n");
     const btn = []; if (isURL(x.url)) btn.push(`<a class="btn sm" href="${h(x.url)}" target="_blank" rel="noopener">${ic("ext")}Ouvrir</a>`);
     if (col && x.status !== "validated") btn.push(`<button class="btn sm" data-act11="doc-deposit" data-id="${d.id}" data-doc="${x.id}">${x.status === "update" ? "Déposer la version corrigée" : x.status === "received" ? "Remplacer" : "Déposer"}</button>`);
     if (!ext && rv && (x.status === "received" || x.status === "update")) btn.push(`<button class="btn sm pri" data-act11="doc-ok" data-id="${d.id}" data-doc="${x.id}">Valider</button>`);
@@ -3924,7 +4001,7 @@ function docMenu(d, x) {
       ${rv && x.status === "validated" ? `<button class="li btn ghost" style="justify-content:flex-start" data-dm="unval">Annuler la validation</button>` : ""}
       ${col ? `<button class="li btn ghost" style="justify-content:flex-start" data-dm="ren">Renommer / changer la date</button>` : ""}
       ${col ? `<button class="li btn ghost danger" style="justify-content:flex-start" data-dm="del">Retirer de la liste</button>` : ""}</div>
-    ${(x.history || []).length ? `<div class="eyebrow" style="margin-top:6px">Historique</div><div class="list">${x.history.slice().reverse().map(e => `<div class="li"><div class="grow"><div class="t1" style="white-space:normal">${(DOC_ST[e.status] || [e.status])[0]}${e.note ? " — " + h(e.note) : ""}</div><div class="t2">${h(mname(e.by))} · ${new Date(e.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</div></div></div>`).join("")}</div>` : ""}`,
+    ${(x.history || []).length ? `<div class="eyebrow" style="margin-top:6px">Historique</div><div class="list">${x.history.slice().reverse().map(e => `<div class="li"><div class="grow"><div class="t1" style="white-space:normal">${(DOC_ST[e.status] || [e.status === "requested" ? "Demandé" : e.status])[0]}${e.note ? " — " + h(e.note) : ""}</div><div class="t2">${h(mname(e.by))} · ${new Date(e.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</div></div></div>`).join("")}</div>` : ""}`,
     `<button class="btn" data-mclose="1">Fermer</button>`, L => {
       L.addEventListener("click", async e => { const b = e.target.closest("[data-dm]"); if (!b) return; const live = dossierById(d.id); const it = (live.docReqs || []).find(y => y.id === x.id); if (!it) return; const a = b.dataset.dm;
         if (a === "na") { it.status = it.status === "na" ? "missing" : "na"; docHist(it, it.status); }
@@ -3937,24 +4014,27 @@ function docMenu(d, x) {
 }
 function cmpRequestModal(d) {
   const c = cmpCfg(); const reqs = (d.docReqs || []).filter(x => x.status === "missing" || x.status === "update");
+  const lastReq = reqs.map(x => x.requestedAt).filter(Boolean).sort().pop() || "";
+  const auto = () => { const pick = u => c.messages.find(m => m.use === u)?.id; return (reqs.length && reqs.every(x => x.status === "update") && pick("fix")) || (lastReq && pick("remind")) || pick("first") || c.messages[0]?.id; };
   const build = (L) => { const sel = $$("[data-rq]", L).filter(i => i.checked).map(i => (d.docReqs || []).find(x => x.id === i.dataset.rq)).filter(Boolean);
+    const tpl = c.messages.find(m => m.id === $("#rq-tpl", L).value) || c.messages[0];
     const liste = sel.map(x => `- ${x.name}${x.status === "update" && x.note ? " (à actualiser : " + x.note + ")" : ""}`).join("\n");
-    const m = me(); const vars = { dossier: `${d.code} · ${d.name}`, societe: d.company || d.name, contact: $("#rq-contact", L).value.trim() || "Madame, Monsieur", echeance: fdate($("#rq-due", L).value) || "—", liste: liste || "-", lien: isURL(d.oneDriveUrl) ? d.oneDriveUrl : "(lien communiqué séparément)", signature: m ? `${m.name}${m.title ? "\n" + m.title : ""}\n${S.cfg.fundRoot?.name || "INMA Capital"}` : (S.cfg.fundRoot?.name || "INMA Capital") };
-    const txt = c.message.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`); const lines = txt.split("\n"); let subject = `${d.code} — documents à transmettre`, body = txt;
-    if (/^objet\s*:/i.test(lines[0])) { subject = lines[0].replace(/^objet\s*:\s*/i, ""); body = lines.slice(1).join("\n").replace(/^\n+/, ""); }
+    const m = me(); const vars = { dossier: `${d.code} · ${d.name}`, societe: d.company || d.name, contact: $("#rq-contact", L).value.trim() || "Madame, Monsieur", echeance: fdate($("#rq-due", L).value) || "—", liste: liste || "-", lien: isURL(d.oneDriveUrl) ? d.oneDriveUrl : "(lien communiqué séparément)", date_demande: fdate(sel.map(x => x.requestedAt).filter(Boolean).sort().pop() || lastReq) || "—", nb: String(sel.length), signature: m ? `${m.name}${m.title ? "\n" + m.title : ""}\n${S.cfg.fundRoot?.name || "INMA Capital"}` : (S.cfg.fundRoot?.name || "INMA Capital") };
+    const txt = (tpl?.text || CMP_MESSAGE_DEFAULT).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? `{${k}}`); const lines = txt.split("\n"); let subject = `${d.code} — documents à transmettre`, body = txt;
+    if (/^(objet|subject)\s*:/i.test(lines[0])) { subject = lines[0].replace(/^(objet|subject)\s*:\s*/i, ""); body = lines.slice(1).join("\n").replace(/^\n+/, ""); }
     $("#rq-subj", L).value = subject; $("#rq-body", L).value = body; };
-  modal(`Demande de documents — ${d.code}`, `<div class="grid3"><label class="f"><span>Destinataire (nom)</span><input type="text" id="rq-contact" value="${h(d.contactName || "")}" placeholder="Ex. M. Ben Salah"></label><label class="f"><span>E-mail du destinataire</span><input type="email" id="rq-mail" value="${h(d.contactEmail || "")}" placeholder="contact@societe.tn"></label><label class="f"><span>À fournir avant le</span><input type="date" id="rq-due" value="${addDays(todayISO(), c.delay)}"></label></div>
+  modal(`Demande de documents — ${d.code}`, `<label class="f"><span>Modèle de message${lastReq ? ` · dernière demande le ${fdate(lastReq)}` : ""}</span><select id="rq-tpl">${c.messages.map(m => `<option value="${m.id}" ${m.id === auto() ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select></label><div class="grid3"><label class="f"><span>Destinataire (nom)</span><input type="text" id="rq-contact" value="${h(d.contactName || "")}" placeholder="Ex. M. Ben Salah"></label><label class="f"><span>E-mail du destinataire</span><input type="email" id="rq-mail" value="${h(d.contactEmail || "")}" placeholder="contact@societe.tn"></label><label class="f"><span>À fournir avant le</span><input type="date" id="rq-due" value="${addDays(todayISO(), c.delay)}"></label></div>
     <div><div class="eyebrow" style="margin-bottom:6px">Documents demandés</div><div class="row" style="gap:4px 12px">${reqs.map(x => `<label class="chk"><input type="checkbox" data-rq="${x.id}" checked>${h(x.name)}${x.status === "update" ? " (à actualiser)" : ""}</label>`).join("") || '<span class="muted">Aucun document manquant ni à actualiser.</span>'}</div></div>
     <label class="f"><span>Objet</span><input type="text" id="rq-subj"></label><label class="f"><span>Message</span><textarea id="rq-body" rows="12"></textarea></label>
-    <p class="muted" style="margin:0;font-size:12px">Modèle modifiable dans Paramètres › Conformité & documents.</p>`,
+    <p class="muted" style="margin:0;font-size:12px">Objet et message restent modifiables ici avant l'envoi. Les modèles se gèrent dans Paramètres › Conformité & documents.</p>`,
     `<button class="btn" id="rq-copy">${ic("copy")}Copier</button><button class="btn" id="rq-mailto">Ouvrir dans Outlook</button><span class="spacer"></span><button class="btn" data-mclose="1">Fermer</button><button class="btn pri" id="rq-done">Marquer comme envoyée</button>`, L => {
-      build(L); L.addEventListener("change", e => { if (e.target.matches("[data-rq],#rq-due")) build(L); }); L.addEventListener("input", e => { if (e.target.id === "rq-contact") build(L); });
+      build(L); L.addEventListener("change", e => { if (e.target.matches("[data-rq],#rq-due,#rq-tpl")) build(L); }); L.addEventListener("input", e => { if (e.target.id === "rq-contact") build(L); });
       $("#rq-copy", L).onclick = () => copyText(`${$("#rq-subj", L).value}\n\n${$("#rq-body", L).value}`);
       $("#rq-mailto", L).onclick = () => { const a = document.createElement("a"); a.href = `mailto:${encodeURIComponent($("#rq-mail", L).value.trim())}?subject=${encodeURIComponent($("#rq-subj", L).value)}&body=${encodeURIComponent($("#rq-body", L).value)}`; a.click(); };
       $("#rq-done", L).onclick = async () => { const live = dossierById(d.id); const ids = $$("[data-rq]", L).filter(i => i.checked).map(i => i.dataset.rq); const dd = $("#rq-due", L).value;
         for (const it of live.docReqs || []) if (ids.includes(it.id)) { it.requestedAt = todayISO(); if (dd) it.due = dd; }
         live.contactName = $("#rq-contact", L).value.trim(); const em = $("#rq-mail", L).value.trim(); if (em) live.contactEmail = em;
-        L.remove(); await cmpSave(live, `${live.code} : demande de ${ids.length} document(s) envoyée${live.contactName ? " à " + live.contactName : ""}`, []); toast("Demande enregistrée"); };
+        L.remove(); const tn = c.messages.find(m => m.id === $("#rq-tpl", L)?.value)?.name; for (const it of live.docReqs || []) if (ids.includes(it.id)) docHist(it, "requested", tn || "demande"); await cmpSave(live, `${live.code} : ${(tn || "demande").toLowerCase()} — ${ids.length} document(s)${live.contactName ? " à " + live.contactName : ""}`, []); toast("Demande enregistrée"); };
     }, true);
 }
 async function cmpShareCheck(d, silent) {
@@ -4008,17 +4088,20 @@ function sCompliance() {
     <div><div class="eyebrow" style="margin-bottom:6px">Modèles de documents (un document par ligne, « Catégorie | Document »)</div>
       <div id="cs-tpls" style="display:flex;flex-direction:column;gap:10px">${c.templates.map((t, i) => `<div class="stagecard"><span class="ix">${String(i + 1).padStart(2, "0")}</span><div style="display:flex;flex-direction:column;gap:6px;flex:1"><input type="text" data-cs-tn="${i}" value="${h(t.name)}" ${ed ? "" : "disabled"} aria-label="Nom du modèle"><textarea data-cs-td="${i}" rows="5" ${ed ? "" : "disabled"} aria-label="Documents du modèle">${h(t.docs.join("\n"))}</textarea>${ed ? `<button class="btn sm ghost danger" data-act11="cs-tpl-del" data-i="${i}" style="align-self:flex-end">Supprimer ce modèle</button>` : ""}</div></div>`).join("")}</div>
       ${ed ? `<button class="btn sm" data-act11="cs-tpl-add" style="margin-top:8px">${ic("plus")}Nouveau modèle</button>` : ""}</div>
-    <label class="f"><span>Modèle de demande de documents (variables : {dossier} {societe} {contact} {echeance} {liste} {lien} {signature} ; 1re ligne « Objet : … »)</span><textarea id="cs-msg" rows="12" ${ed ? "" : "disabled"}>${h(c.message)}</textarea></label>
+    <div><div class="eyebrow" style="margin-bottom:6px">Modèles de demande de documents</div>
+      <p class="muted" style="margin:0 0 8px;font-size:12px">Variables : {dossier} {societe} {contact} {echeance} {liste} {lien} {signature} {date_demande} {nb}. La 1re ligne « Objet : … » donne l'objet de l'e-mail. L'usage choisit le modèle proposé par défaut : relance s'il y a déjà eu une demande, corrections si toutes les pièces sont à actualiser.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">${c.messages.map((m, i) => `<div class="stagecard"><span class="ix">${String(i + 1).padStart(2, "0")}</span><div style="display:flex;flex-direction:column;gap:6px;flex:1"><div class="grid2"><input type="text" data-cs-mn="${i}" value="${h(m.name)}" ${ed ? "" : "disabled"} aria-label="Nom du modèle de message"><select data-cs-mu="${i}" ${ed ? "" : "disabled"} aria-label="Usage">${CMP_MSG_USES.map(u => `<option value="${u[0]}" ${(m.use || "") === u[0] ? "selected" : ""}>Usage : ${u[1]}</option>`).join("")}</select></div><textarea data-cs-mt="${i}" rows="9" ${ed ? "" : "disabled"} aria-label="Texte du modèle">${h(m.text)}</textarea>${ed ? `<div class="row"><span class="spacer"></span><button class="btn sm ghost" data-act11="cs-msg-dup" data-i="${i}">Dupliquer</button>${c.messages.length > 1 ? `<button class="btn sm ghost danger" data-act11="cs-msg-del" data-i="${i}">Supprimer ce modèle</button>` : ""}</div>` : ""}</div></div>`).join("")}</div>
+      ${ed ? `<div class="row" style="margin-top:8px"><button class="btn sm" data-act11="cs-msg-add">${ic("plus")}Nouveau modèle de message</button>${!(S.cfg.compliance?.messages || []).length ? "" : `<button class="btn sm ghost" data-act11="cs-msg-reset">Ajouter les modèles livrés manquants</button>`}</div>` : ""}</div>
     <label class="f"><span>Motifs de blocage proposés (un par ligne)</span><textarea id="cs-blk" rows="5" ${ed ? "" : "disabled"}>${h(blockCats().join("\n"))}</textarea></label>
     ${ed ? `<div class="row"><button class="btn pri" data-act11="cs-save">Enregistrer</button></div>` : ""}</div></div>`;
 }
 function readCmpSettings() {
   const c = cmpCfg(); const tpls = c.templates.map((t, i) => ({ id: t.id || uid("tpl"), name: ($(`[data-cs-tn="${i}"]`)?.value || t.name).trim(), docs: ($(`[data-cs-td="${i}"]`)?.value ?? t.docs.join("\n")).split("\n").map(x => x.trim()).filter(Boolean) })).filter(t => t.name);
-  return { label: $("#cs-label").value.trim() || "TAEF", delay: +$("#cs-delay").value || 10, reviewers: $$("[data-cs-rv]").filter(x => x.checked).map(x => x.dataset.csRv), templates: tpls, message: $("#cs-msg").value || CMP_MESSAGE_DEFAULT };
+  return { label: $("#cs-label").value.trim() || "TAEF", delay: +$("#cs-delay").value || 10, reviewers: $$("[data-cs-rv]").filter(x => x.checked).map(x => x.dataset.csRv), templates: tpls, messages: c.messages.map((m, i) => ({ id: m.id || uid("msg"), name: ($(`[data-cs-mn="${i}"]`)?.value ?? m.name).trim() || "Modèle", use: $(`[data-cs-mu="${i}"]`)?.value ?? (m.use || ""), text: $(`[data-cs-mt="${i}"]`)?.value ?? m.text })) };
 }
 
 /* ---------- préférences de notification (par personne) ---------- */
-const NOTIF_KINDS = [["assign", "Nouvelles tâches qui me sont assignées"], ["mention", "Mentions et commentaires"], ["stage", "Changements d'étape et validations"], ["compliance", "Conformité : documents à vérifier ou à corriger"], ["block", "Dossiers bloqués / débloqués"], ["deadline", "Échéances, reportings et remboursements"], ["meeting", "Comptes rendus de réunion"], ["project", "Projets"], ["other", "Autres (accès, automatisations…)"]];
+const NOTIF_KINDS = [["assign", "Nouvelles tâches qui me sont assignées"], ["mention", "Mentions et commentaires"], ["stage", "Changements d'étape et validations"], ["compliance", "Conformité : documents à vérifier ou à corriger"], ["block", "Dossiers bloqués / débloqués"], ["deadline", "Échéances, reportings et remboursements"], ["meeting", "Réunions : invitations, changements et comptes rendus"], ["project", "Projets"], ["other", "Autres (accès, automatisations…)"]];
 function notifKind(e) {
   if (e.kind) return e.kind; const t = e.text || "";
   if (/^Tâche assignée/.test(t)) return "assign"; if (/^Commentaire/.test(t)) return "mention";
@@ -4070,6 +4153,10 @@ document.addEventListener("click", async e => {
   if (A === "cmp-validate" && d) { d.compliance = { ...(d.compliance || {}), status: "validated", at: new Date().toISOString(), by: me()?.id || null, note: "" }; await cmpSave(d, `${d.code} : conformité validée par ${mname(me()?.id)} (${cmpCfg().label})`, dTeam(d)); toast("Conformité validée"); return; }
   if (A === "cmp-reopen" && d) { d.compliance = { ...(d.compliance || {}), status: "review" }; await cmpSave(d, `${d.code} : contrôle de conformité rouvert`, dOwners(d)); return; }
   if (A === "cs-save") { S.cfg.compliance = readCmpSettings(); S.cfg.blockReasons = $("#cs-blk").value.split("\n").map(x => x.trim()).filter(Boolean); saveCfg("Paramètres de conformité enregistrés"); render(); return; }
+  if (A === "cs-msg-add") { const c = readCmpSettings(); c.messages.push({ id: uid("msg"), name: "Nouveau modèle", use: "", text: "Objet : {dossier} — \n\nBonjour {contact},\n\n{liste}\n\nBien cordialement,\n{signature}" }); S.cfg.compliance = c; render(); return; }
+  if (A === "cs-msg-dup") { const c = readCmpSettings(); const m = c.messages[+el.dataset.i]; c.messages.splice(+el.dataset.i + 1, 0, { ...m, id: uid("msg"), name: m.name + " (copie)", use: "" }); S.cfg.compliance = c; render(); return; }
+  if (A === "cs-msg-del") { const c = readCmpSettings(); c.messages.splice(+el.dataset.i, 1); S.cfg.compliance = c; render(); return; }
+  if (A === "cs-msg-reset") { const c = readCmpSettings(); for (const m of CMP_MESSAGES_DEFAULT()) if (!c.messages.some(x => x.id === m.id)) c.messages.push(m); S.cfg.compliance = c; render(); return; }
   if (A === "cs-tpl-add") { S.cfg.compliance = readCmpSettings(); S.cfg.compliance.templates.push({ id: uid("tpl"), name: "Nouveau modèle", docs: ["Catégorie|Document"] }); render(); return; }
   if (A === "cs-tpl-del") { const c = readCmpSettings(); c.templates.splice(+el.dataset.i, 1); S.cfg.compliance = c; render(); return; }
   if (A === "notif-prefs") { S.inboxOpen = false; renderTop(); return notifPrefsModal(); }
@@ -4212,6 +4299,364 @@ document.addEventListener("click", async e => {
     toast("Lecture des noms dans OneDrive…"); d.odNames = {}; await odFillNames(d, "dossiers", dossierUrls(d)); toast("Noms des dossiers liés mis à jour"); return; }
 });
 
+/* ---------- agenda : réunions planifiées, calendrier type Outlook, liaison Outlook ---------- */
+const AG_H0 = 7, AG_H1 = 21, AG_PX = 44; // heures affichées, pixels par heure
+const agPad = n => String(n).padStart(2, "0");
+const agMin = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : null; };
+const agHHMM = m => `${agPad(Math.floor(m / 60))}:${agPad(m % 60)}`;
+const agDow = iso => new Date(iso + "T12:00:00").getDay();
+const agLocal = (date, time) => new Date(`${date}T${time || "00:00"}:00`);
+const agTZ = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Tunis"; } catch { return "Africa/Tunis"; } };
+const AG_RECUR = [["", "Ne se répète pas"], ["daily", "Chaque jour ouvré"], ["weekly", "Chaque semaine"], ["biweekly", "Toutes les deux semaines"], ["monthly", "Chaque mois"]];
+const AG_RESP = { accepted: ["Accepté", "var(--ok)"], tentative: ["Provisoire", "var(--warn)"], declined: ["Refusé", "var(--bad)"] };
+const agCfg = () => S.ui.ag = { mode: "week", date: todayISO(), who: "me", show: { meetings: 1, tasks: 1, dossiers: 1, deadlines: 1, outlook: 0 }, ...(S.ui.ag || {}) };
+const agGraph = () => !!(window.INMA?.graph?.available?.() && window.INMA.graph.cal);
+const agIsAdmin = () => !!(window.INMA?.me?.()?.isAdmin || (S.isOwner && !S.sim));
+const agInvolved = (e, mid) => !!mid && (e.organizerId === mid || (e.attendees || []).includes(mid));
+const agCanEdit = e => !!e && !e.masked && (agIsAdmin() || e.organizerId === me()?.id || e.createdBy === me()?.id);
+function agVisible() {
+  if (isExt(me())) return [];
+  const mid = me()?.id;
+  return (S.events || []).map(e => (!e.private || agInvolved(e, mid) || agIsAdmin() || e.masked) ? e : { ...e, title: "Occupé", masked: true, agenda: "", location: "", dossierId: "", guests: "" });
+}
+const agType = e => mtType(e.type);
+const agColor = e => e.masked ? "#9AA0A6" : (agType(e).color || "var(--accent)");
+// Occurrences d'une réunion entre deux dates (incluses)
+function agOcc(e, from, to) {
+  const out = [], skip = new Set(e.skip || []), until = e.recurUntil || addDays(e.date, 366);
+  const push = d => { if (d >= from && d <= to && !skip.has(d)) out.push({ ev: e, date: d, key: e.id + "|" + d }); };
+  if (!e.recur) { push(e.date); return out; }
+  let d = e.date, guard = 0;
+  while (d <= to && d <= until && guard++ < 800) {
+    if (e.recur !== "daily" || ![0, 6].includes(agDow(d))) push(d);
+    if (e.recur === "daily") d = addDays(d, 1);
+    else if (e.recur === "weekly") d = addDays(d, 7);
+    else if (e.recur === "biweekly") d = addDays(d, 14);
+    else if (e.recur === "monthly") { const x = new Date(e.date + "T12:00:00"); x.setMonth(x.getMonth() + guard); if (x.getDate() !== +e.date.slice(8, 10)) x.setDate(0); d = x.toISOString().slice(0, 10); }
+    else break;
+  }
+  return out;
+}
+function agRange() {
+  const a = agCfg(), ws = +S.cfg.general.weekStart || 1;
+  if (a.mode === "day") return [a.date, a.date];
+  if (a.mode === "week" || a.mode === "work") { const off = (agDow(a.date) - ws + 7) % 7; const s = addDays(a.date, -off); return a.mode === "work" ? [addDays(s, (1 - ws + 7) % 7), addDays(s, (1 - ws + 7) % 7 + 4)] : [s, addDays(s, 6)]; }
+  if (a.mode === "list") return [a.date, addDays(a.date, 59)];
+  const b = new Date(a.date.slice(0, 7) + "-01T12:00:00"); const off = (b.getDay() - ws + 7) % 7; const s = addDays(b.toISOString().slice(0, 10), -off); return [s, addDays(s, 41)];
+}
+function agWhoOk(e) {
+  const w = agCfg().who; if (w === "all") return true;
+  return agInvolved(e, w === "me" ? me()?.id : w);
+}
+function agMeetings(from, to) { return agVisible().filter(agWhoOk).flatMap(e => agOcc(e, from, to)).sort((x, y) => (x.date + (x.ev.start || "")).localeCompare(y.date + (y.ev.start || ""))); }
+// Éléments « journée entière » : tâches, échéances de dossiers, échéances réglementaires
+function agAllDay(from, to) {
+  const a = agCfg(), who = a.who === "me" ? me()?.id : a.who === "all" ? null : a.who, out = [];
+  if (a.show.tasks) for (const t of visTasks()) if (t.due && t.due >= from && t.due <= to && (!who || (t.assignees || []).includes(who))) out.push({ d: t.due, label: t.title, color: statusById(t.status)?.color || "#999", attr: `data-open-task="${t.id}"`, done: isDone(t) });
+  if (a.show.dossiers) for (const d of visDossiers()) if (d.dueDate && !d.archived && d.dueDate >= from && d.dueDate <= to && (!who || d.ownerId === who || (d.members || []).includes(who))) out.push({ d: d.dueDate, label: "◼ " + d.code + " " + d.name, color: wfById(d.workflowId)?.color || "#999", attr: `data-open="${d.id}"` });
+  if (a.show.deadlines) for (const x of dlOccAll(from, to)) if (!who || (x.o.owners || []).includes(who)) out.push({ d: x.due, label: "◆ " + x.o.title + " · " + x.label, color: x.late ? "var(--bad)" : dlType(x.o.type).color, attr: `data-occ="${x.o.id}|${x.key}"`, done: x.status === "sent" });
+  return out;
+}
+/* Outlook (lecture de l'agenda de l'utilisateur connecté à Microsoft) */
+S.olCache = S.olCache || {};
+function agOutlook(from, to) {
+  const a = agCfg(); if (!a.show.outlook || !agGraph() || !window.INMA.graph.signedIn()) return [];
+  const k = from + "|" + to, c = S.olCache[k];
+  if (!c) { S.olCache[k] = { loading: true }; window.INMA.graph.cal.list(addDays(from, 0), addDays(to, 1)).then(items => { S.olCache[k] = { items }; if (S.view === "calendar") render(); }).catch(er => { S.olCache[k] = { err: er.message || "erreur" }; if (S.view === "calendar") render(); }); return []; }
+  if (!c.items) return [];
+  const linked = new Set((S.events || []).map(e => e.outlook?.id).filter(Boolean));
+  return c.items.filter(x => !linked.has(x.id) && !x.isCancelled).map(x => { const s = new Date(x.start), e = new Date(x.end); const date = `${s.getFullYear()}-${agPad(s.getMonth() + 1)}-${agPad(s.getDate())}`;
+    return { ol: x, date, key: "ol|" + x.id, ev: { id: "ol:" + x.id, title: x.subject || "(sans objet)", date, start: x.isAllDay ? "" : agHHMM(s.getHours() * 60 + s.getMinutes()), end: x.isAllDay ? "" : agHHMM(Math.min(24 * 60 - 1, e.getHours() * 60 + e.getMinutes() + (e.toDateString() !== s.toDateString() ? 24 * 60 : 0))), allDay: x.isAllDay, location: x.location || "", outlookOnly: true } }; });
+}
+function agOlStatus() {
+  const a = agCfg(); if (!a.show.outlook) return "";
+  if (!agGraph()) return '<span class="muted" style="font-size:12px">Agenda Outlook : disponible dans la version déployée de l\'outil.</span>';
+  if (!window.INMA.graph.signedIn()) return `<button class="btn sm" data-ag="ol-login">Se connecter à Microsoft pour afficher Outlook</button>`;
+  const [f, t] = agRange(); const c = S.olCache[f + "|" + t];
+  if (c?.loading) return '<span class="muted" style="font-size:12px">Chargement de l\'agenda Outlook…</span>';
+  if (c?.err) return `<span style="font-size:12px;color:var(--bad)">Outlook : ${h(c.err)}</span> <button class="btn sm ghost" data-ag="ol-retry">Réessayer</button>`;
+  return "";
+}
+/* mise en page des réunions qui se chevauchent dans une journée */
+function agLayout(items) {
+  const xs = items.map(o => { const s = agMin(o.ev.start) ?? AG_H0 * 60, e0 = agMin(o.ev.end); return { o, s, e: Math.max(s + 20, e0 ?? s + 60) }; }).sort((a, b) => a.s - b.s || b.e - a.e);
+  const out = []; let group = [], gEnd = -1;
+  const flush = () => { const cols = []; for (const x of group) { let c = cols.findIndex(end => end <= x.s); if (c < 0) { c = cols.length; cols.push(0); } cols[c] = x.e; x.col = c; } for (const x of group) { x.n = cols.length; out.push(x); } group = []; };
+  for (const x of xs) { if (x.s >= gEnd && group.length) { flush(); gEnd = -1; } group.push(x); gEnd = Math.max(gEnd, x.e); }
+  if (group.length) flush(); return out;
+}
+function agBlock(x) {
+  const e = x.o.ev, top = (Math.max(x.s, AG_H0 * 60) - AG_H0 * 60) / 60 * AG_PX, hgt = Math.max(18, (Math.min(x.e, AG_H1 * 60) - Math.max(x.s, AG_H0 * 60)) / 60 * AG_PX - 2);
+  const w = 100 / x.n, mine = me() && (e.attendees || []).includes(me().id) && e.organizerId !== me().id ? (e.responses || {})[me().id] : "accepted";
+  const col = e.outlookOnly ? "#2F6FB0" : agColor(e);
+  const attr = e.outlookOnly ? `data-ag-ol="${h(x.o.ol.id)}"` : `data-ag-ev="${e.id}" data-ag-date="${x.o.date}"`;
+  return `<button type="button" class="ag-ev${e.outlookOnly ? " ol" : ""}${mine === "declined" ? " declined" : !mine ? " pending" : ""}" ${attr} style="top:${top}px;height:${hgt}px;left:calc(${x.col * w}% + 2px);width:calc(${w}% - 4px);--c:${h(col)}" title="${h(e.title)}${e.start ? " · " + e.start + (e.end ? "–" + e.end : "") : ""}${e.location ? " · " + h(e.location) : ""}">
+    <b>${h(e.title)}</b><span>${e.start ? h(e.start) + (e.end ? "–" + h(e.end) : "") : ""}${e.location ? " · " + h(e.location) : ""}${e.joinUrl || e.teams ? " · Teams" : ""}${e.recur ? " ↻" : ""}</span></button>`;
+}
+function agChip(x) { return `<span class="ev" style="border-left-color:${h(x.color)};${x.done ? "text-decoration:line-through;opacity:.6" : ""}" ${x.attr} title="${h(x.label)}">${h(x.label)}</span>`; }
+function agMeetChip(o) { const e = o.ev; const col = e.outlookOnly ? "#2F6FB0" : agColor(e); return `<span class="ev ag-mchip" style="border-left-color:${h(col)}" ${e.outlookOnly ? `data-ag-ol="${h(o.ol.id)}"` : `data-ag-ev="${e.id}" data-ag-date="${o.date}"`} title="${h(e.title)}"><b>${h(e.start || "")}</b> ${h(e.title)}</span>`; }
+
+function vCalendar() {
+  const a = agCfg(); const [from, to] = agRange();
+  const meets = a.show.meetings ? agMeetings(from, to) : []; const ol = agOutlook(from, to); const allM = [...meets, ...ol];
+  const allday = agAllDay(from, to);
+  const title = a.mode === "month" ? new Date(a.date + "T12:00:00").toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+    : a.mode === "day" ? new Date(a.date + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    : a.mode === "list" ? `À partir du ${fdate(from)}` : `${new Date(from + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – ${new Date(to + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}`;
+  const whoSel = `<select data-ag-who aria-label="Agenda de"><option value="me" ${a.who === "me" ? "selected" : ""}>Mon agenda</option><option value="all" ${a.who === "all" ? "selected" : ""}>Toute l'équipe</option><optgroup label="Agenda de…">${internals().filter(m => m.id !== me()?.id).map(m => `<option value="${m.id}" ${a.who === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</optgroup></select>`;
+  const tog = (k, l) => `<label class="chk" style="font-size:12.5px"><input type="checkbox" data-ag-show="${k}" ${a.show[k] ? "checked" : ""}>${l}</label>`;
+  const tb = `<div class="toolbar ag-tb"><button class="btn pri" data-ag="new">${ic("plus")}Nouvelle réunion</button>
+    <div class="seg">${[["day", "Jour"], ["work", "Semaine de travail"], ["week", "Semaine"], ["month", "Mois"], ["list", "Liste"]].map(v => `<button class="${a.mode === v[0] ? "on" : ""}" data-ag-mode="${v[0]}">${v[1]}</button>`).join("")}</div>
+    <button class="btn sm" data-ag-nav="-1" aria-label="Précédent">‹</button><button class="btn sm ghost" data-ag-nav="0">Aujourd'hui</button><button class="btn sm" data-ag-nav="1" aria-label="Suivant">›</button>
+    <b class="ag-title" style="${a.mode === "list" ? "text-transform:none" : ""}">${h(title)}</b><span class="spacer"></span>${whoSel}</div>
+    <div class="row ag-tog">${tog("meetings", "Réunions")}${tog("tasks", "Tâches")}${tog("dossiers", "Échéances de dossiers")}${tog("deadlines", "Échéances et reportings")}${tog("outlook", "Mon agenda Outlook")}${agOlStatus()}</div>`;
+  let body = "";
+  if (a.mode === "month") body = agMonth(from, allM, allday, a);
+  else if (a.mode === "list") body = agList(allM);
+  else { const days = []; for (let d = from; d <= to; d = addDays(d, 1)) days.push(d); body = agGrid(days, allM, allday); }
+  return tb + body;
+}
+function agMonth(from, allM, allday, a) {
+  const ws = +S.cfg.general.weekStart || 1, names = [...Array(7)].map((_, i) => ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"][(i + ws) % 7]); const ym = a.date.slice(0, 7);
+  let cells = "";
+  for (let i = 0; i < 42; i++) { const iso = addDays(from, i); const m = allM.filter(x => x.date === iso), e = allday.filter(x => x.d === iso); const n = m.length + e.length; const show = [...m.map(agMeetChip), ...e.map(agChip)];
+    cells += `<div class="d ${iso.slice(0, 7) !== ym ? "out" : ""} ${iso === todayISO() ? "today" : ""}" data-ag-day="${iso}"><span class="n">${+iso.slice(8)}</span>${show.slice(0, 4).join("")}${n > 4 ? `<button type="button" class="linkish" style="font-size:10.5px" data-ag-goday="${iso}">+${n - 4} autres</button>` : ""}</div>`; }
+  return `<div class="tablewrap"><div class="cal" style="min-width:640px">${names.map(n => `<div class="cal-h">${n}</div>`).join("")}${cells}</div></div><p class="muted" style="font-size:12px;margin:6px 0 0">Double-cliquez un jour pour planifier une réunion · ◼ échéances de dossiers · ◆ échéances et reportings</p>`;
+}
+function agGrid(days, allM, allday) {
+  const hours = []; for (let hh = AG_H0; hh < AG_H1; hh++) hours.push(hh);
+  const now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
+  const cols = days.map(d => { const its = allM.filter(x => x.date === d && !x.ev.allDay && x.ev.start); const lay = agLayout(its);
+    const nowLine = d === todayISO() && nowMin >= AG_H0 * 60 && nowMin <= AG_H1 * 60 ? `<div class="ag-now" style="top:${(nowMin - AG_H0 * 60) / 60 * AG_PX}px"></div>` : "";
+    return `<div class="ag-col${[0, 6].includes(agDow(d)) ? " we" : ""}" data-ag-col="${d}" style="height:${(AG_H1 - AG_H0) * AG_PX}px">${lay.map(agBlock).join("")}${nowLine}</div>`; }).join("");
+  const heads = days.map(d => { const x = new Date(d + "T12:00:00"); return `<button type="button" class="ag-dh${d === todayISO() ? " today" : ""}" data-ag-goday="${d}"><span>${x.toLocaleDateString("fr-FR", { weekday: "short" })}</span><b>${x.getDate()}</b></button>`; }).join("");
+  const ad = days.map(d => { const its = [...allM.filter(x => x.date === d && (x.ev.allDay || !x.ev.start)).map(agMeetChip), ...allday.filter(x => x.d === d).map(agChip)]; return `<div class="ag-adc">${its.slice(0, 5).join("")}${its.length > 5 ? `<button type="button" class="linkish" style="font-size:10.5px" data-ag-goday="${d}">+${its.length - 5}</button>` : ""}</div>`; }).join("");
+  return `<div class="panel ag-wrap" style="--n:${days.length}"><div class="ag-head"><div class="ag-gut"></div>${heads}</div><div class="ag-ad"><div class="ag-gut muted">Journée</div>${ad}</div>
+    <div class="ag-scroll" id="ag-scroll"><div class="ag-body"><div class="ag-gut">${hours.map(hh => `<div class="ag-hl" style="height:${AG_PX}px">${agPad(hh)}:00</div>`).join("")}</div>${cols}</div></div></div>
+    <p class="muted" style="font-size:12px;margin:6px 0 0">Cliquez un créneau libre pour planifier une réunion à cette heure.</p>`;
+}
+function agList(allM) {
+  if (!allM.length) return `<div class="empty"><b>Aucune réunion sur les 60 prochains jours</b><span>Planifiez une réunion : elle apparaît dans l'agenda des participants, qui sont notifiés, et peut être envoyée dans Outlook.</span><button class="btn pri" data-ag="new">Nouvelle réunion</button></div>`;
+  const by = {}; for (const o of allM) (by[o.date] ||= []).push(o);
+  return Object.entries(by).map(([d, os]) => `<div class="eyebrow" style="margin:6px 0 -4px;text-transform:none;letter-spacing:0;font-size:12.5px">${new Date(d + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
+    <div class="panel"><div class="body list">${os.sort((x, y) => (x.ev.start || "").localeCompare(y.ev.start || "")).map(o => agListRow(o)).join("")}</div></div>`).join("");
+}
+function agListRow(o) {
+  const e = o.ev, cr = !e.outlookOnly && (S.meetings || []).find(m => m.eventId === e.id && (!e.recur || m.date === o.date));
+  const attr = e.outlookOnly ? `data-ag-ol="${h(o.ol.id)}"` : `data-ag-ev="${e.id}" data-ag-date="${o.date}"`;
+  return `<div class="li" ${attr} tabindex="0" role="button" style="cursor:pointer"><span class="ag-time"><b>${h(e.start || "Journée")}</b>${e.end ? `<span>${h(e.end)}</span>` : ""}</span><span class="dot" style="width:4px;align-self:stretch;border-radius:2px;background:${h(e.outlookOnly ? "#2F6FB0" : agColor(e))}"></span>
+    <div class="grow"><div class="t1" style="white-space:normal">${h(e.title)}${e.recur ? ' <span class="muted" title="Réunion périodique">↻</span>' : ""}${e.private && !e.masked ? ' <span class="tag">Privée</span>' : ""}</div>
+    <div class="t2">${e.outlookOnly ? "Agenda Outlook" : h(agType(e).label)}${e.location ? " · " + h(e.location) : ""}${e.joinUrl ? " · Teams" : ""}${e.dossierId && dossierById(e.dossierId) ? " · " + h(dossierById(e.dossierId).code) : ""}${cr ? " · compte rendu " + (cr.status === "draft" ? "en brouillon" : "validé") : ""}</div></div>
+    ${e.outlookOnly ? "" : avs([e.organizerId, ...(e.attendees || []).filter(x => x !== e.organizerId)].slice(0, 6))}</div>`;
+}
+
+/* ---------- fenêtre réunion ---------- */
+function agNew(over = {}) {
+  const now = new Date(); let s = Math.ceil((now.getHours() * 60 + now.getMinutes() + 1) / 30) * 30; if (s < 8 * 60) s = 9 * 60; if (s > 19 * 60) s = 9 * 60;
+  const t = (S.cfg.meetingTypes || []).find(x => x.id === "mt_other") || (S.cfg.meetingTypes || [])[0];
+  return { id: uid("ev"), title: "", type: t?.id || "", date: agCfg().date >= todayISO() ? agCfg().date : todayISO(), start: agHHMM(s), end: agHHMM(Math.min(s + 60, 23 * 60 + 30)), allDay: false, attendees: me() ? [me().id] : [], guests: "", location: "", teams: false, joinUrl: "", dossierId: "", projectId: "", agenda: "", private: false, recur: "", recurUntil: "", organizerId: me()?.id || null, responses: {}, ...over };
+}
+function agConflicts(ev) {
+  if (ev.allDay || !ev.start) return [];
+  const s = agMin(ev.start), e = agMin(ev.end) ?? s + 60, out = [];
+  for (const o of agVisible().flatMap(x => x.id === ev.id ? [] : agOcc(x, ev.date, ev.date))) {
+    const x = o.ev; if (x.allDay || !x.start) continue; const xs = agMin(x.start), xe = agMin(x.end) ?? xs + 60; if (xs >= e || xe <= s) continue;
+    const who = (ev.attendees || []).filter(id => agInvolved(x, id)); if (who.length) out.push({ x, who });
+  }
+  return out;
+}
+const agEmails = ev => [...new Set([...(ev.attendees || []).map(id => member(id)?.email).filter(Boolean), ...String(ev.guests || "").split(/[,;\s]+/).map(x => x.trim()).filter(x => /@/.test(x))])];
+function agText(ev) {
+  const d = ev.dossierId && dossierById(ev.dossierId);
+  return [ev.agenda || "", d ? `Dossier : ${d.code} · ${d.name}` : "", ev.joinUrl ? `Rejoindre la réunion Teams : ${ev.joinUrl}` : "", `Organisée depuis ${S.cfg.general.appName || "INMA Workflow"}.`].filter(Boolean).join("\n\n");
+}
+function agICS(ev) {
+  const z = d => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const esc = s => String(s || "").replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/[,;]/g, m => "\\" + m);
+  const fold = l => l.length <= 74 ? l : l.match(/.{1,73}/g).join("\r\n ");
+  const s = ev.allDay ? null : agLocal(ev.date, ev.start), e = ev.allDay ? null : agLocal(ev.date, ev.end || agHHMM((agMin(ev.start) || 540) + 60));
+  const rr = { daily: "FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR", weekly: "FREQ=WEEKLY", biweekly: "FREQ=WEEKLY;INTERVAL=2", monthly: "FREQ=MONTHLY" }[ev.recur];
+  const org = member(ev.organizerId);
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//INMA Capital//INMA Workflow//FR", "METHOD:REQUEST", "BEGIN:VEVENT", `UID:${ev.id}@inma-workflow`, `DTSTAMP:${z(new Date())}`,
+    ev.allDay ? `DTSTART;VALUE=DATE:${ev.date.replace(/-/g, "")}` : `DTSTART:${z(s)}`, ev.allDay ? `DTEND;VALUE=DATE:${addDays(ev.date, 1).replace(/-/g, "")}` : `DTEND:${z(e)}`,
+    rr ? `RRULE:${rr}${ev.recurUntil ? ";UNTIL=" + ev.recurUntil.replace(/-/g, "") + "T235959Z" : ""}` : "", `SUMMARY:${esc(ev.title)}`, ev.location ? `LOCATION:${esc(ev.location)}` : "", `DESCRIPTION:${esc(agText(ev))}`,
+    org?.email ? `ORGANIZER;CN=${esc(org.name)}:mailto:${org.email}` : "", ...agEmails(ev).map(m => `ATTENDEE;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:${m}`), "BEGIN:VALARM", "TRIGGER:-PT15M", "ACTION:DISPLAY", "DESCRIPTION:Rappel", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].filter(Boolean).map(fold);
+  return L.join("\r\n") + "\r\n";
+}
+function agDeeplink(ev) {
+  const s = ev.allDay ? ev.date : agLocal(ev.date, ev.start).toISOString(), e = ev.allDay ? addDays(ev.date, 1) : agLocal(ev.date, ev.end || ev.start).toISOString();
+  const q = new URLSearchParams({ path: "/calendar/action/compose", rru: "addevent", subject: ev.title || "Réunion", startdt: s, enddt: e, body: agText(ev), location: ev.location || "", to: agEmails(ev).join(","), allday: ev.allDay ? "true" : "false" });
+  return "https://outlook.office.com/calendar/0/deeplink/compose?" + q.toString();
+}
+// Corps d'événement Microsoft Graph (heures envoyées en UTC)
+function agGraphBody(ev) {
+  const iso = d => d.toISOString().slice(0, 19);
+  const s = ev.allDay ? `${ev.date}T00:00:00` : iso(agLocal(ev.date, ev.start)), e = ev.allDay ? `${addDays(ev.date, 1)}T00:00:00` : iso(agLocal(ev.date, ev.end || agHHMM((agMin(ev.start) || 540) + 60)));
+  const tz = ev.allDay ? agTZ() : "UTC";
+  const b = { subject: ev.title || "Réunion", body: { contentType: "text", content: agText(ev) }, start: { dateTime: s, timeZone: tz }, end: { dateTime: e, timeZone: tz }, isAllDay: !!ev.allDay,
+    location: { displayName: ev.location || "" }, attendees: agEmails(ev).filter(m => m.toLowerCase() !== (member(ev.organizerId)?.email || "").toLowerCase()).map(m => ({ emailAddress: { address: m, name: (S.cfg.members.find(x => (x.email || "").toLowerCase() === m.toLowerCase()) || {}).name || m }, type: "required" })),
+    isOnlineMeeting: !!ev.teams, ...(ev.teams ? { onlineMeetingProvider: "teamsForBusiness" } : {}), sensitivity: ev.private ? "private" : "normal", isReminderOn: true, reminderMinutesBeforeStart: 15 };
+  if (ev.recur) { const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    b.recurrence = { pattern: ev.recur === "monthly" ? { type: "absoluteMonthly", interval: 1, dayOfMonth: +ev.date.slice(8, 10) } : ev.recur === "daily" ? { type: "weekly", interval: 1, daysOfWeek: days.slice(1, 6) } : { type: "weekly", interval: ev.recur === "biweekly" ? 2 : 1, daysOfWeek: [days[agDow(ev.date)]] },
+      range: ev.recurUntil ? { type: "endDate", startDate: ev.date, endDate: ev.recurUntil } : { type: "noEnd", startDate: ev.date } }; }
+  return b;
+}
+async function agSyncOutlook(ev, quiet) {
+  if (!agGraph()) return false;
+  try {
+    const body = agGraphBody(ev); let r;
+    if (ev.outlook?.id) r = await window.INMA.graph.cal.update(ev.outlook.id, body); else r = await window.INMA.graph.cal.create(body);
+    ev.outlook = { id: r?.id || ev.outlook?.id, webLink: r?.webLink || ev.outlook?.webLink || "", by: me()?.id || null, at: new Date().toISOString() };
+    const ju = r?.onlineMeeting?.joinUrl; if (ju) ev.joinUrl = ju;
+    if (!quiet) toast("Invitation envoyée dans Outlook");
+    return true;
+  } catch (er) { toast("Outlook : " + (er.message || "envoi impossible")); return false; }
+}
+function agRespond(ev, v) { const live = (S.events || []).find(x => x.id === ev.id); if (!live || !me()) return; live.responses = { ...(live.responses || {}), [me().id]: v }; putDoc("events", live).then(() => { log(`${mname(me().id)} a répondu « ${AG_RESP[v][0]} » à la réunion « ${live.title} »`, { kind: "meeting", eventId: live.id, notify: [live.organizerId].filter(x => x && x !== me().id) }); }); }
+
+function agModal(ev0, occDate) {
+  const isNew = !(S.events || []).some(x => x.id === ev0.id); const ev = clone(ev0); const ed = isNew || agCanEdit(ev);
+  const mid = me()?.id; const attendee = !ed && (ev.attendees || []).includes(mid);
+  if (ev.masked) { modal("Créneau occupé", `<p style="margin:0">${h(mname(ev.organizerId))} a une réunion privée le ${fdate(occDate || ev.date)}${ev.start ? ` de ${h(ev.start)} à ${h(ev.end || "")}` : ""}.</p>`, `<button class="btn" data-mclose="1">Fermer</button>`); return; }
+  const types = (S.cfg.meetingTypes || []);
+  const dis = ed ? "" : "disabled";
+  const crs = (S.meetings || []).filter(m => m.eventId === ev.id).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const respHTML = !isNew ? `<div class="ag-resp">${(ev.attendees || []).map(id => { const r = id === ev.organizerId ? ["Organisateur", "var(--accent)"] : AG_RESP[(ev.responses || {})[id]] || ["Sans réponse", "var(--muted)"]; return `<span class="row" style="gap:5px;flex-wrap:nowrap">${av(id)}<span style="font-size:12.5px">${h(mname(id))}</span><span style="font-size:11px;color:${r[1]}">${r[0]}</span></span>`; }).join("")}</div>` : "";
+  const inner = `<div class="ag-form">
+    <label class="f"><span>Titre</span><input type="text" id="ag-title" value="${h(ev.title)}" placeholder="Ex. Comité d'investissement — Projet Atlas" ${dis}></label>
+    <div class="grid3"><label class="f"><span>Date</span><input type="date" id="ag-date" value="${h(occDate && ev.recur && !ed ? occDate : ev.date)}" ${dis}></label>
+      <label class="f"><span>Début</span><input type="time" id="ag-start" value="${h(ev.start)}" step="900" ${ev.allDay ? "disabled" : dis}></label>
+      <label class="f"><span>Fin</span><input type="time" id="ag-end" value="${h(ev.end)}" step="900" ${ev.allDay ? "disabled" : dis}></label></div>
+    <div class="row" style="gap:6px 16px"><label class="chk"><input type="checkbox" id="ag-allday" ${ev.allDay ? "checked" : ""} ${dis}>Toute la journée</label>
+      <label class="f" style="flex-direction:row;align-items:center;gap:8px"><span style="white-space:nowrap">Répétition</span><select id="ag-recur" ${dis}>${AG_RECUR.map(r => `<option value="${r[0]}" ${ev.recur === r[0] ? "selected" : ""}>${r[1]}</option>`).join("")}</select></label>
+      <label class="f" style="flex-direction:row;align-items:center;gap:8px;${ev.recur ? "" : "display:none"}" id="ag-until-w"><span style="white-space:nowrap">jusqu'au</span><input type="date" id="ag-until" value="${h(ev.recurUntil || "")}" ${dis}></label></div>
+    <div><div class="eyebrow" style="margin-bottom:6px">Participants INMA</div><div class="row" style="gap:4px 12px">${internals().map(m => `<label class="chk"><input type="checkbox" data-ag-att="${m.id}" ${(ev.attendees || []).includes(m.id) ? "checked" : ""} ${dis}>${h(m.name)}</label>`).join("")}</div></div>
+    <label class="f"><span>Invités externes (e-mails séparés par des virgules)</span><input type="text" id="ag-guests" value="${h(ev.guests || "")}" placeholder="dirigeant@societe.tn, avocat@cabinet.tn" ${dis}></label>
+    <div id="ag-conf"></div>
+    <div class="grid3"><label class="f"><span>Type</span><select id="ag-type" ${dis}>${types.map(t => `<option value="${t.id}" ${ev.type === t.id ? "selected" : ""}>${h(t.label)}</option>`).join("")}</select></label>
+      <label class="f"><span>Lieu</span><input type="text" id="ag-loc" value="${h(ev.location || "")}" placeholder="Salle du conseil, Teams, chez le client…" ${dis}></label>
+      <label class="f"><span>Dossier lié</span><select id="ag-dos" ${dis}><option value="">— aucun —</option>${visDossiers().filter(d => !d.archived || d.id === ev.dossierId).map(d => `<option value="${d.id}" ${ev.dossierId === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label></div>
+    <div class="row" style="gap:6px 16px"><label class="chk"><input type="checkbox" id="ag-teams" ${ev.teams ? "checked" : ""} ${dis}>Réunion Teams${agGraph() ? " (lien créé par Outlook)" : ""}</label>
+      <label class="f" style="flex:1;min-width:240px"><input type="url" id="ag-join" value="${h(ev.joinUrl || "")}" placeholder="Lien Teams (facultatif)" ${dis} aria-label="Lien Teams"></label>
+      <label class="chk"><input type="checkbox" id="ag-private" ${ev.private ? "checked" : ""} ${dis}>Privée (les autres voient « Occupé »)</label></div>
+    <label class="f"><span>Ordre du jour / description</span><textarea id="ag-agenda" rows="4" ${dis}>${h(ev.agenda || "")}</textarea></label>
+    ${ed && agGraph() ? `<label class="chk"><input type="checkbox" id="ag-ol" ${isNew || ev.outlook?.id ? "checked" : ""}>${ev.outlook?.id ? "Mettre à jour la réunion dans mon calendrier Outlook (les participants reçoivent la mise à jour)" : "Ajouter à mon calendrier Outlook et envoyer les invitations"}</label>` : ""}
+    ${!isNew ? `<div><div class="eyebrow" style="margin-bottom:6px">Réponses</div>${respHTML}</div>` : ""}
+    ${attendee ? `<div class="row" style="gap:6px"><span class="muted" style="font-size:12.5px">Votre réponse :</span>${Object.entries(AG_RESP).map(([k, v]) => `<button class="btn sm ${(ev.responses || {})[mid] === k ? "pri" : ""}" data-ag-resp="${k}">${v[0]}</button>`).join("")}</div>` : ""}
+    ${crs.length ? `<div class="row" style="gap:6px"><span class="muted" style="font-size:12.5px">Compte(s) rendu(s) :</span>${crs.map(m => `<button class="btn sm" data-ag-cr="${m.id}">${h(fdate(m.date))}${m.status === "draft" ? " (brouillon)" : ""}</button>`).join("")}</div>` : ""}
+    ${!isNew ? `<p class="muted" style="margin:0;font-size:12px">Organisée par ${h(mname(ev.organizerId))}${ev.outlook?.id ? " · synchronisée avec Outlook" : ""}.</p>` : ""}</div>`;
+  const foot = `${!isNew && ed ? `<button class="btn ghost danger" id="ag-del">${ic("trash")}${ev.recur ? "Supprimer…" : "Annuler la réunion"}</button>` : ""}
+    <div class="ag-more"><button class="btn" id="ag-ics">${ic("cal")}.ics</button><a class="btn" id="ag-owa" href="#" target="_blank" rel="noopener">Ouvrir dans Outlook</a>${ev.joinUrl ? `<a class="btn" href="${h(ev.joinUrl)}" target="_blank" rel="noopener">Rejoindre Teams</a>` : ""}</div>
+    <span class="spacer"></span>${!isNew && can("meetings") ? `<button class="btn" id="ag-cr">Rédiger le compte rendu</button>` : ""}<button class="btn" data-mclose="1">${ed ? "Annuler" : "Fermer"}</button>${ed ? `<button class="btn pri" id="ag-save">${isNew ? "Planifier" : "Enregistrer"}</button>` : ""}`;
+  modal(isNew ? "Nouvelle réunion" : (ed ? "Réunion" : ev.title || "Réunion"), inner, foot, L => {
+    const read = () => { if (!ed) return ev;
+      ev.title = $("#ag-title", L).value.trim(); ev.date = $("#ag-date", L).value || ev.date; ev.allDay = $("#ag-allday", L).checked; ev.start = ev.allDay ? "" : $("#ag-start", L).value; ev.end = ev.allDay ? "" : $("#ag-end", L).value;
+      if (!ev.allDay && ev.start && (!ev.end || ev.end <= ev.start)) ev.end = agHHMM(Math.min((agMin(ev.start) || 0) + 60, 23 * 60 + 59));
+      ev.recur = $("#ag-recur", L).value; ev.recurUntil = ev.recur ? $("#ag-until", L).value : "";
+      ev.attendees = $$("[data-ag-att]", L).filter(x => x.checked).map(x => x.dataset.agAtt); if (ev.organizerId && !ev.attendees.includes(ev.organizerId)) ev.attendees.unshift(ev.organizerId);
+      ev.guests = $("#ag-guests", L).value.trim(); ev.type = $("#ag-type", L).value; ev.location = $("#ag-loc", L).value.trim(); ev.dossierId = $("#ag-dos", L).value;
+      ev.teams = $("#ag-teams", L).checked; ev.joinUrl = $("#ag-join", L).value.trim(); ev.private = $("#ag-private", L).checked; ev.agenda = $("#ag-agenda", L).value; return ev; };
+    const conf = () => { const box = $("#ag-conf", L); if (!box) return; const c = agConflicts(read()); box.innerHTML = c.length ? `<div class="ag-warn">${ic("alert")}<div><b>Conflit d'agenda</b>${c.slice(0, 5).map(x => `<div>${h(x.who.map(mname).join(", "))} : « ${h(x.x.title)} » ${h(x.x.start)}–${h(x.x.end || "")}</div>`).join("")}</div></div>` : ""; };
+    const owa = () => { $("#ag-owa", L).href = agDeeplink(read()); };
+    conf(); owa();
+    L.addEventListener("change", e => { if (e.target.id === "ag-allday") { $("#ag-start", L).disabled = $("#ag-end", L).disabled = e.target.checked; } if (e.target.id === "ag-recur") $("#ag-until-w", L).style.display = e.target.value ? "" : "none";
+      if (e.target.id === "ag-start" && ed) { const s0 = agMin(ev.start), e0 = agMin(ev.end), s1 = agMin(e.target.value); if (s1 != null && s0 != null && e0 != null) $("#ag-end", L).value = agHHMM(Math.min(s1 + (e0 - s0), 23 * 60 + 59)); }
+      if (e.target.id === "ag-type" && ed && !$("#ag-title", L).value.trim()) $("#ag-title", L).value = types.find(t => t.id === e.target.value)?.label || "";
+      conf(); owa(); });
+    L.addEventListener("input", e => { if (e.target.matches("#ag-title,#ag-loc,#ag-guests,#ag-agenda")) owa(); });
+    $("#ag-ics", L).onclick = () => { const x = read(); saveFile(`${(x.title || "reunion").replace(/[\\/:*?"<>|]/g, "-").slice(0, 60)}.ics`, new Blob([agICS(x)], { type: "text/calendar;charset=utf-8" })); };
+    L.addEventListener("click", e => { const r = e.target.closest("[data-ag-resp]"); if (r) { agRespond(ev, r.dataset.agResp); L.remove(); toast("Réponse envoyée à l'organisateur"); render(); } const c = e.target.closest("[data-ag-cr]"); if (c) { L.remove(); S.view = "meeting"; S.ui.mtTab = "view:" + c.dataset.agCr; saveUI(); render(); } });
+    $("#ag-cr", L) && ($("#ag-cr", L).onclick = () => { const x = read(); L.remove(); const m = newMeeting(); Object.assign(m, { title: x.title || m.title, date: occDate || x.date, time: x.start || "", location: x.location || (x.joinUrl ? "Teams" : ""), type: x.type || m.type, participants: [...(x.attendees || [])], eventId: x.id }); if (x.dossierId) m.points = [{ id: uid("pt"), kind: "dossier", refId: x.dossierId, text: "" }]; openMeetingEditor(m); });
+    $("#ag-del", L) && ($("#ag-del", L).onclick = () => { const live = (S.events || []).find(x => x.id === ev.id); if (!live) return; L.remove();
+      const cancel = async () => { if (live.outlook?.id && agGraph()) { try { await window.INMA.graph.cal.cancel(live.outlook.id, "Réunion annulée"); } catch (er) { toast("Outlook : " + er.message); } } await delDoc("events", live.id); await log(`Réunion annulée : « ${live.title} » du ${fdate(live.date)}`, { kind: "meeting", notify: (live.attendees || []).filter(x => x !== me()?.id) }); toast("Réunion annulée"); render(); };
+      if (live.recur && occDate) modal("Supprimer une réunion périodique", `<p style="margin:0">Supprimer seulement l'occurrence du ${fdate(occDate)}, ou toute la série ?</p>`, `<button class="btn" data-mclose="1">Fermer</button><button class="btn" id="ag-d1">Cette occurrence</button><button class="btn pri" id="ag-dall">Toute la série</button>`, M => {
+        $("#ag-d1", M).onclick = async () => { M.remove(); live.skip = [...new Set([...(live.skip || []), occDate])]; await putDoc("events", live); await log(`Réunion « ${live.title} » du ${fdate(occDate)} annulée`, { kind: "meeting", notify: (live.attendees || []).filter(x => x !== me()?.id) }); render(); };
+        $("#ag-dall", M).onclick = async () => { M.remove(); await cancel(); }; });
+      else confirmBox(`Annuler la réunion « ${live.title} » ? Les participants seront prévenus.`, "Annuler la réunion", cancel); });
+    $("#ag-save", L) && ($("#ag-save", L).onclick = async () => { const x = read(); if (!x.title) { toast("Indiquez un titre."); $("#ag-title", L).focus(); return; } if (!x.date) { toast("Indiquez une date."); return; }
+      const prev = (S.events || []).find(y => y.id === x.id); const changed = prev && (prev.date !== x.date || prev.start !== x.start || prev.end !== x.end || prev.location !== x.location);
+      x.updatedAt = new Date().toISOString(); if (isNew) x.createdAt = x.updatedAt;
+      const wantOl = $("#ag-ol", L)?.checked; L.remove();
+      if (wantOl) await agSyncOutlook(x, true);
+      if (!S.events) S.events = []; await putDoc("events", x);
+      const others = (x.attendees || []).filter(id => id !== me()?.id); const when = `${fdate(x.date)}${x.start ? " à " + x.start : ""}`;
+      const added = prev ? others.filter(id => !(prev.attendees || []).includes(id)) : others;
+      if (added.length) await log(`Invitation : « ${x.title} » le ${when}${x.location ? " · " + x.location : ""}`, { kind: "meeting", eventId: x.id, dossierId: x.dossierId || null, notify: added });
+      if (prev && changed) { const rest = others.filter(id => !added.includes(id)); if (rest.length) await log(`Réunion modifiée : « ${x.title} », désormais le ${when}`, { kind: "meeting", eventId: x.id, dossierId: x.dossierId || null, notify: rest }); }
+      toast(isNew ? (wantOl && x.outlook?.id ? "Réunion planifiée et envoyée dans Outlook" : "Réunion planifiée") : "Réunion mise à jour");
+      const a = agCfg(); if (isNew && a.who !== "all" && !agInvolved(x, a.who === "me" ? me()?.id : a.who)) a.who = "all"; a.date = x.date; saveUI(); render(); });
+  }, true);
+}
+function agOutlookModal(id) {
+  const [f, t] = agRange(); const it = (S.olCache[f + "|" + t]?.items || []).find(x => x.id === id); if (!it) return;
+  const s = new Date(it.start), e = new Date(it.end);
+  modal(it.subject || "Réunion Outlook", `<p style="margin:0"><b>${s.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</b>${it.isAllDay ? " · toute la journée" : ` · ${agHHMM(s.getHours() * 60 + s.getMinutes())}–${agHHMM(e.getHours() * 60 + e.getMinutes())}`}${it.location ? " · " + h(it.location) : ""}</p>
+    ${it.organizer ? `<p class="muted" style="margin:0;font-size:12.5px">Organisateur : ${h(it.organizer)}</p>` : ""}${(it.attendees || []).length ? `<p class="muted" style="margin:0;font-size:12.5px">Participants : ${h(it.attendees.join(", "))}</p>` : ""}
+    <p class="muted" style="margin:0;font-size:12px">Réunion de votre agenda Outlook, affichée ici en lecture. « Ajouter à INMA » la reprend dans l'outil (rattachement à un dossier, compte rendu) sans la dupliquer dans Outlook.</p>`,
+    `${it.webLink ? `<a class="btn" href="${h(it.webLink)}" target="_blank" rel="noopener">Ouvrir dans Outlook</a>` : ""}${it.joinUrl ? `<a class="btn" href="${h(it.joinUrl)}" target="_blank" rel="noopener">Rejoindre Teams</a>` : ""}<span class="spacer"></span><button class="btn" data-mclose="1">Fermer</button><button class="btn pri" id="ol-imp">Ajouter à INMA</button>`, L => {
+      $("#ol-imp", L).onclick = () => { L.remove(); const date = `${s.getFullYear()}-${agPad(s.getMonth() + 1)}-${agPad(s.getDate())}`; const mails = (it.attendeeMails || []).map(x => x.toLowerCase());
+        const att = internals().filter(m => m.email && mails.includes(m.email.toLowerCase())).map(m => m.id); if (me() && !att.includes(me().id)) att.unshift(me().id);
+        agModal(agNew({ title: it.subject || "", date, allDay: !!it.isAllDay, start: it.isAllDay ? "" : agHHMM(s.getHours() * 60 + s.getMinutes()), end: it.isAllDay ? "" : agHHMM(e.getHours() * 60 + e.getMinutes()), location: it.location || "", joinUrl: it.joinUrl || "", teams: !!it.joinUrl, attendees: att, guests: (it.attendeeMails || []).filter(x => !internals().some(m => (m.email || "").toLowerCase() === x.toLowerCase())).join(", "), outlook: { id: it.id, webLink: it.webLink || "", by: me()?.id || null, imported: true } })); };
+    });
+}
+/* prochaines réunions (tableau de bord, fiche dossier) */
+function agUpcoming(filter, n = 5) { const to = addDays(todayISO(), 30); const nowT = new Date(); const nowHM = agHHMM(nowT.getHours() * 60 + nowT.getMinutes());
+  return agVisible().filter(e => !e.masked && filter(e)).flatMap(e => agOcc(e, todayISO(), to)).filter(o => o.date > todayISO() || !o.ev.end || o.ev.end >= nowHM).sort((x, y) => (x.date + (x.ev.start || "")).localeCompare(y.date + (y.ev.start || ""))).slice(0, n); }
+function agUpcomingHTML(list, empty) { return list.length ? `<div class="list">${list.map(o => `<div class="li" data-ag-ev="${o.ev.id}" data-ag-date="${o.date}" style="cursor:pointer" tabindex="0" role="button"><span class="ag-time"><b>${o.date === todayISO() ? "Auj." : new Date(o.date + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}</b><span>${h(o.ev.start || "Journée")}</span></span><div class="grow"><div class="t1">${h(o.ev.title)}</div><div class="t2">${h(agType(o.ev).label)}${o.ev.location ? " · " + h(o.ev.location) : ""}</div></div>${avs((o.ev.attendees || []).slice(0, 4))}</div>`).join("")}</div>` : `<p class="muted" style="margin:0">${empty}</p>`; }
+
+/* commentaires de tâche : modifier / supprimer */
+const tcCanEdit = c => !!me() && (c.by === me().id || agIsAdmin());
+function tcEdit(t, i) {
+  const cur = S.tasks.find(x => x.id === t.id); const c = cur?.comments?.[i]; if (!c || !tcCanEdit(c)) return;
+  modal("Modifier le commentaire", `<label class="f"><span>Commentaire</span><textarea id="tc-text" rows="4">${h(c.text)}</textarea></label>`, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="tc-ok">Enregistrer</button>`, L => {
+    $("#tc-ok", L).onclick = async () => { const v = $("#tc-text", L).value.trim(); if (!v) { toast("Le commentaire est vide : utilisez Supprimer."); return; } L.remove(); const live = S.tasks.find(x => x.id === t.id); const k = live.comments.findIndex(x => x.at === c.at && x.by === c.by); if (k < 0) return;
+      live.comments = live.comments.map((x, j) => j === k ? { ...x, text: v, editedAt: new Date().toISOString() } : x); await putDoc("tasks", live); document.querySelectorAll("#modal").forEach(m => m.remove()); taskModal(live); toast("Commentaire modifié"); };
+  });
+}
+function tcDelete(t, i) {
+  const cur = S.tasks.find(x => x.id === t.id); const c = cur?.comments?.[i]; if (!c || !tcCanEdit(c)) return;
+  confirmBox("Supprimer ce commentaire ?", "Supprimer", async () => { const live = S.tasks.find(x => x.id === t.id); live.comments = (live.comments || []).filter(x => !(x.at === c.at && x.by === c.by)); await putDoc("tasks", live); document.querySelectorAll("#modal").forEach(m => m.remove()); taskModal(live); toast("Commentaire supprimé"); });
+}
+
+/* événements */
+document.addEventListener("click", e => {
+  const mo = e.target.closest("[data-mt-open]");
+  if (mo) { const m = (S.meetings || []).find(x => x.id === mo.dataset.mtOpen); S.inboxOpen = false;
+    if (!m || !canSeeMeeting(m)) { renderTop(); toast("Ce compte rendu n'est pas accessible avec vos droits, ou il a été supprimé."); return; }
+    document.querySelectorAll("#modal").forEach(x => x.remove()); S.openDossier = null; S.view = "meeting"; S.ui.mtTab = "view:" + m.id; saveUI(); render(); renderDrawer?.(); window.scrollTo?.(0, 0); return; }
+  const tc = e.target.closest("[data-tc-edit],[data-tc-del]");
+  if (tc) { const t = S.tasks.find(x => x.id === tc.dataset.task); if (!t) return; if (tc.dataset.tcEdit != null) tcEdit(t, +tc.dataset.tcEdit); else tcDelete(t, +tc.dataset.tcDel); return; }
+  const el = e.target.closest("[data-ag],[data-ag-mode],[data-ag-nav],[data-ag-ev],[data-ag-ol],[data-ag-goday],[data-ag-col]"); if (!el) return;
+  if (el.closest(".modalwrap") && !el.matches("[data-ag-ev]")) return;
+  const a = agCfg(), d = el.dataset;
+  if (d.agEv && el.closest(".inbox")) { S.inboxOpen = false; renderTop(); if (!(S.events || []).some(x => x.id === d.agEv)) { toast("Cette réunion a été annulée."); return; } }
+  if (d.agEv) { e.preventDefault(); const ev = (S.events || []).find(x => x.id === d.agEv) || agVisible().find(x => x.id === d.agEv); if (ev) agModal(ev, d.agDate); return; }
+  if (d.agOl) { agOutlookModal(d.agOl); return; }
+  if (d.agMode) { a.mode = d.agMode; saveUI(); render(); agScroll(); return; }
+  if (d.agGoday) { a.mode = "day"; a.date = d.agGoday; saveUI(); render(); agScroll(); return; }
+  if (d.agNav) { const n = +d.agNav; if (!n) a.date = todayISO(); else if (a.mode === "month") { const b = new Date(a.date.slice(0, 7) + "-01T12:00:00"); b.setMonth(b.getMonth() + n); a.date = b.toISOString().slice(0, 10); } else a.date = addDays(a.date, n * (a.mode === "day" ? 1 : a.mode === "list" ? 30 : 7)); saveUI(); render(); agScroll(); return; }
+  if (d.ag === "new") { agModal(agNew(S.view === "dossiers" || S.openDossier ? { dossierId: d.dossier || "" } : { dossierId: d.dossier || "" })); return; }
+  if (d.ag === "ol-login") { window.INMA?.msLogin?.(); return; }
+  if (d.ag === "ol-retry") { S.olCache = {}; render(); return; }
+  if (d.agCol != null && e.target === el) { const r = el.getBoundingClientRect(); const m = AG_H0 * 60 + Math.floor((e.clientY - r.top) / AG_PX * 2) * 30; agModal(agNew({ date: d.agCol, start: agHHMM(m), end: agHHMM(Math.min(m + 60, 23 * 60 + 30)) })); }
+});
+document.addEventListener("dblclick", e => { const c = e.target.closest("[data-ag-day]"); if (!c || e.target.closest("[data-ag-ev],[data-open-task],[data-occ],[data-open]")) return; agModal(agNew({ date: c.dataset.agDay })); });
+document.addEventListener("keydown", e => { if (e.key !== "Enter") return; const el = e.target.closest?.(".li[data-ag-ev]"); if (el) agModal((S.events || []).find(x => x.id === el.dataset.agEv), el.dataset.agDate); });
+document.addEventListener("change", e => {
+  const t = e.target; if (t.matches?.("[data-ag-who]")) { agCfg().who = t.value; saveUI(); render(); agScroll(); }
+  if (t.matches?.("[data-ag-show]")) { agCfg().show[t.dataset.agShow] = t.checked ? 1 : 0; saveUI(); render(); agScroll(); }
+});
+function agScroll() { requestAnimationFrame(() => { const s = document.getElementById("ag-scroll"); if (s && !s.dataset.done) { s.dataset.done = 1; const n = new Date(); s.scrollTop = Math.max(0, ((n.getHours() >= AG_H0 && n.getHours() < AG_H1 ? n.getHours() - 1 : 8) - AG_H0) * AG_PX); } }); }
+
+function vAgendaTab() {
+  const mid = me()?.id; const all = agUpcoming(() => true, 200); const mine = all.filter(o => agInvolved(o.ev, mid));
+  const past = agVisible().filter(e => !e.masked).flatMap(e => agOcc(e, addDays(todayISO(), -30), addDays(todayISO(), -1))).filter(o => !(S.meetings || []).some(m => m.eventId === o.ev.id && (!o.ev.recur || m.date === o.date))).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+  return `<div class="toolbar"><button class="btn pri" data-ag="new">${ic("plus")}Nouvelle réunion</button><button class="btn" data-nav="calendar">${ic("cal")}Ouvrir l'agenda</button><span class="spacer"></span><span class="muted" style="font-size:12px">${agGraph() ? "Les réunions peuvent être envoyées dans Outlook à l'enregistrement." : "Chaque réunion s'exporte vers Outlook (.ics ou « Ouvrir dans Outlook »)."}</span></div>
+    <div class="dash"><div class="panel"><header><h2>Mes prochaines réunions</h2><span class="chip">${mine.length}</span></header><div class="body">${agUpcomingHTML(mine.slice(0, 12), "Aucune réunion prévue dans les 30 prochains jours.")}</div></div>
+    <div class="panel"><header><h2>Toutes les réunions de l'équipe</h2><span class="chip">${all.length}</span></header><div class="body">${agUpcomingHTML(all.slice(0, 12), "Aucune réunion planifiée.")}</div></div></div>
+    ${past.length && can("meetings") ? `<div class="panel"><header><h2>Réunions passées sans compte rendu</h2><span class="chip">${past.length}</span></header><div class="body">${agUpcomingHTML(past, "")}</div></div>` : ""}`;
+}
+
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
 document.addEventListener("click", async e => {
@@ -4306,7 +4751,7 @@ document.addEventListener("change", async e => {
   if (ds.odwf) { S.cfg.onedrive.perWorkflowRoot = S.cfg.onedrive.perWorkflowRoot || {}; S.cfg.onedrive.perWorkflowRoot[ds.odwf] = t.value.trim(); saveCfg(); return; }
   if (t.id === "icon-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const c = document.createElement("canvas"); c.width = c.height = 512; const x = c.getContext("2d"); const sc = Math.min(512 / (img.width || 512), 512 / (img.height || 512)); const w = (img.width || 512) * sc, hh = (img.height || 512) * sc; x.drawImage(img, (512 - w) / 2, (512 - hh) / 2, w, hh); S.cfg.general.icon = c.toDataURL("image/png"); saveCfg("Icône de l'application mise à jour"); render(); }; img.onerror = () => toast("Image illisible. Essayez un PNG."); img.src = r.result; }; r.readAsDataURL(t.files[0]); return; }
   if (t.id === "logo-file" && t.files[0]) { const f = t.files[0]; const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const sc = Math.min(1, 640 / img.width, 180 / img.height); const c = document.createElement("canvas"); c.width = Math.round(img.width * sc) || 160; c.height = Math.round(img.height * sc) || 40; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); S.cfg.general.logo = c.toDataURL("image/png"); saveCfg("Logo mis à jour"); render(); }; img.onerror = () => toast("Image illisible. Essayez un PNG."); img.src = r.result; }; r.readAsDataURL(f); return; }
-  if (t.id === "import-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j.cfg || !Array.isArray(j.dossiers)) throw 0; confirmBox(`Importer ${j.dossiers.length} dossiers et ${(j.tasks || []).length} tâches ? Les paramètres seront remplacés ; les éléments existants de même identifiant aussi.`, "Importer", async () => { S.cfg = { ...DEFAULT_CFG(), ...j.cfg }; saveCfg("Paramètres importés"); for (const d of j.dossiers) await putDoc("dossiers", d); for (const x of j.tasks || []) await putDoc("tasks", x); for (const x of j.deadlines || []) await putDoc("deadlines", x); for (const x of j.projects || []) await putDoc("projects", x); for (const x of j.meetings || []) await putDoc("meetings", x); toast("Import terminé"); render(); }); } catch { toast("Fichier invalide : utilisez une sauvegarde exportée depuis l'outil."); } }; r.readAsText(t.files[0]); }
+  if (t.id === "import-file" && t.files[0]) { const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j.cfg || !Array.isArray(j.dossiers)) throw 0; confirmBox(`Importer ${j.dossiers.length} dossiers et ${(j.tasks || []).length} tâches ? Les paramètres seront remplacés ; les éléments existants de même identifiant aussi.`, "Importer", async () => { S.cfg = { ...DEFAULT_CFG(), ...j.cfg }; saveCfg("Paramètres importés"); for (const d of j.dossiers) await putDoc("dossiers", d); for (const x of j.tasks || []) await putDoc("tasks", x); for (const x of j.deadlines || []) await putDoc("deadlines", x); for (const x of j.projects || []) await putDoc("projects", x); for (const x of j.meetings || []) await putDoc("meetings", x); for (const x of j.events || []) await putDoc("events", x); toast("Import terminé"); render(); }); } catch { toast("Fichier invalide : utilisez une sauvegarde exportée depuis l'outil."); } }; r.readAsText(t.files[0]); }
 });
 document.addEventListener("input", e => { if (e.target.id === "f-q" || e.target.id === "tf-q") { clearTimeout(S.qT); const id = e.target.id; S.qT = setTimeout(() => { if (id === "f-q") S.ui.filters.q = e.target.value; else { S.ui.tf = S.ui.tf || {}; S.ui.tf.q = e.target.value; } saveUI(); render(); const el = $("#" + id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 250); } });
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if ($("#modal")) $("#modal").remove(); else if (S.openDossier) { S.openDossier = null; renderDrawer(); } } });
@@ -4325,7 +4770,7 @@ async function saveFile(filename, data) {
   if (!S.downloads) { toast("Téléchargement indisponible dans cette vue."); return; }
   try { await S.downloads.save({ filename, data }); } catch (e) { if (e?.code !== "declined") toast("Téléchargement impossible : " + (e?.message || "erreur")); }
 }
-function exportJSON() { saveFile(`inma-workflow-${todayISO()}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, activity: S.activity }, null, 2)); }
+function exportJSON() { saveFile(`inma-workflow-${todayISO()}.json`, JSON.stringify({ exportedAt: new Date().toISOString(), cfg: S.cfg, dossiers: S.dossiers, tasks: S.tasks, deadlines: S.deadlines, projects: S.projects, meetings: S.meetings, events: S.events, activity: S.activity }, null, 2)); }
 function exportCSV() {
   const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const rows = [["Référence","Dossier","Workflow","Étape","Véhicule","Secteur","Responsable","Montant","Priorité","Début","Échéance","Lien OneDrive","Archivé"]].concat(visDossiers().map(d => [d.code, d.name, wfById(d.workflowId)?.name, stageOf(d)?.name, d.vehicle, d.sector, mname(d.ownerId), can("view_amounts") ? d.amount : "", prioById(d.priority)?.label, d.startDate, d.dueDate, d.oneDriveUrl, d.archived ? "oui" : "non"]));
@@ -4365,7 +4810,7 @@ function render() {
 }
 
 /* ---------- boot ---------- */
-function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.projects = d.projects || []; S.meetings = d.meetings || []; S.prefs = d.prefs || []; S.activity = d.activity || []; } }
+function loadLocal() { const d = store.get(LOCAL_KEY, null); if (d) { S.cfg = { ...DEFAULT_CFG(), ...d.cfg }; S.dossiers = d.dossiers || []; S.tasks = d.tasks || []; S.deadlines = d.deadlines || []; S.projects = d.projects || []; S.meetings = d.meetings || []; S.events = d.events || []; S.prefs = d.prefs || []; S.activity = d.activity || []; } }
 async function boot() {
   S.view = homeView(); render();
   const use = (window.INMA && window.INMA.use) || (window.claude && window.claude.use);
@@ -4383,7 +4828,7 @@ async function boot() {
     S.cfgLoaded = true; if (snap.exists) migrateCfg(snap.data()); if (!document.querySelector("#content :focus")) render(); renderDrawer();
   }, () => {});
   const sub = (coll, sortKey) => db.collection(coll).onSnapshot(q => { S[coll] = q.docs.map(d => ({ ...d.data(), id: d.id })); if (sortKey) S[coll].sort((a, b) => String(b[sortKey]).localeCompare(String(a[sortKey]))); if (!document.querySelector("#content :focus") && !$("#modal")) render(); if (S.openDossier && !document.querySelector("#layer :focus")) renderDrawer(); }, () => {});
-  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null); sub("projects", null); sub("meetings", null); sub("prefs", null);
+  sub("dossiers", "createdAt"); sub("tasks", null); sub("claims", null); sub("deadlines", null); sub("projects", null); sub("meetings", null); sub("events", null); sub("prefs", null);
   db.collection("activity").orderBy("at", "desc").limit(300).onSnapshot(q => { S.activity = q.docs.map(d => ({ ...d.data(), id: d.id })); if (!document.querySelector("#content :focus") && !$("#modal")) { renderTop(); if (S.view === "dashboard") render(); } }, () => {});
 }
 boot();
