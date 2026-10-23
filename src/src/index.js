@@ -1,7 +1,7 @@
 // INMA Workflow — Cloudflare Worker (free plan): API, sign-in, invitations. Static files are served from ./public.
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { context, snapshot, checkWrite, checkDelete, Denied, activeGrants } from "./acl.js";
-import { sendMail, inviteEmail, otpEmail, mailMode, mailMissing } from "./mail.js";
+import { sendMail, inviteEmail, otpEmail, notifEmail, mailMode, mailMissing } from "./mail.js";
 import { aiStatus, aiChat } from "./ai.js";
 import seedConfig from "../seed/config.json";
 import seedDemo from "../seed/demo.json";
@@ -61,7 +61,7 @@ async function loadAll(env) {
   const v = await getVersion(env);
   if (cache.v === v && cache.all) return { all: cache.all, v };
   const { results } = await env.DB.prepare("select coll, id, data, version from docs").all();
-  const all = { cfg: null, dossiers: [], tasks: [], activity: [], deadlines: [], projects: [], meetings: [] };
+  const all = { cfg: null, dossiers: [], tasks: [], activity: [], deadlines: [], projects: [], meetings: [], prefs: [] };
   for (const r of results) { const d = parseDoc(r); if (r.coll === "ws" && r.id === "config") all.cfg = d; else if (all[r.coll]) all[r.coll].push(d); }
   cache.v = v; cache.all = all;
   return { all, v };
@@ -146,11 +146,28 @@ async function verifyMsIdToken(env, idToken) {
   return { email, name: payload.name, oid: payload.oid };
 }
 
+/* ---------------- notifications par e-mail ---------------- */
+const MAIL_DEFAULT_KINDS = { assign: true, compliance: true, block: true, mention: true };
+async function mailNotifications(env, all, e, authorId, appUrl) {
+  const day = new Date().toISOString().slice(0, 10); const max = +(env.MAIL_DAILY_LIMIT || 40);
+  const d = e.dossierId ? all.dossiers.find(x => x.id === e.dossierId) : null;
+  for (const id of [...new Set(e.notify || [])].slice(0, 25)) {
+    if (id === authorId) continue;
+    const m = (all.cfg?.members || []).find(x => x.id === id); const to = normEmail(m?.email); if (!m || !isEmail(to)) continue;
+    const p = (all.prefs || []).find(x => x.id === id); if (!p?.email?.on) continue;
+    const kinds = { ...MAIL_DEFAULT_KINDS, ...(p.email.kinds || {}) }; if (!kinds[e.kind || "other"]) continue;
+    const key = `mail:${id}:${day}`; const used = (await env.DB.prepare("select v from meta where k = ?1").bind(key).first())?.v || 0; if (used >= max) continue;
+    await env.DB.prepare("insert into meta (k, v) values (?1, 1) on conflict(k) do update set v = v + 1").bind(key).run();
+    const author = (all.cfg?.members || []).find(x => x.id === authorId);
+    await sendMail(env, { to, ...notifEmail({ text: String(e.text || "").slice(0, 400), name: m.name, author: author?.name, dossier: d ? `${d.code} · ${d.name}` : "", appUrl, appName: appName(env) }) });
+  }
+}
+
 /* ---------------- request handling ---------------- */
 async function readJson(req) { try { return await req.json(); } catch { return {}; } }
 const OTP_TTL = 10 * 60_000;
 
-async function api(req, env, url) {
+async function api(req, env, url, ctx) {
   const p = url.pathname, method = req.method, origin = url.origin, secure = url.protocol === "https:";
   if (method !== "GET" && req.headers.get("X-INMA") !== "1") return fail(400, "Requête refusée.");
   await ensureSchema(env);
@@ -242,7 +259,7 @@ async function api(req, env, url) {
   const doc = p.match(/^\/api\/docs\/([\w-]+)\/([\w.:@+~-]{1,200})$/);
   if (doc && (method === "PUT" || method === "DELETE")) {
     const [, coll, id] = doc;
-    if (!["ws", "dossiers", "tasks", "activity", "claims", "deadlines", "projects", "meetings"].includes(coll)) return fail(400, "Document inconnu.");
+    if (!["ws", "dossiers", "tasks", "activity", "claims", "deadlines", "projects", "meetings", "prefs"].includes(coll)) return fail(400, "Document inconnu.");
     const dossierOf = did => all.dossiers.find(d => d.id === did);
     if (coll === "claims") {
       if (method === "DELETE") {
@@ -269,6 +286,10 @@ async function api(req, env, url) {
     if (!data || typeof data !== "object") return fail(400, "Contenu manquant.");
     const stored = checkWrite(c, coll, id, data, existing, dossierOf);
     await putDoc(env, coll, id, stored, user.id);
+    if (coll === "activity" && (stored.notify || []).length && (mailMode(env) === "graph" || env.DEV_MODE === "true")) {
+      const job = mailNotifications(env, all, { ...stored, id }, c.member?.id, appUrl).catch(e => console.error("notif mail", e));
+      if (ctx?.waitUntil) ctx.waitUntil(job); else await job;
+    }
     if (coll === "activity" && Math.random() < 0.05) {
       await env.DB.prepare("delete from docs where coll = 'activity' and id in (select id from docs where coll = 'activity' order by updated_at desc limit -1 offset 500)").run();
     }
@@ -305,10 +326,10 @@ async function api(req, env, url) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     if (url.pathname.startsWith("/api/")) {
-      try { return await api(req, env, url); }
+      try { return await api(req, env, url, ctx); }
       catch (e) { if (e.status) return fail(e.status, e.message); console.error(e); return fail(500, "Erreur serveur : " + e.message); }
     }
     // Icône de l'application : celle importée dans Paramètres, sinon l'icône INMA par défaut.

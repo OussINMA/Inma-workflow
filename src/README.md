@@ -93,3 +93,18 @@ L'assistant (bouton en haut de chaque écran) répond aux questions sur les doss
 ## Indicateurs personnalisés
 
 Tableau de bord › carte « + Indicateurs » (ou Paramètres › Champs, Fonds › Personnaliser, Réunion d'équipe › diapositive Indicateurs) : créez un indicateur sans code — mesure (nombre, somme, moyenne, min, max, ratio entre deux indicateurs), source (dossiers, tâches, échéances, échéanciers, participations, projets), filtres (fonds, étapes, phase, responsables, statut, horizon…), format et seuil d'alerte. Aperçu en direct par fonds. Les indicateurs sont partagés avec l'équipe ; le choix des cartes du tableau de bord est personnel. Permission : « Créer des indicateurs personnalisés ».
+
+## Conformité, documents et blocages
+
+- **Conformité** (menu de gauche) : dossiers en contrôle, documents reçus / manquants / à actualiser / validés. Le chargé de dossier applique un modèle (KYC personne morale, personne physique, financement…), dépose les liens du share, envoie la demande de documents (modèle de message), puis soumet au contrôle (TAEF par défaut, modifiable). Les vérificateurs valident chaque document ou demandent une correction ; chaque redépôt les notifie. Droit associé : « Contrôle conformité ». Réglages : Paramètres › Conformité & documents.
+- **Blocage** : bouton « Signaler un blocage » dans un dossier (nature, motif, actions nécessaires, responsable, date de levée) ; badge BLOQUÉ, filtre et indicateur « Dossiers bloqués ».
+- **Avancement des étapes** et **tâches prioritaires** (Critique / Haute) affichés sur les cartes, la liste et la fiche dossier.
+- **Tâches de projet** : une tâche peut être rattachée à un projet ; la fiche projet liste ses tâches en cours.
+- **Notifications** : cloche › Régler — chaque personne choisit ce qu'elle reçoit dans l'outil et par e-mail (ex. seulement les nouvelles tâches assignées). Plafond : 40 e-mails par personne et par jour (variable MAIL_DAILY_LIMIT).
+
+## Listes, liens OneDrive et étapes
+
+- **Réordonner** : poignée ⠿ (glisser-déposer, ou flèches ↑ ↓ au clavier) sur les tâches d'un dossier ou d'un projet, les documents et liens OneDrive, les jalons, la checklist d'une tâche et les documents de conformité. Dans les Paramètres, flèches monter / descendre sur les listes (statuts, priorités, champs…).
+- **Noms des dossiers liés** : les liens OneDrive / SharePoint affichent le nom du dossier ou du fichier (lu dans le lien, ou dans OneDrive avec « Actualiser les noms » quand vous êtes connecté à Microsoft). Les projets ont aussi une liste de liens.
+- **Tâches automatiques** : jamais recréées en revenant à une étape précédente, ni si une tâche du même nom existe déjà dans le dossier.
+- **Consulter une étape** : cliquer sur une étape du parcours affiche ce qui s'y est passé (périodes, checklist, tâches, documents, activité) sans changer l'étape du dossier.
