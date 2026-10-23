@@ -40,7 +40,7 @@ L'outil est déjà utilisable. Sans la configuration Microsoft, « Inviter » af
    - URI de redirection : **Application monopage (SPA)** = l'adresse de l'outil suivie de `/`.
 2. Notez l'**ID d'application (client)** et l'**ID de l'annuaire (locataire)**.
 3. *Autorisations d'API* › Microsoft Graph :
-   - **Déléguées** : `User.Read`, `Files.ReadWrite.All`, `Sites.ReadWrite.All` ;
+   - **Déléguées** : `User.Read`, `Files.ReadWrite.All`, `Sites.ReadWrite.All`, `Calendars.ReadWrite` (agenda Outlook : envoi des invitations et affichage de son agenda) ;
    - **Application** : `Mail.Send`.
    Puis **Accorder un consentement d'administrateur**.
 4. *Certificats et secrets* › **Nouveau secret client** : copiez la valeur.

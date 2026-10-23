@@ -118,16 +118,43 @@
     try { return (await st.msal.acquireTokenSilent({ scopes, account: acc })).accessToken; }
     catch { try { return (await st.msal.acquireTokenPopup({ scopes, account: acc })).accessToken; } catch { await st.msal.acquireTokenRedirect({ scopes, account: acc }); return new Promise(() => {}); } }
   }
+  const CAL_SCOPES = ["Calendars.ReadWrite"];
   async function g(path, opts = {}) {
-    const t = await token(DRIVE_SCOPES);
-    const r = await fetch(path.startsWith("http") ? path : "https://graph.microsoft.com/v1.0" + path, { method: opts.method || "GET", body: opts.body ? JSON.stringify(opts.body) : undefined, headers: { Authorization: "Bearer " + t, "Content-Type": "application/json" } });
+    const t = await token(opts.scopes || DRIVE_SCOPES);
+    const r = await fetch(path.startsWith("http") ? path : "https://graph.microsoft.com/v1.0" + path, { method: opts.method || "GET", body: opts.body ? JSON.stringify(opts.body) : undefined, headers: { Authorization: "Bearer " + t, "Content-Type": "application/json", ...(opts.headers || {}) } });
     if (r.status === 204) return null;
     const j = await r.json().catch(() => null);
     if (!r.ok) { const e = new Error(j?.error?.message || ("Microsoft Graph : erreur " + r.status)); e.status = r.status; throw e; }
     return j;
   }
   const shareId = url => "u!" + btoa(unescape(encodeURIComponent(url))).replace(/=+$/, "").replace(/\//g, "_").replace(/\+/g, "-");
+  // Agenda Outlook de l'utilisateur connecté (permission déléguée Calendars.ReadWrite)
+  const calErr = e => { if (e.status === 403 || e.status === 401) e.message = "accès à l'agenda refusé : la permission « Calendars.ReadWrite » doit être ajoutée à l'application dans Microsoft Entra (voir le guide d'administration)."; throw e; };
+  const cal = {
+    async list(from, to) {
+      const s = new Date(from + "T00:00:00").toISOString(), e = new Date(to + "T00:00:00").toISOString();
+      let url = `/me/calendarView?startDateTime=${encodeURIComponent(s)}&endDateTime=${encodeURIComponent(e)}&$top=200&$orderby=start/dateTime&$select=id,subject,start,end,isAllDay,location,webLink,onlineMeeting,organizer,attendees,isCancelled,showAs`;
+      const out = []; let guard = 0;
+      try {
+        while (url && guard++ < 6) {
+          const j = await g(url, { scopes: CAL_SCOPES, headers: { Prefer: 'outlook.timezone="UTC"' } });
+          for (const x of j.value || []) {
+            const t = (d, allDay) => allDay ? d.dateTime.slice(0, 10) + "T12:00:00" : d.dateTime.replace(/\.\d+$/, "") + "Z";
+            out.push({ id: x.id, subject: x.subject, start: x.isAllDay ? x.start.dateTime.slice(0, 10) + "T00:00:00" : t(x.start), end: x.isAllDay ? x.start.dateTime.slice(0, 10) + "T23:59:00" : t(x.end), isAllDay: !!x.isAllDay, isCancelled: !!x.isCancelled,
+              location: x.location?.displayName || "", webLink: x.webLink || "", joinUrl: x.onlineMeeting?.joinUrl || "", organizer: x.organizer?.emailAddress?.name || "",
+              attendees: (x.attendees || []).map(a => a.emailAddress?.name || a.emailAddress?.address).filter(Boolean), attendeeMails: (x.attendees || []).map(a => a.emailAddress?.address).filter(Boolean) });
+          }
+          url = j["@odata.nextLink"] || null;
+        }
+      } catch (er) { calErr(er); }
+      return out;
+    },
+    create: body => g("/me/events", { method: "POST", body, scopes: CAL_SCOPES }).catch(calErr),
+    update: (id, body) => g(`/me/events/${encodeURIComponent(id)}`, { method: "PATCH", body, scopes: CAL_SCOPES }).catch(calErr),
+    async cancel(id, comment) { try { return await g(`/me/events/${encodeURIComponent(id)}/cancel`, { method: "POST", body: { comment: comment || "" }, scopes: CAL_SCOPES }); } catch (e) { if (e.status === 400) return g(`/me/events/${encodeURIComponent(id)}`, { method: "DELETE", scopes: CAL_SCOPES }).catch(calErr); calErr(e); } },
+  };
   const graph = {
+    cal,
     available: () => !!st.msal,
     signedIn: () => !!st.msal?.getActiveAccount(),
     async resolve(url) { const it = await g(`/shares/${shareId(url)}/driveItem?$select=id,name,webUrl,parentReference,folder`); return { driveId: it.parentReference.driveId, id: it.id, webUrl: it.webUrl, name: it.name }; },
