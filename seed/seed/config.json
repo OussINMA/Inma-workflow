@@ -273,7 +273,8 @@
         "projects": true,
         "meetings": true,
         "ai": true,
-        "kpis": true
+        "kpis": true,
+        "compliance": true
       }
     },
     {
@@ -303,7 +304,8 @@
         "projects": true,
         "meetings": true,
         "ai": true,
-        "kpis": true
+        "kpis": true,
+        "compliance": true
       }
     },
     {
@@ -333,7 +335,8 @@
         "projects": true,
         "meetings": true,
         "ai": true,
-        "kpis": true
+        "kpis": true,
+        "compliance": false
       }
     },
     {
@@ -363,7 +366,8 @@
         "projects": true,
         "meetings": true,
         "ai": true,
-        "kpis": true
+        "kpis": true,
+        "compliance": false
       }
     },
     {
@@ -393,7 +397,8 @@
         "projects": false,
         "meetings": false,
         "ai": true,
-        "kpis": false
+        "kpis": false,
+        "compliance": false
       }
     },
     {
@@ -423,7 +428,8 @@
         "projects": true,
         "meetings": true,
         "ai": true,
-        "kpis": true
+        "kpis": true,
+        "compliance": false
       }
     },
     {
@@ -453,7 +459,8 @@
         "projects": false,
         "meetings": false,
         "ai": false,
-        "kpis": false
+        "kpis": false,
+        "compliance": false
       }
     }
   ],
