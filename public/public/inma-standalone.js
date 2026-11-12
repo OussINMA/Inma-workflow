@@ -175,6 +175,15 @@
       return g(`/drives/${it.driveId}/items/${it.id}/invite`, { method: "POST", body: { recipients: [{ email }], requireSignIn: true, sendInvitation: true, roles: [write ? "write" : "read"], message: message || "Accès partagé depuis INMA Workflow" } });
     },
     pick: pickFolder,
+    // Télécharge un fichier OneDrive / SharePoint (ex. classeur de valorisation) et ses informations
+    async readFile(url) {
+      const it = await g(`/shares/${shareId(url)}/driveItem?$select=id,name,webUrl,parentReference,file,lastModifiedDateTime,lastModifiedBy,size`);
+      if (!it.file) throw new Error("Ce lien désigne un dossier : liez le fichier Excel lui-même.");
+      const t = await token(DRIVE_SCOPES);
+      const r = await fetch(`https://graph.microsoft.com/v1.0/drives/${it.parentReference.driveId}/items/${it.id}/content`, { headers: { Authorization: "Bearer " + t } });
+      if (!r.ok) { const e = new Error(`Téléchargement impossible (${r.status})`); e.status = r.status; throw e; }
+      return { buf: await r.arrayBuffer(), name: it.name, webUrl: it.webUrl, modified: it.lastModifiedDateTime || "", by: it.lastModifiedBy?.user?.displayName || "", size: it.size || 0 };
+    },
     // Liste le contenu d'un dossier (récursif) : sert au module « Guide INMA »
     async listTree(url, maxDepth = 3, maxItems = 600) {
       const root = await graph.resolve(url); const out = []; let n = 0;
