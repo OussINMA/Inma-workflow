@@ -75,7 +75,8 @@ function pruneTree(nodes, granted) {
 }
 // Fiches des participations : montants (investi, capital, accordé, restant dû, prochaine échéance) soumis à « view_amounts ».
 const FICHE_MONEY = ["id_montant", "cap_capital", "fi_montant", "rb_crd", "rb_next_amt"];
-function stripFicheAmounts(p) {
+function stripFicheAmounts(p0) {
+  const { valos, ...p } = p0; // les valorisations sont entièrement soumises à « view_amounts »
   if (!p.fiche?.v) return p;
   const v = { ...p.fiche.v }; for (const k of FICHE_MONEY) delete v[k];
   return { ...p, fiche: { ...p.fiche, v } };
@@ -202,6 +203,14 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
       const byId = Object.fromEntries(inc.funds.map(f => [f.id, f]));
       out.funds = (stored.funds || []).map(f => byId[f.id] && Array.isArray(byId[f.id].positions) ? { ...f, positions: byId[f.id].positions } : f);
     }
+    if (Array.isArray(out.funds) && out.funds !== stored.funds && !(c.isAdmin || c.can("funds") || c.can("stage_approve"))) {
+      // seule une personne habilitée (Fonds ou validation des étapes) peut valider une valorisation
+      const oldV = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).flatMap(p => (p.valos || []).map(v => [v.id, v]))));
+      out.funds = out.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => !Array.isArray(p.valos) ? p : { ...p, valos: p.valos.map(v => {
+        const o = oldV[v.id]; if (v.status === "validated" && o?.status !== "validated") return { ...v, status: "draft", validatedBy: undefined, validatedAt: undefined };
+        if (o?.status === "validated" && JSON.stringify(o) !== JSON.stringify(v)) return o; // une valorisation validée ne se modifie plus sans habilitation
+        return v; }).concat(Object.values(oldV).filter(o => o.status === "validated" && o && !p.valos.some(v => v.id === o.id) && (stored.funds || []).some(sf => sf.id === f.id && (sf.positions || []).some(sp => sp.id === p.id && (sp.valos || []).some(x => x.id === o.id))))) }) }));
+    }
     if (Array.isArray(out.funds) && out.funds !== stored.funds) { // tout élément du portefeuille reste rattaché à un dossier
       const before = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).map(p => [f.id + "|" + p.id, p])));
       for (const f of out.funds) for (const p of f.positions || []) {
@@ -214,6 +223,7 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
       out.funds = out.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => { const o = old[f.id + "|" + p.id];
         const r = { ...p, amount: o?.amount ?? "", outstanding: o?.outstanding ?? "" };
         if (r.fiche) { const v = { ...(r.fiche.v || {}) }; for (const k of FICHE_MONEY) { if (o?.fiche?.v?.[k] !== undefined) v[k] = o.fiche.v[k]; else delete v[k]; } r.fiche = { ...r.fiche, v }; }
+        if (o?.valos) r.valos = o.valos; else delete r.valos;
         return r; }) }));
     }
     // Membres : internes (droit Membres) et externes (droit Accès externes) ; les codes d'invitation ne sont jamais écrits par le navigateur.
