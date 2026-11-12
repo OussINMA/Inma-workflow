@@ -464,6 +464,54 @@ a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoratio
 .gd-intro .body{font-size:13.5px}
 .gd-row{display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto;gap:6px;align-items:center}
 @media (max-width:640px){.gd-row{grid-template-columns:1fr auto}.gd-row input[type=url]{grid-column:1/-1}}
+
+.fc-scrim{z-index:45}
+.fc-drawer{width:min(1060px,100%);background:var(--bg);outline:none}
+.fc-head{gap:10px}
+.fc-title{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px;margin-top:2px;overflow-wrap:anywhere}
+.fc-band{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.fc-band>div{padding:8px 12px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
+.fc-band>div:first-child{border-left:0;box-shadow:inset 3px 0 0 var(--accent)}
+.fc-band span:first-child{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.fc-band b{font-size:13px;display:flex;align-items:center;gap:6px}
+.fc-band select{padding:3px 6px;font-size:12.5px}
+.fc-edit-note{font-size:12.5px;background:var(--info-bg);border-radius:6px;padding:6px 10px;color:var(--ink)}
+.fc-body{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;padding:18px 20px 40px;align-items:start}
+.fc-toc{position:sticky;top:170px;display:flex;flex-direction:column;gap:2px;font-size:12.5px}
+.fc-toc a{color:var(--ink);text-decoration:none;padding:5px 8px;border-radius:5px}
+.fc-toc a:hover{background:var(--surface)}
+.fc-toc a.sub{padding-left:16px;color:var(--muted)}
+.fc-tg{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:10px 8px 2px}
+.fc-main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.fc-group{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--accent);margin:8px 0 -4px;padding-bottom:4px;border-bottom:2px solid var(--accent)}
+.fc-sec{scroll-margin-top:180px}
+.fc-sec>header h2{text-transform:uppercase;letter-spacing:.06em;font-size:12.5px}
+.fc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}
+.fc-kv{display:grid;grid-template-columns:minmax(120px,40%) minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--line);align-items:start;min-width:0}
+.fc-kv.wide{grid-column:1/-1;grid-template-columns:minmax(120px,20%) minmax(0,1fr)}
+.fc-l{font-size:12px;font-weight:600;color:var(--muted)}
+.fc-v{font-size:13.5px;min-width:0;overflow-wrap:anywhere}
+.fc-v input,.fc-v select,.fc-v textarea{font-size:13px}
+.fc-txt{white-space:pre-wrap}
+.fc-table td{vertical-align:top}
+.fc-table td input,.fc-table td select,.fc-table td textarea{min-width:110px}
+.fc-table tfoot th{border-top:2px solid var(--line);text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--ink)}
+@media (max-width:860px){.fc-body{grid-template-columns:1fr;padding:14px}.fc-toc{display:none}.fc-grid{grid-template-columns:1fr}.fc-band{grid-template-columns:1fr 1fr}.fc-band>div:nth-child(3){border-left:0}.fc-kv.wide,.fc-kv{grid-template-columns:1fr;gap:3px}}
+@media print{body.fc-printing .app,body.fc-printing #layer,body.fc-printing .toast{display:none!important}body.fc-printing .fc-scrim{position:static;background:none;display:block}body.fc-printing .fc-drawer{width:100%;height:auto;overflow:visible;box-shadow:none;animation:none}body.fc-printing .fc-toc,body.fc-printing .fc-head .btn{display:none!important}body.fc-printing .fc-body{display:block;padding:0}body.fc-printing .fc-head{position:static}body.fc-printing .fc-sec{break-inside:avoid;margin-bottom:10px}body.fc-printing .btn{display:none!important}}
+
+.ro input:disabled,.ro select:disabled,.ro textarea:disabled{border-color:transparent;background:transparent;color:var(--ink);-webkit-text-fill-color:var(--ink);opacity:1;padding-left:0;padding-right:0;cursor:default;appearance:none;-webkit-appearance:none;box-shadow:none;resize:none;overflow:hidden;min-height:0;font-size:13.5px}
+.ro input:disabled::placeholder,.ro textarea:disabled::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
+.ro input[type=date]:disabled::-webkit-calendar-picker-indicator{display:none}
+.ro select:disabled{background-image:none}
+.ro label.f>span:first-child,.ro .f>span:first-child{color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.ro label.f,.ro .f{border-bottom:1px solid var(--line);padding-bottom:4px}
+.ro .chk input:disabled{display:none}
+.ro .chk{background:var(--surface-2);border-radius:99px;padding:2px 10px;font-size:12.5px;cursor:default}
+.ro textarea:disabled{white-space:pre-wrap}
+.ro .ro-top{margin-bottom:-2px}
+[hidden]{display:none!important}
+.ro-note{font-size:12.5px;background:var(--info-bg);border-radius:6px;padding:6px 10px}
+.modal.ro-editing,.ro-editing .modal{box-shadow:0 0 0 2px var(--accent),var(--shadow)}
 </style>
 
 <div class="app" id="app">
@@ -1265,7 +1313,7 @@ function cfInput(f, val, prefix) {
   const t = { number: "number", currency: "number", date: "date", url: "url" }[f.type] || "text";
   return `<input id="${id}" type="${t}" data-cf="${f.id}" value="${h(val ?? "")}">`;
 }
-function openDossier(id, tab) { S.openDossier = id; S.dTab = tab || "overview"; S.dStageView = null; renderDrawer(); }
+function openDossier(id, tab) { S.dEdit = null; S.openDossier = id; S.dTab = tab || "overview"; S.dStageView = null; renderDrawer(); }
 function renderDrawer() {
   const d = dossierById(S.openDossier); const L = $("#layer");
   if (!d) { L.innerHTML = ""; return; }
@@ -1330,6 +1378,7 @@ function renderDrawer() {
       <div class="row" style="font-size:12px"><span class="muted">Étape actuelle :</span><b>${h(s?.name)}</b>${stageSince != null ? `<span class="muted">depuis ${stageSince} j${s?.sla ? " · délai cible " + s.sla + " j" : ""}</span>${s?.sla && stageSince > s.sla ? '<span class="chip" style="background:var(--bad-bg);color:var(--bad)">Hors délai</span>' : ""}` : ""}<span class="row" style="gap:6px;flex-wrap:nowrap"><span class="muted">Avancement</span>${progBar(stagePos(d).pct, true)}<span class="muted">(${idx + 1}/${w.stages.length})</span></span>${blockTag(d)}<span class="spacer"></span>${ed && !isBlocked(d) && !isExt(me()) ? `<button class="btn sm" data-act11="block" data-id="${d.id}">Signaler un blocage</button>` : ""}${idx < w.stages.length - 1 && can("stage_advance") && ed ? `<button class="btn sm pri" data-stage="${w.stages[idx + 1].id}">Étape suivante →</button>` : ""}</div>
       <div class="seg" style="align-self:flex-start">${tabs.map(t => `<button class="${S.dTab === t[0] && !S.dStageView ? "on" : ""}" data-dtab="${t[0]}">${t[1]}</button>`).join("")}</div>
     </header><div class="dbody">${body}</div></aside></div>`;
+  if (S.dTab === "overview" && !S.dStageView) roDossier(d, ed);
 }
 function docList(docs, kind, sortKey, names) {
   if (!(docs || []).length) return '<p class="muted" style="margin:0">Aucun document lié.</p>';
@@ -1340,8 +1389,9 @@ function docList(docs, kind, sortKey, names) {
 function modal(title, inner, foot, onMount, wide) {
   const L = document.createElement("div"); L.className = "modalwrap"; L.id = "modal";
   L.innerHTML = `<div class="modal${wide ? " wide" : ""}" role="dialog" aria-label="${h(title)}"><header><h2>${h(title)}</h2><span class="spacer"></span><button class="btn sm ghost" data-mclose="1" aria-label="Fermer">${ic("x")}</button></header><div class="mbody">${inner}</div><footer>${foot}</footer></div>`;
+  const ro = S._ro; S._ro = null;
   document.body.appendChild(L); L.addEventListener("click", e => { if (e.target === L || e.target.closest("[data-mclose]")) L.remove(); });
-  onMount && onMount(L); const f = L.querySelector("input,select,textarea"); f && f.focus();
+  onMount && onMount(L); if (ro) { roLock(L, ro); L.querySelector(".modal")?.focus?.(); return; } const f = L.querySelector("input,select,textarea"); f && f.focus();
 }
 function confirmBox(text, label, fn) { modal("Confirmation", `<p style="margin:0">${h(text)}</p>`, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="ok-btn">${h(label)}</button>`, L => L.querySelector("#ok-btn").onclick = async () => { L.remove(); await fn(); }); }
 
@@ -1390,8 +1440,8 @@ function taskModal(t, presetDossier, presetProject) {
     <label class="f"><span>Description</span><textarea id="tk-desc" ${dis}>${h(t.description || "")}</textarea></label>
     <div><div class="eyebrow" style="margin-bottom:6px">Checklist</div><div id="tk-check" data-sortlist="tkcheck|x">${tkCheckHTML(t.checklist, dis)}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-newcheck" placeholder="Ajouter un élément…" style="max-width:320px"><button class="btn sm" id="tk-addcheck">Ajouter</button></div>` : ""}</div>
     <div><div class="eyebrow" style="margin-bottom:6px">Documents OneDrive</div><div id="tk-docs">${docList(t.docs, ed ? "tkm" : null, ed ? "tkdocs|x" : null)}</div>${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="tk-docname" placeholder="Nom" style="max-width:200px"><input type="url" id="tk-docurl" placeholder="Lien OneDrive" style="max-width:260px"><button class="btn sm" id="tk-adddoc">Lier</button></div>` : ""}</div>
-    ${!isNew ? `<div><div class="eyebrow" style="margin-bottom:6px">Commentaires</div>${(t.comments || []).map((c, ci) => `<div class="comment">${av(c.by)}<div class="bubble"><span class="who">${h(mname(c.by))}<span class="when">${new Date(c.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}${c.editedAt ? " · modifié" : ""}</span>${tcCanEdit(c) ? `<span class="tc-act"><button type="button" class="linkish" data-tc-edit="${ci}" data-task="${t.id}">Modifier</button><button type="button" class="linkish" data-tc-del="${ci}" data-task="${t.id}">Supprimer</button></span>` : ""}</span><div>${h(c.text).replace(/@([\wÀ-ÿ-]+)/g, '<span class="mention">@$1</span>')}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun commentaire.</p>'}<div class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" id="tk-comment" placeholder="Écrire un commentaire… (@Prénom pour mentionner)"><button class="btn sm" id="tk-send">Envoyer</button></div></div>` : ""}`;
-  modal(isNew ? "Nouvelle tâche" : "Tâche", inner, `${!isNew && ed ? `<button class="btn danger" id="tk-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="tk-save">${isNew ? "Créer la tâche" : "Enregistrer"}</button>` : ""}`, L => {
+    ${!isNew ? `<div><div class="eyebrow" style="margin-bottom:6px">Commentaires</div>${(t.comments || []).map((c, ci) => `<div class="comment">${av(c.by)}<div class="bubble"><span class="who">${h(mname(c.by))}<span class="when">${new Date(c.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}${c.editedAt ? " · modifié" : ""}</span>${tcCanEdit(c) ? `<span class="tc-act"><button type="button" class="linkish" data-tc-edit="${ci}" data-task="${t.id}">Modifier</button><button type="button" class="linkish" data-tc-del="${ci}" data-task="${t.id}">Supprimer</button></span>` : ""}</span><div>${h(c.text).replace(/@([\wÀ-ÿ-]+)/g, '<span class="mention">@$1</span>')}</div></div></div>`).join("") || '<p class="muted" style="margin:0">Aucun commentaire.</p>'}<div class="row" data-live="1" style="margin-top:6px;flex-wrap:nowrap"><input type="text" id="tk-comment" placeholder="Écrire un commentaire… (@Prénom pour mentionner)"><button class="btn sm" id="tk-send">Envoyer</button></div></div>` : ""}`;
+  S._ro = isNew ? null : { editable: ed }; modal(isNew ? "Nouvelle tâche" : "Tâche", inner, `${!isNew && ed ? `<button class="btn danger" id="tk-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="tk-save">${isNew ? "Créer la tâche" : "Enregistrer"}</button>` : ""}`, L => {
     const collect = () => { t.title = $("#tk-title", L).value.trim(); t.dossierId = $("#tk-dossier", L).value || null; if ($("#tk-project", L)) t.projectId = $("#tk-project", L).value || null; t.status = $("#tk-status", L).value; t.priority = $("#tk-prio", L).value; t.due = $("#tk-due", L).value; t.recurring = $("#tk-rec", L).value; t.dependsOn = $("#tk-dep", L).value ? [$("#tk-dep", L).value] : []; t.assignees = $$("[data-tka]", L).filter(x => x.checked).map(x => x.dataset.tka); t.description = $("#tk-desc", L).value; t.checklist = (t.checklist || []).map((c, i) => ({ ...c, done: $(`[data-ci="${i}"]`, L)?.checked || false })); t.custom = { ...(t.custom || {}) }; $$("[data-cf]", L).forEach(x => t.custom[x.dataset.cf] = x.value); };
     $("#tk-addcheck", L) && ($("#tk-addcheck", L).onclick = () => { const v = $("#tk-newcheck", L).value.trim(); if (!v) return; collect(); t.checklist.push({ text: v, done: false }); $("#tk-check", L).innerHTML = tkCheckHTML(t.checklist, ""); $("#tk-newcheck", L).value = ""; });
     L.addEventListener("click", e => { const b = e.target.closest("[data-ck-del]"); if (!b) return; collect(); t.checklist.splice(+b.dataset.ckDel, 1); $("#tk-check", L).innerHTML = tkCheckHTML(t.checklist, dis); });
@@ -1654,7 +1704,7 @@ function nodeModal(f0, n0, isNew) {
     <label class="f"><span>Note (contenu, règles de classement…)</span><textarea id="nm-note" rows="2" ${ef ? "" : "disabled"}>${h(n0.note || "")}</textarea></label>
     ${ef ? `<label class="chk"><input type="checkbox" id="nm-auto" ${n0.auto === "dossiers" ? "checked" : ""}>Afficher automatiquement ici les dossiers de travail de ce fonds</label>` : ""}
     ${!isNew && !isExt(me()) && (can("externals") || grantsOn("node", n0.id).length) ? accessPanel("node", n0.id, f0.id) : ""}`;
-  modal(isNew ? "Nouveau dossier" : "Dossier du fonds", inner, `<button class="btn" data-mclose="1">Fermer</button>${el ? `<button class="btn pri" id="nm-save">Enregistrer</button>` : ""}`, L => {
+  S._ro = isNew ? null : { editable: can("funds") }; modal(isNew ? "Nouveau dossier" : "Dossier du fonds", inner, `<button class="btn" data-mclose="1">Fermer</button>${el ? `<button class="btn pri" id="nm-save">Enregistrer</button>` : ""}`, L => {
     if (isNew) { const i = $("#nm-n", L); i && i.select(); }
     const b = $("#nm-save", L); if (!b) return;
     b.onclick = () => {
@@ -1760,7 +1810,7 @@ function extModal(m0, preset) {
     <div class="eyebrow">Dossiers de travail</div><div>${dRows || '<p class="muted">Aucun dossier.</p>'}</div>
     <div class="eyebrow">Dossiers des fonds (le sous-dossier est inclus)</div><div>${fRows}</div>
     <p class="muted" style="font-size:12px;margin:0">Code d'accès : <span class="mono">${h(m.code)}</span></p>`;
-  modal(isNew ? "Ajouter un externe" : "Accès de " + m.name, inner, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="ex-ok">${isNew ? "Ajouter et préparer l'invitation" : "Enregistrer les accès"}</button>`, L => {
+  S._ro = isNew ? null : { editable: can("externals") }; modal(isNew ? "Ajouter un externe" : "Accès de " + m.name, inner, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="ex-ok">${isNew ? "Ajouter et préparer l'invitation" : "Enregistrer les accès"}</button>`, L => {
     $("#gx-q", L).oninput = e => { const q = e.target.value.toLowerCase(); $$(".grow-row", L).forEach(r => r.hidden = !!q && !r.textContent.toLowerCase().includes(q)); if (q) $$("details", L).forEach(d => d.open = true); };
     $("#gx-all-l", L).onchange = e => { if (!e.target.value) return; $$("[data-gx]", L).filter(x => x.checked).forEach(x => L.querySelector(`[data-gl="${x.dataset.gx}"]`).value = e.target.value); };
     $("#gx-all-u", L).onchange = e => { $$("[data-gx]", L).filter(x => x.checked).forEach(x => L.querySelector(`[data-gu="${x.dataset.gx}"]`).value = e.target.value); };
@@ -2123,7 +2173,7 @@ function dlModal(o0) {
     <label class="f"><span>Modèle ou dossier OneDrive / SharePoint</span><input type="url" id="dm-url" value="${h(o.url || "")}" placeholder="https://…"></label>
     <label class="f"><span>Consignes / contenu attendu</span><textarea id="dm-notes" rows="3">${h(o.notes || "")}</textarea></label>
     <label class="chk"><input type="checkbox" id="dm-active" ${o.active !== false ? "checked" : ""}>Échéance active</label>`;
-  modal(isNew ? "Nouvelle échéance" : "Modifier l'échéance", inner, `${!isNew ? `<button class="btn danger" id="dm-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="dm-save">${isNew ? "Créer l'échéance" : "Enregistrer"}</button>`, L => {
+  S._ro = isNew ? null : { editable: can("deadlines") }; modal(isNew ? "Nouvelle échéance" : "Échéance", inner, `${!isNew ? `<button class="btn danger" id="dm-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="dm-save">${isNew ? "Créer l'échéance" : "Enregistrer"}</button>`, L => {
     let rt = r.type || "period";
     const parseDates = () => $("#dm-dates", L).value.split(/[,;\s]+/).map(s => s.trim()).filter(Boolean).map(s => { const m = s.match(/^(\d{1,2})[\/.-](\d{1,2})$/); return m ? `${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : null; }).filter(Boolean);
     const readRule = () => rt === "fixed" ? { type: "fixed", dates: parseDates() } : rt === "once" ? { type: "once", date: $("#dm-date", L).value } : { type: "period", freq: $("#dm-freq", L).value, offset: +$("#dm-offset", L).value || 0 };
@@ -2204,8 +2254,8 @@ function positionsPanel(f) {
   const act = livePositions(f); const eq = act.filter(p => p.kind !== "debt"), debt = act.filter(p => p.kind === "debt");
   const totEq = eq.reduce((s, p) => s + (+p.amount || 0), 0), totDebt = debt.reduce((s, p) => s + (+(p.outstanding || p.amount) || 0), 0);
   return `<div class="panel"><header><h2>Participations et financements actuels · ${h(f.name)}</h2><span class="muted" style="font-size:12px">${act.length} en portefeuille${eq.length ? ` · investi ${money(totEq)}` : ""}${debt.length ? ` · encours ${money(totDebt)}` : ""}</span><span class="spacer"></span>${cpOn() && S.view === "funds" ? `<button class="btn sm cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${ef ? `<button class="btn sm pri" data-pos-new="${f.id}">${ic("plus")}Ajouter</button>` : ""}</header>
-  <div class="body tablewrap">${list.length ? `<table class="t"><thead><tr><th></th><th>Société</th><th>Nature</th><th>Secteur</th><th>Instrument</th><th class="r">Investi / financé</th><th class="r">Encours</th><th>Entrée</th><th>Dernier reporting</th><th>Statut</th></tr></thead><tbody>
-    ${list.map(p => `<tr class="click" data-pos="${f.id}|${p.id}" style="${p.status === "exited" || p.status === "repaid" ? "opacity:.55" : ""}"><td>${hdot(p.health)}</td><td><b>${h(p.name)}</b>${p.boardSeat ? ' <span class="tag">Siège CA</span>' : ""}</td><td>${p.kind === "debt" ? "Financement" : "Participation"}</td><td>${h(p.sector || "—")}</td><td>${h(p.instrument || "—")}</td><td class="r">${p.amount ? money(p.amount) : '<span class="muted">—</span>'}</td><td class="r">${(() => { const sc = visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`); if (p.kind === "debt" && p.outstanding) return money(p.outstanding); if (sc) return `${money(schSummary(sc).crd)}<div class="muted" style="font-size:10.5px">selon échéancier</div>`; return '<span class="muted">—</span>'; })()}</td><td>${p.date ? h(fdate(p.date)) : "—"}</td><td>${p.lastReport ? due(p.lastReport, true) : '<span class="muted">—</span>'}</td><td>${chip(posStatus(p.status)[1], posStatus(p.status)[2])}</td></tr>`).join("")}
+  <div class="body tablewrap">${list.length ? `<table class="t"><thead><tr><th></th><th>Société</th><th>Nature</th><th>Secteur</th><th>Instrument</th><th class="r">Investi / financé</th><th class="r">Encours</th><th>Entrée</th><th>Dernier reporting</th><th>Statut</th><th>Fiche</th></tr></thead><tbody>
+    ${list.map(p => `<tr class="click" data-pos="${f.id}|${p.id}" style="${p.status === "exited" || p.status === "repaid" ? "opacity:.55" : ""}"><td>${hdot(p.health)}</td><td><b>${h(p.name)}</b>${p.boardSeat ? ' <span class="tag">Siège CA</span>' : ""}</td><td>${p.kind === "debt" ? "Financement" : "Participation"}</td><td>${h(p.sector || "—")}</td><td>${h(p.instrument || "—")}</td><td class="r">${p.amount ? money(p.amount) : '<span class="muted">—</span>'}</td><td class="r">${(() => { const sc = visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`); if (p.kind === "debt" && p.outstanding) return money(p.outstanding); if (sc) return `${money(schSummary(sc).crd)}<div class="muted" style="font-size:10.5px">selon échéancier</div>`; return '<span class="muted">—</span>'; })()}</td><td>${p.date ? h(fdate(p.date)) : "—"}</td><td>${p.lastReport ? due(p.lastReport, true) : '<span class="muted">—</span>'}</td><td>${chip(posStatus(p.status)[1], posStatus(p.status)[2])}</td><td title="Fiche complétée à ${ficheCompletion(f, p)} %"><span class="pgr"><span style="width:${ficheCompletion(f, p)}%"></span></span><span class="pgr-n">${ficheCompletion(f, p)} %</span></td></tr>`).join("")}
   </tbody></table>` : `<p class="muted" style="margin:0">Aucune participation ni aucun financement enregistré.${ef ? " Cliquez « Ajouter »." : ""}</p>`}</div></div>`;
 }
 function posModal(fid, pid) {
@@ -2294,7 +2344,7 @@ function prjModal(p0, scope0) {
     ${!isNew ? `<div class="pj-tasks" id="pj-tasks" data-pjt="${p.id}">${prjTasksHTML(p)}</div>` : ""}
     <div><div class="eyebrow" style="margin-bottom:4px">Jalons</div><div class="list" id="pj-ms" data-sortlist="pms|x">${msHtml()}</div>
     ${ed ? `<div class="row" style="margin-top:6px"><input type="text" id="pj-newms" placeholder="Nouveau jalon" style="max-width:300px"><input type="date" id="pj-newms-due" style="width:auto" aria-label="Échéance du jalon"><button class="btn sm" id="pj-addms">Ajouter</button></div>` : ""}</div>`;
-  modal(isNew ? "Nouveau projet" : p.title, inner, `${!isNew && full ? `<button class="btn danger" id="pj-del">Supprimer</button>` : ""}${!isNew && cpOn() ? `<button class="btn cp-btn" data-cp="project|${p.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${!isNew ? `<span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="pj-save">${isNew ? "Créer le projet" : "Enregistrer"}</button>` : ""}`, L => {
+  S._ro = isNew ? null : { editable: ed }; modal(isNew ? "Nouveau projet" : p.title, inner, `${!isNew && full ? `<button class="btn danger" id="pj-del">Supprimer</button>` : ""}${!isNew && cpOn() ? `<button class="btn cp-btn" data-cp="project|${p.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${!isNew ? `<span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ed ? `<button class="btn pri" id="pj-save">${isNew ? "Créer le projet" : "Enregistrer"}</button>` : ""}`, L => {
     const sync = () => { p.milestones = (p.milestones || []).map((m, i) => ({ ...m, done: L.querySelector(`[data-pm-done="${i}"]`)?.checked ?? m.done })); };
     SORTERS.pms = (_, f, to) => { sync(); moveArr(p.milestones, f, to); $("#pj-ms", L).innerHTML = msHtml(); };
     SORTERS.pdocs = (_, f, to) => { moveArr(p.docs, f, to); $("#pj-docs", L).innerHTML = prjDocsHTML(p, ed); };
@@ -3448,7 +3498,7 @@ function schModal(o0, preset = {}) {
     <div class="grid2"><label class="f"><span>Rappel (jours avant chaque échéance)</span><input type="number" id="sc-reminder" min="0" max="60" value="${h(o.reminder ?? 3)}"></label><label class="f"><span>Contrat / dossier OneDrive</span><input type="url" id="sc-url" value="${h(o.url || "")}" placeholder="https://…"></label></div>
     <label class="f"><span>Notes (garanties, covenants, conditions particulières)</span><textarea id="sc-notes" rows="2">${h(o.notes || "")}</textarea></label>
     <label class="chk"><input type="checkbox" id="sc-active" ${o.active !== false ? "checked" : ""}>Échéancier actif</label>`;
-  modal(isNew ? "Nouvel échéancier" : `Échéancier · ${schOwnerName(o)}`, inner, `${!isNew ? `<button class="btn danger" id="sc-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="sc-save">${isNew ? "Créer l'échéancier" : "Enregistrer"}</button>`, Lm => {
+  S._ro = isNew ? null : { editable: can("deadlines") }; modal(isNew ? "Nouvel échéancier" : `Échéancier · ${schOwnerName(o)}`, inner, `${!isNew ? `<button class="btn danger" id="sc-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="sc-save">${isNew ? "Créer l'échéancier" : "Enregistrer"}</button>`, Lm => {
     let rt = L.rateType === "tmm" ? "tmm" : "fixed"; let rules = clone(L.caRules || []); let computed = null;
     const segs = () => [...new Set(rules.map(r => (r.seg || "").trim()).filter(Boolean))];
     const syncRules = () => { rules = $$("[data-cr]", Lm).map(row => ({ label: "", seg: $("[data-crf=seg]", row).value.trim(), from: $("[data-crf=from]", row).value, to: $("[data-crf=to]", row).value, pct: $("[data-crf=pct]", row).value })); };
@@ -4578,9 +4628,9 @@ function agModal(ev0, occDate) {
     ${crs.length ? `<div class="row" style="gap:6px"><span class="muted" style="font-size:12.5px">Compte(s) rendu(s) :</span>${crs.map(m => `<button class="btn sm" data-ag-cr="${m.id}">${h(fdate(m.date))}${m.status === "draft" ? " (brouillon)" : ""}</button>`).join("")}</div>` : ""}
     ${!isNew ? `<p class="muted" style="margin:0;font-size:12px">Organisée par ${h(mname(ev.organizerId))}${ev.outlook?.id ? " · synchronisée avec Outlook" : ""}.</p>` : ""}</div>`;
   const foot = `${!isNew && ed ? `<button class="btn ghost danger" id="ag-del">${ic("trash")}${ev.recur ? "Supprimer…" : "Annuler la réunion"}</button>` : ""}
-    <div class="ag-more"><button class="btn" id="ag-ics">${ic("cal")}.ics</button><a class="btn" id="ag-owa" href="#" target="_blank" rel="noopener">Ouvrir dans Outlook</a>${ev.joinUrl ? `<a class="btn" href="${h(ev.joinUrl)}" target="_blank" rel="noopener">Rejoindre Teams</a>` : ""}</div>
-    <span class="spacer"></span>${!isNew && can("meetings") ? `<button class="btn" id="ag-cr">Rédiger le compte rendu</button>` : ""}<button class="btn" data-mclose="1">${ed ? "Annuler" : "Fermer"}</button>${ed ? `<button class="btn pri" id="ag-save">${isNew ? "Planifier" : "Enregistrer"}</button>` : ""}`;
-  modal(isNew ? "Nouvelle réunion" : (ed ? "Réunion" : ev.title || "Réunion"), inner, foot, L => {
+    <div class="ag-more"><button class="btn" id="ag-ics" data-ro-keep="1">${ic("cal")}.ics</button><a class="btn" id="ag-owa" href="#" target="_blank" rel="noopener">Ouvrir dans Outlook</a>${ev.joinUrl ? `<a class="btn" href="${h(ev.joinUrl)}" target="_blank" rel="noopener">Rejoindre Teams</a>` : ""}</div>
+    <span class="spacer"></span>${!isNew && can("meetings") ? `<button class="btn" id="ag-cr" data-ro-keep="1">Rédiger le compte rendu</button>` : ""}<button class="btn" data-mclose="1">${ed ? "Annuler" : "Fermer"}</button>${ed ? `<button class="btn pri" id="ag-save">${isNew ? "Planifier" : "Enregistrer"}</button>` : ""}`;
+  S._ro = isNew ? null : { editable: ed }; modal(isNew ? "Nouvelle réunion" : (ev.title || "Réunion"), inner, foot, L => {
     const read = () => { if (!ed) return ev;
       ev.title = $("#ag-title", L).value.trim(); ev.date = $("#ag-date", L).value || ev.date; ev.allDay = $("#ag-allday", L).checked; ev.start = ev.allDay ? "" : $("#ag-start", L).value; ev.end = ev.allDay ? "" : $("#ag-end", L).value;
       if (!ev.allDay && ev.start && (!ev.end || ev.end <= ev.start)) ev.end = agHHMM(Math.min((agMin(ev.start) || 0) + 60, 23 * 60 + 59));
@@ -4815,6 +4865,256 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("input", e => { if (e.target.id === "gd-q") { S.ui.gd = { ...(S.ui.gd || {}), q: e.target.value }; clearTimeout(S._gdT); S._gdT = setTimeout(() => { saveUI(); render(); const i = $("#gd-q"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); } });
 document.addEventListener("change", e => { const t = e.target; if (!["gd-cat", "gd-type", "gd-tpl"].includes(t.id)) return; const f = S.ui.gd = { ...(S.ui.gd || {}) }; if (t.id === "gd-cat") f.cat = t.value; if (t.id === "gd-type") f.type = t.value; if (t.id === "gd-tpl") f.tpl = t.checked ? 1 : ""; saveUI(); render(); });
+
+/* ---------- fiches des participations : un modèle par fonds, consultation structurée puis « Modifier » ---------- */
+const FK = (k, l, type = "text", extra = {}) => ({ k, l, type, ...extra });
+const FICHE_COMMON = [
+  { id: "identite", title: "Identité de la participation", kind: "kv", fields: [
+    FK("id_raison", "Raison sociale", "text", { pre: p => p.name }), FK("id_forme", "Forme juridique"), FK("id_siege", "Siège social"),
+    FK("id_secteur", "Secteur", "text", { pre: p => p.sector }), FK("id_date", "Date d'entrée", "date", { pre: p => p.date }),
+    FK("id_instr", "Instrument", "text", { pre: p => p.instrument }), FK("id_montant", "Montant investi", "money", { pre: p => p.amount })] },
+  { id: "contacts", title: "Contacts clés", kind: "table", rows: 3, cols: [FK("nom", "Nom"), FK("fonction", "Fonction"), FK("tel", "Téléphone", "tel"), FK("email", "E-mail", "email")] },
+  { id: "captable", group: "Table de capitalisation", title: "Table de capitalisation", kind: "table", rows: 3, total: ["titres", "pcap", "pvote"],
+    cols: [FK("actionnaire", "Actionnaire"), FK("titres", "Nombre de titres", "num"), FK("pcap", "% du capital", "pct"), FK("pvote", "% des votes", "pct")] },
+  { id: "capital", group: "Table de capitalisation", title: "Synthèse du capital", kind: "kv", fields: [
+    FK("cap_capital", "Capital social", "money"), FK("cap_titres", "Nombre total de titres", "num"), FK("cap_dilution", "Dilution prévue"),
+    FK("cap_derniere", "Dernière opération sur le capital"), FK("cap_comment", "Commentaires", "long")] },
+];
+const FICHE_EQUITY = [
+  { id: "gouv", group: "Gouvernance", title: "Gouvernance", kind: "kv", fields: [
+    FK("gv_conseil", "Composition du conseil", "long"), FK("gv_sieges", "Sièges attribués à INMA"), FK("gv_rep", "Représentant INMA", "member"),
+    FK("gv_freq", "Fréquence des conseils"), FK("gv_comites", "Comités spécialisés"), FK("gv_accord", "Décisions soumises à l'accord d'INMA", "long"), FK("gv_info", "Droits d'information", "long")] },
+  { id: "instances", group: "Gouvernance", title: "Suivi des instances", kind: "table", rows: 2, sort: "date",
+    cols: [FK("date", "Date", "date"), FK("instance", "Instance", "select", { opts: ["Conseil d'administration", "Assemblée générale ordinaire", "Assemblée générale extraordinaire", "Comité d'audit", "Comité stratégique", "Autre"] }), FK("sujets", "Sujets clés", "long"), FK("decisions", "Décisions", "long"), FK("action", "Action requise", "long")] },
+  { id: "pacte", title: "Pacte d'actionnaires", kind: "kv", fields: [
+    FK("pa_preemption", "Préemption", "long"), FK("pa_tag", "Tag along", "long"), FK("pa_drag", "Drag along", "long"), FK("pa_liq", "Liquidité", "long"),
+    FK("pa_ratchet", "Ratchet", "long"), FK("pa_noncc", "Non concurrence", "long"), FK("pa_sortie", "Horizon et modalités de sortie", "long"), FK("pa_autres", "Autres clauses clés", "long")] },
+];
+const FICHE_FINANCE = [
+  { id: "financement", group: "Fiche financement", title: "Caractéristiques du financement", kind: "kv", fields: [
+    FK("fi_emprunteur", "Emprunteur", "text", { pre: p => p.name }), FK("fi_type", "Type de financement", "text", { pre: p => p.instrument }), FK("fi_montant", "Montant accordé", "money", { pre: p => p.amount }),
+    FK("fi_date", "Date de décaissement", "date", { pre: p => p.date }), FK("fi_duree", "Durée et échéance finale"), FK("fi_taux", "Taux et commissions"),
+    FK("fi_profil", "Profil de remboursement"), FK("fi_period", "Périodicité", "select", { opts: ["Mensuelle", "Trimestrielle", "Semestrielle", "Annuelle", "In fine"] }),
+    FK("fi_differe", "Différé de capital / intérêts"), FK("fi_objet", "Objet du financement", "long"), FK("fi_statut", "Statut du financement", "select", { opts: ["En période de différé", "En amortissement", "Remboursé", "Restructuré", "En défaut"] })] },
+  { id: "remb", group: "Fiche financement", title: "Synthèse du remboursement", kind: "kv", sched: true, fields: [
+    FK("rb_crd", "Capital restant dû", "money"), FK("rb_next", "Prochaine échéance", "date"), FK("rb_next_amt", "Montant de la prochaine", "money"),
+    FK("rb_last", "Dernier paiement reçu"), FK("rb_late", "Retards ou impayés", "long")] },
+  { id: "garanties", group: "Fiche financement", title: "Garanties et sûretés", kind: "kv", fields: [
+    FK("ga_garanties", "Garanties", "long"), FK("ga_suretes", "Sûretés", "long"), FK("ga_rang", "Rang et valeur estimée")] },
+  { id: "covenants", group: "Covenants et événements de défaut", title: "Covenants financiers et non financiers", kind: "table", rows: 2,
+    cols: [FK("covenant", "Covenant"), FK("type", "Type", "select", { opts: ["Financier", "Non financier"] }), FK("seuil", "Seuil"), FK("freq", "Fréquence", "select", { opts: ["Mensuelle", "Trimestrielle", "Semestrielle", "Annuelle"] }), FK("constat", "Dernier constat"), FK("statut", "Statut", "select", { opts: ["Respecté", "À surveiller", "Non respecté", "Dérogation accordée"] })] },
+  { id: "defaut", group: "Covenants et événements de défaut", title: "Événements de défaut", kind: "kv", fields: [
+    FK("df_prevus", "Événements de défaut prévus", "long"), FK("df_incidents", "Incidents constatés", "long"), FK("df_delai", "Délai de régularisation"),
+    FK("df_waivers", "Dérogations ou waivers", "long"), FK("df_mesures", "Mesures correctives", "long")] },
+];
+const FICHE_TPL = { equity: { label: "Fiche participation", sections: [...FICHE_COMMON, ...FICHE_EQUITY] }, finance: { label: "Fiche financement", sections: [...FICHE_COMMON, ...FICHE_FINANCE] } };
+const FICHE_MONEY = ["id_montant", "cap_capital", "fi_montant", "rb_crd", "rb_next_amt"];
+const ficheTplId = f => f?.ficheTpl || (/finance/i.test(f?.name || "") || f?.type === "Dette privée" ? "finance" : "equity");
+const COV_COL = { "Respecté": "var(--ok)", "À surveiller": "var(--warn)", "Non respecté": "var(--bad)", "Dérogation accordée": "#2F6FB0" };
+function fichePos(fid, pid) { const f = fundById(fid); const p = f && (f.positions || []).find(x => x.id === pid); return f && p ? { f, p } : null; }
+function ficheSched(f, p) { return visDeadlines().find(o => isSched(o) && (o.posRef === `${f.id}|${p.id}` || (p.dossierId && o.dossierId === p.dossierId))); }
+function ficheVal(sec, fld, p, fc) { const v = fc.v?.[fld.k]; return (v !== undefined && v !== "") ? v : (fld.pre ? (fld.pre(p) ?? "") : ""); }
+function ficheSchedVals(o) { if (!o) return null; const s = schSummary(o); const last = s.items.filter(it => (o.done?.[schKey(o, it)]?.status) === "sent").pop();
+  return { rb_crd: s.crd, rb_next: s.next?.d || "", rb_next_amt: s.next ? schAmt(s.next) : "", rb_last: last ? `${fdate(last.d)} — ${can("view_amounts") ? fmtN(schAmt(last)) + " " + S.cfg.general.currency : "montant masqué"}` : "Aucun paiement enregistré",
+    rb_late: s.lateN ? `${s.lateN} échéance(s) impayée(s)${can("view_amounts") ? " pour " + fmtN(s.lateAmt) + " " + S.cfg.general.currency : ""}` : "Aucun retard" }; }
+function ficheCompletion(f, p) {
+  const t = FICHE_TPL[ficheTplId(f)], fc = p.fiche || {}; let n = 0, ok = 0;
+  for (const sec of t.sections) { if (sec.kind === "kv") { if (sec.sched && ficheSched(f, p)) continue; for (const fld of sec.fields) { n++; if (String(ficheVal(sec, fld, p, fc)).trim()) ok++; } }
+    else { n++; if ((fc.t?.[sec.id] || []).some(r => Object.values(r).some(v => String(v).trim()))) ok++; } }
+  return n ? Math.round(ok / n * 100) : 0;
+}
+const fNum = v => v === "" || v == null ? "" : fmtN(v);
+function fRead(fld, v) {
+  if (v === "" || v == null) return '<span class="muted">—</span>';
+  if (fld.type === "money") return money(v);
+  if (fld.type === "date") return h(fdate(v));
+  if (fld.type === "num") return `<span class="num">${h(fNum(v))}</span>`;
+  if (fld.type === "pct") return `<span class="num">${h(fNum(v))} %</span>`;
+  if (fld.type === "member") return h(member(v)?.name || v);
+  if (fld.type === "email") return `<a href="mailto:${h(v)}">${h(v)}</a>`;
+  if (fld.type === "tel") return `<a href="tel:${h(String(v).replace(/\s/g, ""))}">${h(v)}</a>`;
+  if (fld.k === "statut" && COV_COL[v]) return `<span class="chip"><span class="dot" style="background:${COV_COL[v]}"></span>${h(v)}</span>`;
+  return `<span class="fc-txt">${h(v)}</span>`;
+}
+function fInput(fld, v, attr) {
+  const a = `${attr} aria-label="${h(fld.l)}"`;
+  if (fld.type === "money" && !can("view_amounts")) return '<span class="muted">Masqué (droit « Voir les montants » requis)</span>';
+  if (fld.type === "long") return `<textarea ${a} rows="2">${h(v)}</textarea>`;
+  if (fld.type === "select") return `<select ${a}><option value="">—</option>${fld.opts.map(o => `<option ${v === o ? "selected" : ""}>${h(o)}</option>`).join("")}${v && !fld.opts.includes(v) ? `<option selected>${h(v)}</option>` : ""}</select>`;
+  if (fld.type === "member") return `<select ${a}><option value="">—</option>${internals().map(m => `<option value="${m.id}" ${v === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select>`;
+  const type = fld.type === "date" ? "date" : ["money", "num", "pct"].includes(fld.type) ? "number" : fld.type === "email" ? "email" : fld.type === "tel" ? "tel" : "text";
+  return `<input type="${type}" ${type === "number" ? 'step="any"' : ""} ${a} value="${h(v)}">`;
+}
+function ficheSection(sec, f, p, fc, ed) {
+  const anchor = `fc-${sec.id}`;
+  if (sec.kind === "kv") {
+    const sv = sec.sched ? ficheSchedVals(ficheSched(f, p)) : null;
+    const rows = sec.fields.map(fld => { const v = sv ? sv[fld.k] : ficheVal(sec, fld, p, fc); const wide = fld.type === "long";
+      return `<div class="fc-kv${wide ? " wide" : ""}"><div class="fc-l">${h(fld.l)}</div><div class="fc-v">${ed && !sv ? fInput(fld, ficheVal(sec, fld, p, fc), `data-fv="${fld.k}"`) : (sv && ["rb_last", "rb_late"].includes(fld.k) ? `<span class="fc-txt">${h(v)}</span>` : fRead(fld, v))}</div></div>`; }).join("");
+    return `<section class="panel fc-sec" id="${anchor}"><header><h2>${h(sec.title)}</h2>${sv ? '<span class="tag" title="Valeurs calculées à partir de l\'échéancier de remboursement">Calculé depuis l\'échéancier</span>' : ""}</header><div class="body fc-grid">${rows}</div></section>`;
+  }
+  let rows = (fc.t?.[sec.id] || []).filter(r => ed || Object.values(r).some(v => String(v).trim()));
+  if (sec.sort && !ed) rows = [...rows].sort((a, b) => String(b[sec.sort] || "").localeCompare(String(a[sec.sort] || "")));
+  if (ed && !rows.length) rows = Array.from({ length: sec.rows || 1 }, () => ({}));
+  const tot = sec.total && rows.length ? sec.total.map(k => rows.reduce((s, r) => s + num(r[k]), 0)) : null;
+  const warn = tot && !ed && rows.length && sec.total.slice(1).some((k, i) => Math.abs(tot[i + 1] - 100) > 0.05 && tot[i + 1] > 0) ? `<span class="tag" style="color:var(--warn)">Total différent de 100 %</span>` : "";
+  const head = `<tr>${sec.cols.map(c => `<th${["num", "pct"].includes(c.type) ? ' class="r"' : ""}>${h(c.l)}</th>`).join("")}${ed ? "<th></th>" : ""}</tr>`;
+  const body = rows.map((r, i) => `<tr data-fr="${sec.id}|${i}">${sec.cols.map(c => `<td${["num", "pct"].includes(c.type) ? ' class="r"' : ""}>${ed ? fInput(c, r[c.k] ?? "", `data-fc="${c.k}"`) : fRead(c, r[c.k])}</td>`).join("")}${ed ? `<td><button type="button" class="btn sm ghost danger" data-fiche="row-del" data-sec="${sec.id}" data-i="${i}" aria-label="Supprimer la ligne">${ic("x")}</button></td>` : ""}</tr>`).join("");
+  const foot = tot && !ed ? `<tfoot><tr>${sec.cols.map((c, j) => { const k = sec.total.indexOf(c.k); return j === 0 ? "<th>Total</th>" : k < 0 ? "<th></th>" : `<th class="r num">${h(fmtN(tot[k]))}${c.type === "pct" ? " %" : ""}</th>`; }).join("")}</tr></tfoot>` : "";
+  return `<section class="panel fc-sec" id="${anchor}"><header><h2>${h(sec.title)}</h2>${warn}</header><div class="body">${rows.length ? `<div class="tablewrap"><table class="t fc-table">${`<thead>${head}</thead>`}<tbody>${body}</tbody>${foot}</table></div>` : '<p class="muted" style="margin:0">Aucune ligne renseignée.</p>'}${ed ? `<button type="button" class="btn sm" data-fiche="row-add" data-sec="${sec.id}" style="margin-top:8px">${ic("plus")}Ajouter une ligne</button>` : ""}</div></section>`;
+}
+function ficheSuivi(f, p, ed) {
+  const d = p.dossierId && dossierById(p.dossierId), sc = ficheSched(f, p);
+  const R = (l, v, wide) => `<div class="fc-kv${wide ? " wide" : ""}"><div class="fc-l">${l}</div><div class="fc-v">${v}</div></div>`;
+  if (!ed) return `<section class="panel fc-sec" id="fc-suivi"><header><h2>Suivi INMA</h2></header><div class="body fc-grid">
+    ${R("Statut", `<span class="chip"><span class="dot" style="background:${posStatus(p.status)[2]}"></span>${h(posStatus(p.status)[1])}</span>`)}${R("Santé", `${hdot(p.health)} ${h((HEALTH[p.health] || HEALTH.green)[0])}`)}
+    ${R("Nature", p.kind === "debt" ? "Financement (dette)" : "Participation (fonds propres)")}${R("Participation détenue", p.stake ? `<span class="num">${h(fNum(p.stake))} %</span>` : '<span class="muted">—</span>')}
+    ${p.kind === "debt" ? R("Encours restant", money(p.outstanding)) : ""}${R("Dernier reporting reçu", p.lastReport ? h(fdate(p.lastReport)) : '<span class="muted">—</span>')}${R("Siège au conseil", p.boardSeat ? "Oui" : "Non")}
+    ${R("Dossier de travail", d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : '<span class="muted">—</span>')}${R("Dossier OneDrive", isURL(p.url) ? odLink(p.url, null, "folder", "Ouvrir le dossier") : '<span class="muted">—</span>')}
+    ${R("Échéancier", sc ? `<button class="btn sm" data-act7="sch-show" data-ref="${h(sc.dossierId ? "d:" + sc.dossierId : "c:" + (sc.company || ""))}">Voir l'échéancier</button>` : '<span class="muted">—</span>')}
+    ${R("Commentaire", p.note ? `<span class="fc-txt">${h(p.note)}</span>` : '<span class="muted">—</span>', true)}</div></section>`;
+  const sel = (id, opts, v) => `<select id="${id}">${opts.map(o => `<option value="${o[0]}" ${v === o[0] ? "selected" : ""}>${h(o[1])}</option>`).join("")}</select>`;
+  return `<section class="panel fc-sec" id="fc-suivi"><header><h2>Suivi INMA</h2></header><div class="body fc-grid">
+    ${R("Statut", sel("fs-status", POS_STATUS, p.status))}${R("Santé", sel("fs-health", Object.entries(HEALTH).map(([k, v]) => [k, v[0]]), p.health))}
+    ${R("Nature", sel("fs-kind", [["equity", "Participation (fonds propres)"], ["debt", "Financement (dette)"]], p.kind === "debt" ? "debt" : "equity"))}${R("Participation détenue (%)", `<input type="number" step="any" id="fs-stake" value="${h(p.stake || "")}">`)}
+    ${can("view_amounts") ? R("Encours restant", `<input type="number" step="any" id="fs-out" value="${h(p.outstanding || "")}">`) : ""}${R("Dernier reporting reçu", `<input type="date" id="fs-rep" value="${h(p.lastReport || "")}">`)}
+    ${R("Siège au conseil", `<label class="chk"><input type="checkbox" id="fs-board" ${p.boardSeat ? "checked" : ""}>INMA siège au conseil</label>`)}
+    ${R("Dossier de travail", `<select id="fs-dossier"><option value="">—</option>${visDossiers().map(x => `<option value="${x.id}" ${p.dossierId === x.id ? "selected" : ""}>${h(x.code)} · ${h(x.name)}</option>`).join("")}</select>`)}
+    ${R("Dossier OneDrive", `<input type="url" id="fs-url" value="${h(p.url || "")}" placeholder="https://…">`, true)}
+    ${R("Commentaire (faits marquants, points d'attention)", `<textarea id="fs-note" rows="2">${h(p.note || "")}</textarea>`, true)}</div></section>`;
+}
+function ficheHTML(fid, pid, ed) {
+  const x = fichePos(fid, pid); if (!x) return ""; const { f, p } = x; const t = FICHE_TPL[ficheTplId(f)], fc = p.fiche || {};
+  const canEd = !isExt(me()) && (can("funds") || can("portfolio")); const resp = fc.resp || (p.dossierId && dossierById(p.dossierId)?.ownerId) || "";
+  const pct = ficheCompletion(f, p);
+  const groups = []; for (const s of [{ id: "suivi", title: "Suivi INMA" }, ...t.sections]) { const g = s.group || s.title; const last = groups[groups.length - 1]; if (last && last.g === g) last.items.push(s); else groups.push({ g, items: [s] }); }
+  const toc = groups.map(g => g.items.length === 1 && g.items[0].title === g.g ? `<a href="#fc-${g.items[0].id}" data-fiche="go">${h(g.g)}</a>` : `<div class="fc-tg">${h(g.g)}</div>${g.items.map(s => `<a href="#fc-${s.id}" data-fiche="go" class="sub">${h(s.title)}</a>`).join("")}`).join("");
+  let body = ficheSuivi(f, p, ed), lastG = null;
+  for (const s of t.sections) { if (s.group && s.group !== lastG && s.group !== s.title) body += `<div class="fc-group">${h(s.group)}</div>`; lastG = s.group; body += ficheSection(s, f, p, fc, ed); }
+  return `<div class="scrim fc-scrim" id="fiche" data-fid="${fid}" data-pid="${pid}" data-ed="${ed ? 1 : 0}"><div class="drawer fc-drawer" role="dialog" aria-modal="true" aria-label="${h(t.label)} ${h(p.name)}">
+    <header class="fc-head"><div class="row" style="gap:10px;align-items:flex-start">
+      <div style="flex:1;min-width:0"><div class="eyebrow">${h(t.label)} · ${h(f.name)}</div><h1 class="fc-title">${hdot(p.health)} ${h(p.name)}</h1></div>
+      ${ed ? `<button class="btn" data-fiche="cancel">Annuler</button><button class="btn pri" data-fiche="save">Enregistrer</button>`
+           : `${canEd ? `<button class="btn pri" data-fiche="edit">Modifier</button>` : ""}<button class="btn" data-fiche="print" title="Imprimer ou enregistrer en PDF">Imprimer</button><button class="btn ghost" data-fiche="close" aria-label="Fermer">${ic("x")}</button>`}</div>
+      <div class="fc-band"><div><span>Véhicule</span><b>${h(f.name)}</b></div><div><span>Responsable</span>${ed ? `<select id="fs-resp"><option value="">—</option>${internals().map(m => `<option value="${m.id}" ${resp === m.id ? "selected" : ""}>${h(m.name)}</option>`).join("")}</select>` : `<b>${resp ? h(mname(resp)) : "—"}</b>`}</div><div><span>Date de mise à jour</span><b>${fc.updatedAt ? h(fdate(fc.updatedAt.slice(0, 10))) + (fc.updatedBy ? ` · ${h(mname(fc.updatedBy))}` : "") : "—"}</b></div>
+        <div><span>Fiche complétée</span><b><span class="pgr"><span style="width:${pct}%"></span></span> ${pct} %</b></div></div>
+      ${ed ? '<div class="fc-edit-note">Mode modification : les champs sont modifiables. « Enregistrer » applique les changements, « Annuler » les abandonne.</div>' : ""}</header>
+    <div class="fc-body"><nav class="fc-toc" aria-label="Sommaire de la fiche">${toc}</nav><div class="fc-main">${body}
+      ${ed && can("funds") ? `<div class="row"><button class="btn ghost danger" data-fiche="remove">${ic("trash")}Retirer du portefeuille</button></div>` : ""}</div></div></div></div>`;
+}
+function ficheOpen(fid, pid, ed = false, keepScroll) {
+  const old = $("#fiche"); const sc = keepScroll && old ? $(".fc-drawer", old)?.scrollTop : 0; old?.remove();
+  const w = document.createElement("div"); w.innerHTML = ficheHTML(fid, pid, ed); const el = w.firstElementChild; if (!el) return;
+  document.body.appendChild(el); const dr = $(".fc-drawer", el); if (sc) dr.scrollTop = sc;
+  S.ficheDirty = false; if (ed) setTimeout(() => $("input,select,textarea", $(".fc-main", el))?.focus(), 30); else dr.focus?.();
+}
+function ficheClose(force) { const el = $("#fiche"); if (!el) return; if (!force && el.dataset.ed === "1" && S.ficheDirty) { confirmBox("Abandonner les modifications non enregistrées ?", "Abandonner", () => { $("#fiche")?.remove(); S.ficheDirty = false; }); return; } el.remove(); S.ficheDirty = false; }
+function ficheRead(el, f, p) {
+  const t = FICHE_TPL[ficheTplId(f)]; const fc = clone(p.fiche || {}); fc.v = fc.v || {}; fc.t = fc.t || {};
+  for (const i of $$("[data-fv]", el)) fc.v[i.dataset.fv] = i.value.trim();
+  for (const sec of t.sections.filter(s => s.kind === "table")) {
+    fc.t[sec.id] = $$(`[data-fr^="${sec.id}|"]`, el).map(tr => Object.fromEntries($$("[data-fc]", tr).map(i => [i.dataset.fc, i.value.trim()]))).filter(r => Object.values(r).some(v => v));
+  }
+  if (!can("view_amounts")) for (const k of FICHE_MONEY) if (p.fiche?.v?.[k] !== undefined) fc.v[k] = p.fiche.v[k]; else delete fc.v[k];
+  fc.resp = $("#fs-resp", el)?.value || "";
+  return fc;
+}
+async function ficheSave() {
+  const el = $("#fiche"); if (!el) return; const x = fichePos(el.dataset.fid, el.dataset.pid); if (!x) return; const { f, p } = x;
+  const bad = $$("input[type=email]", el).find(i => i.value && !i.checkValidity()); if (bad) { toast("Une adresse e-mail n'est pas valide."); bad.focus(); return; }
+  const u = $("#fs-url", el)?.value.trim(); if (u && !isURL(u)) { toast("Le lien OneDrive doit commencer par https://"); $("#fs-url", el).focus(); return; }
+  const fc = ficheRead(el, f, p); fc.updatedAt = new Date().toISOString(); fc.updatedBy = me()?.id || null;
+  const np = { ...p, fiche: fc, status: $("#fs-status", el).value, health: $("#fs-health", el).value, kind: $("#fs-kind", el).value, stake: $("#fs-stake", el).value, lastReport: $("#fs-rep", el).value,
+    boardSeat: $("#fs-board", el).checked, dossierId: $("#fs-dossier", el).value || "", url: u, note: $("#fs-note", el).value.trim() };
+  if ($("#fs-out", el)) np.outstanding = $("#fs-out", el).value;
+  // les champs d'identité alimentent aussi la ligne du portefeuille
+  const v = fc.v; const fin = ficheTplId(f) === "finance";
+  if (v.id_raison) np.name = v.id_raison; if (v.id_secteur) np.sector = v.id_secteur; if (v.id_date) np.date = v.id_date; if (v.id_instr) np.instrument = v.id_instr;
+  if (can("view_amounts")) { const amt = (fin && np.kind === "debt" && v.fi_montant) || v.id_montant; if (amt) np.amount = amt; }
+  const live = fundById(f.id); live.positions = (live.positions || []).map(y => y.id === p.id ? np : y);
+  S.ficheDirty = false; await saveCfg("Fiche enregistrée"); render(); ficheOpen(f.id, p.id, false, true);
+}
+document.addEventListener("click", e => {
+  const pos = e.target.closest("[data-pos]"); if (pos && !e.target.closest("#fiche")) { e.stopImmediatePropagation(); const [fid, pid] = pos.dataset.pos.split("|"); ficheOpen(fid, pid); return; }
+  const el = e.target.closest("#fiche"); if (!el) return;
+  if (e.target === el) { ficheClose(); return; }
+  const b = e.target.closest("[data-fiche]"); if (!b) { if (e.target.closest("[data-open],[data-act7]")) ficheClose(true); return; } const a = b.dataset.fiche;
+  if (a === "go") { e.preventDefault(); const t = $(b.getAttribute("href"), el); t?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  if (a === "close") return ficheClose();
+  if (a === "edit") return ficheOpen(el.dataset.fid, el.dataset.pid, true, true);
+  if (a === "cancel") { if (!S.ficheDirty) return ficheOpen(el.dataset.fid, el.dataset.pid, false, true); confirmBox("Abandonner les modifications non enregistrées ?", "Abandonner", () => ficheOpen(el.dataset.fid, el.dataset.pid, false, true)); return; }
+  if (a === "save") return ficheSave();
+  if (a === "print") { document.body.classList.add("fc-printing"); setTimeout(() => { window.print(); setTimeout(() => document.body.classList.remove("fc-printing"), 300); }, 50); return; }
+  if (a === "row-add" || a === "row-del") { const x = fichePos(el.dataset.fid, el.dataset.pid); if (!x) return; const fc = ficheRead(el, x.f, x.p); const sec = b.dataset.sec; const rows = $$(`[data-fr^="${sec}|"]`, el).map(tr => Object.fromEntries($$("[data-fc]", tr).map(i => [i.dataset.fc, i.value.trim()])));
+    if (a === "row-add") rows.push({}); else rows.splice(+b.dataset.i, 1);
+    const tmp = { ...x.p, fiche: { ...fc, t: { ...fc.t, [sec]: rows.length ? rows : [{}] } } }; const keep = { ...x.p };
+    const live = fundById(x.f.id); live.positions = live.positions.map(y => y.id === x.p.id ? tmp : y); // aperçu local, non enregistré
+    ficheOpen(x.f.id, x.p.id, true, true); live.positions = live.positions.map(y => y.id === x.p.id ? keep : y); S.ficheDirty = true;
+    if (a === "row-add") { const trs = $$(`[data-fr^="${sec}|"]`, $("#fiche")); $("input,select", trs[trs.length - 1])?.focus(); } return; }
+  if (a === "remove") { const x = fichePos(el.dataset.fid, el.dataset.pid); if (!x) return; confirmBox(`Retirer « ${x.p.name} » du portefeuille de ${x.f.name} ? Pour garder l'historique, choisissez plutôt le statut « Sortie » ou « Remboursé ».`, "Retirer", async () => { const live = fundById(x.f.id); live.positions = live.positions.filter(y => y.id !== x.p.id); ficheClose(true); await saveCfg("Retiré du portefeuille"); render(); }); }
+}, true);
+document.addEventListener("input", e => { if (e.target.closest?.("#fiche")) S.ficheDirty = true; });
+document.addEventListener("change", e => { if (e.target.closest?.("#fiche")) S.ficheDirty = true; });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && $("#fiche") && !$("#modal")) { e.stopImmediatePropagation(); ficheClose(); } }, true);
+
+/* ---------- consultation d'abord : chaque élément s'ouvre en lecture, « Modifier » donne la main sur les champs ---------- */
+const RO_KEEP = "[data-open],[data-open-task],[data-ag-resp],[data-ag-cr],[data-act7],[data-copy],[data-live],[data-nav],[data-mt-open],[data-ro-keep],[data-mclose],[data-cp],[data-occ],[data-pos]";
+function roLock(scope, opt = {}) {
+  if (!scope || scope.dataset.ro === "1") return; scope.dataset.ro = "1"; scope.classList.add("ro");
+  const foot = scope.querySelector(":scope > .modal > footer");
+  for (const el of $$("input,select,textarea", scope)) {
+    if (el.closest("[data-live]") || ["hidden", "file"].includes(el.type) || el.closest("footer")) continue;
+    if (!el.disabled) { el.disabled = true; el.dataset.roDis = "1"; }
+    if (el.type === "checkbox" || el.type === "radio") { if (!el.checked) { const lab = el.closest("label"); if (lab && !lab.hidden) { lab.hidden = true; lab.dataset.roHide = "1"; } } continue; }
+    if (el.value && ["date", "number"].includes(el.type)) { el.dataset.roVal = el.value; el.dataset.roType = el.type; const v = el.value; el.type = "text"; el.value = v.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(v) ? fdate(v) : (isNaN(+v) ? v : (+v).toLocaleString("fr-FR", { maximumFractionDigits: 3 })); continue; }
+    if (!el.value && el.tagName !== "SELECT") { el.dataset.roPh = el.getAttribute("placeholder") ?? "\u0001"; el.placeholder = "—"; if (["date", "time", "datetime-local", "month"].includes(el.type)) { el.dataset.roType = el.type; el.type = "text"; } }
+    if (el.tagName === "TEXTAREA") { el.dataset.roH = el.style.height || "\u0001"; requestAnimationFrame(() => { el.style.height = "auto"; el.style.height = Math.max(24, el.scrollHeight + 2) + "px"; }); }
+  }
+  for (const lab of $$("label[data-ro-hide]", scope)) { const p = lab.parentElement; if (p && !p.querySelector(":scope > .ro-dash") && ![...p.children].some(c => c.tagName === "LABEL" && !c.hidden)) p.insertAdjacentHTML("beforeend", '<span class="muted ro-dash">—</span>'); }
+  for (const b of $$("button,label.btn", scope)) {
+    if (b.matches(RO_KEEP) || b.closest("[data-live]") || b.closest(".modal > header")) continue;
+    if (foot && b.closest("footer") !== foot && b.closest("footer")) continue;
+    if (!b.hidden) { b.hidden = true; b.dataset.roHid = "1"; }
+    const p = b.parentElement; // formulaire d'ajout vide (ex. « Ajouter un document ») : masqué en lecture
+    if (p && p !== scope && !p.matches(".mbody,.body,footer") && !p.hidden && (t => t.length && t.every(x => !(x.dataset.roVal || x.value)))($$("input:not([type=checkbox]):not([type=radio]),textarea", p)) && !$$("input[type=checkbox]", p).some(x => x.checked)) { p.hidden = true; p.dataset.roHid = "1"; }
+  }
+  if (foot) { for (const b of $$("[data-mclose]", foot)) { b.dataset.roTxt = b.textContent; b.textContent = "Fermer"; } for (const s of $$(".spacer", foot)) { s.hidden = true; s.dataset.roHid = "1"; } }
+  if (opt.editable) {
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "btn pri ro-edit"; btn.textContent = "Modifier"; btn.dataset.roAdded = "1";
+    btn.onclick = () => { roUnlock(scope); opt.onEdit?.(); };
+    if (foot) foot.appendChild(btn); else if (opt.anchor) opt.anchor.prepend(btn);
+  }
+  if (opt.note && !foot && opt.anchor) {}
+}
+function roUnlock(scope) {
+  if (!scope || scope.dataset.ro !== "1") return; delete scope.dataset.ro; scope.classList.remove("ro");
+  for (const el of $$("[data-ro-dis]", scope)) { el.disabled = false; delete el.dataset.roDis; }
+  for (const el of $$("[data-ro-type]", scope)) { el.type = el.dataset.roType; delete el.dataset.roType; if (el.dataset.roVal !== undefined) { el.value = el.dataset.roVal; delete el.dataset.roVal; } }
+  for (const el of $$("[data-ro-ph]", scope)) { const v = el.dataset.roPh; if (v === "\u0001") el.removeAttribute("placeholder"); else el.placeholder = v; delete el.dataset.roPh; }
+  for (const el of $$("[data-ro-h]", scope)) { const v = el.dataset.roH; el.style.height = v === "\u0001" ? "" : v; delete el.dataset.roH; }
+  for (const el of $$("[data-ro-hide]", scope)) { el.hidden = false; delete el.dataset.roHide; }
+  for (const el of $$("[data-ro-hid]", scope)) { el.hidden = false; delete el.dataset.roHid; }
+  for (const el of $$("[data-ro-txt]", scope)) { el.textContent = el.dataset.roTxt; delete el.dataset.roTxt; }
+  for (const el of $$(".ro-dash,[data-ro-added]", scope)) el.remove();
+  const first = $$("input,select,textarea", scope).find(x => !x.disabled && x.offsetParent && !x.closest("[data-live]"));
+  first?.focus();
+  scope.classList.add("ro-editing");
+}
+// fiche du dossier (onglet Synthèse) : lecture, puis « Modifier »
+function roDossier(d, ed) {
+  const nm = $("#d-name"); if (!nm) return; const panel = nm.closest(".panel"); if (!panel) return;
+  const body = panel.querySelector(".body");
+  if (!ed) { roLock(panel, {}); return; }
+  if (S.dEdit === d.id) { const bar = $('[data-act="d-save"]', panel)?.parentElement; if (bar && !bar.querySelector("[data-ro-cancel]")) bar.querySelector('[data-act="d-save"]').insertAdjacentHTML("beforebegin", '<button type="button" class="btn" data-ro-cancel="1">Annuler</button>');
+    body.insertAdjacentHTML("afterbegin", '<div class="ro-note">Mode modification : « Enregistrer » applique les changements, « Annuler » les abandonne.</div>'); return; }
+  const top = document.createElement("div"); top.className = "row ro-top"; top.innerHTML = '<span class="eyebrow">Informations du dossier</span><span class="spacer"></span>'; body.prepend(top);
+  roLock(panel, { editable: true, anchor: top, onEdit: () => { S.dEdit = d.id; renderDrawer(); } });
+  top.appendChild(top.querySelector(".ro-edit"));
+}
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-ro-cancel]")) { S.dEdit = null; renderDrawer(); return; }
+  if (e.target.closest('[data-act="d-save"]')) S.dEdit = null;
+}, true);
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
