@@ -1,7 +1,8 @@
 // Access control: what each signed-in person may read and write. Pure functions (no I/O).
 export const ALL_PERMS = ["settings", "roles", "members", "workflows", "automations", "view_all", "view_amounts", "dossier_create", "dossier_edit_all",
-  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects", "meetings", "ai", "kpis", "compliance"];
-const CONFIG_PERMS = ["settings", "roles", "members", "workflows", "automations", "onedrive", "funds", "externals", "export"];
+  "dossier_delete", "stage_advance", "stage_approve", "task_create", "task_edit_all", "onedrive", "funds", "externals", "export", "deadlines", "projects", "meetings", "ai", "kpis", "compliance", "guide", "portfolio", "meetings_view", "projects_view"];
+// Droits de consultation accordés par défaut : un rôle existant qui ne les mentionne pas les conserve.
+export const DEFAULT_ON = ["meetings_view", "projects_view"];
 const today = () => new Date().toISOString().slice(0, 10);
 
 export class Denied extends Error { constructor(msg) { super(msg || "Action non autorisée pour votre rôle."); this.status = 403; } }
@@ -12,7 +13,7 @@ export function context(user, cfg, adminEmails) {
   const role = (cfg.roles || []).find(r => r.id === (member ? member.roleId : cfg.general?.defaultRoleId));
   const perms = isAdmin ? Object.fromEntries(ALL_PERMS.map(p => [p, true])) : { ...(role?.perms || {}) };
   const isExt = !isAdmin && !!member?.external;
-  return { cfg, user, member, perms, isAdmin, isExt, can: k => !!perms[k] };
+  return { cfg, user, member, perms, isAdmin, isExt, can: k => !!(k in perms ? perms[k] : DEFAULT_ON.includes(k)) };
 }
 
 export const canReview = c => c.isAdmin || c.can("compliance") || ((c.cfg.compliance?.reviewers || []).includes(c.member?.id));
@@ -24,11 +25,17 @@ export function canSeeMeeting(c, m) {
   if (c.isAdmin) return true;
   const id = c.member?.id; if (!id) return false;
   if (m.createdBy === id || m.secretaryId === id || (m.participants || []).includes(id)) return true;
+  if (!c.can("meetings_view")) return false; // rôle limité : seulement les réunions auxquelles il a participé
   if (!m.visibility || m.visibility === "all") return true;
   if (m.visibility === "roles") return (m.roles || []).includes(c.member.roleId);
   return false;
 }
 const canEditMeeting = (c, m) => canSeeMeeting(c, m) && (c.isAdmin || c.can("meetings") || m.createdBy === c.member?.id || m.secretaryId === c.member?.id);
+export function canSeeProject(c, p) {
+  if (!p || c.isExt) return false;
+  if (c.isAdmin || c.can("projects_view") || c.can("projects")) return true;
+  const id = c.member?.id; return !!id && (p.ownerId === id || (p.members || []).includes(id));
+}
 export function canSeeDossier(c, d) {
   if (!d) return false;
   if (c.isExt) return !!grantFor(c, "dossier", d.id);
@@ -45,7 +52,7 @@ function canEditDossier(c, d) {
 function canSeeTask(c, t, dossierOf) {
   if (!c.isExt && c.can("view_all")) return true;
   const m = c.member;
-  if (t.projectId && m && !c.isExt) return true;
+  if (t.projectId && m && !c.isExt && (c.can("projects_view") || c.can("projects"))) return true;
   if (m && (t.assignees || []).includes(m.id)) return true;
   if (t.dossierId) return canSeeDossier(c, dossierOf(t.dossierId));
   return !c.isExt && !!m && t.createdBy === m.id;
@@ -107,14 +114,15 @@ export function snapshot(c, all, version) {
   const dossiers = all.dossiers.filter(d => canSeeDossier(c, d)).map(d => hideAmounts(c, d));
   const tasks = all.tasks.filter(t => canSeeTask(c, t, id => dmap[id]));
   const visible = new Set(dossiers.map(d => d.id));
-  const activity = all.activity.filter(e => e.dossierId ? visible.has(e.dossierId) : !c.isExt)
+  const seenMeetings = new Set((all.meetings || []).filter(m => canSeeMeeting(c, m)).map(m => m.id));
+  const activity = all.activity.filter(e => (e.dossierId ? visible.has(e.dossierId) : !c.isExt) && (!e.meetingId || seenMeetings.has(e.meetingId)))
     .sort((a, b) => String(b.at).localeCompare(String(a.at))).slice(0, 300);
   const seesCodes = c.isAdmin || c.can("members") || c.can("externals");
   return {
     version,
     config: sanitizeConfig(c),
     dossiers, tasks, activity,
-    projects: c.isExt ? [] : (all.projects || []),
+    projects: c.isExt ? [] : (all.projects || []).filter(p => canSeeProject(c, p)),
     meetings: (all.meetings || []).filter(m => canSeeMeeting(c, m)),
     events: (all.events || []).map(e => eventView(c, e)).filter(Boolean),
     prefs: (all.prefs || []).filter(p => p.id === c.member?.id),
@@ -157,42 +165,58 @@ const NOTIF_KEYS = ["assign", "mention", "stage", "compliance", "block", "deadli
 export function checkWrite(c, coll, id, data, existing, dossierOf) {
   if (coll === "ws") {
     if (id !== "config") throw new Denied();
-    if (!c.isAdmin && !CONFIG_PERMS.some(p => c.can(p))) {
-      // Les gestionnaires d'échéances peuvent seulement mettre à jour l'historique du TMM.
-      // Exceptions ciblées : historique du TMM (gestion des échéances) et modèles de réunion (comptes rendus).
-      const out = { ...c.cfg }; let ok = false;
-      if (c.can("deadlines") && Array.isArray(data.tmm)) { out.tmm = data.tmm.filter(x => x && /^\d{4}-\d{2}$/.test(x.m)).map(x => ({ m: x.m, v: +x.v })); ok = true; }
-      if (c.can("meetings") && Array.isArray(data.meetingBoards)) { out.meetingBoards = data.meetingBoards; ok = true; }
-      if (canReview(c) && data.compliance && typeof data.compliance === "object") { out.compliance = data.compliance; if (Array.isArray(data.blockReasons)) out.blockReasons = data.blockReasons.map(String).slice(0, 40); ok = true; }
-      if (c.can("kpis") && Array.isArray(data.customKpis)) { out.customKpis = data.customKpis.filter(k => k && typeof k === "object" && /^ck_/.test(String(k.id || ""))).slice(0, 200); ok = true; }
-      if (ok) return out;
-      throw new Denied("Seuls les administrateurs peuvent modifier les paramètres.");
+    // Chaque rubrique des paramètres est protégée par le droit qui la gère ; le reste est conservé tel qu'enregistré.
+    const stored = c.cfg, inc = data && typeof data === "object" ? data : {};
+    const review = canReview(c) || c.can("settings");
+    const SECTION = {
+      general: "settings", notify: "settings", copilot: "settings", dashKpis: "settings", fundRoot: "funds",
+      compliance: () => review, blockReasons: () => review, guide: () => c.can("guide") || c.can("settings"),
+      roles: "roles", teams: "members",
+      funds: "funds", fundView: "funds", fundStatuses: "funds", fundTypes: "funds", fundFields: "funds", fundTemplate: "funds",
+      workflows: "workflows", customFields: "workflows", statuses: "workflows", priorities: "workflows", tags: "workflows", sectors: "workflows",
+      vehicles: "workflows", deadlineTypes: "workflows", meetingTypes: "workflows", projectCategories: "workflows",
+      automations: "automations", onedrive: "onedrive", customKpis: "kpis", tmm: "deadlines", meetingBoards: "meetings",
+    };
+    const allowed = k => c.isAdmin || (typeof SECTION[k] === "function" ? SECTION[k]() : SECTION[k] ? c.can(SECTION[k]) : c.can("settings"));
+    const out = { ...stored }; let any = c.isAdmin;
+    for (const k of Object.keys(inc)) {
+      if (k === "members") continue;
+      if (!allowed(k)) continue;
+      any = true;
+      if (k === "tmm" && !c.isAdmin) { if (Array.isArray(inc.tmm)) out.tmm = inc.tmm.filter(x => x && /^\d{4}-\d{2}$/.test(x.m)).map(x => ({ m: x.m, v: +x.v })); continue; }
+      if (k === "customKpis" && !c.isAdmin) { if (Array.isArray(inc.customKpis)) out.customKpis = inc.customKpis.filter(x => x && typeof x === "object" && /^ck_/.test(String(x.id || ""))).slice(0, 200); continue; }
+      if (k === "blockReasons") { if (Array.isArray(inc.blockReasons)) out.blockReasons = inc.blockReasons.map(String).slice(0, 40); continue; }
+      out[k] = inc[k];
     }
-    const stored = c.cfg, inc = { ...data };
-    if (!c.isAdmin && !c.can("roles")) inc.roles = stored.roles;
+    // Portefeuille : mise à jour des participations (positions) sans toucher à l'architecture des fonds.
+    if (!allowed("funds") && c.can("portfolio") && Array.isArray(inc.funds)) {
+      any = true;
+      const byId = Object.fromEntries(inc.funds.map(f => [f.id, f]));
+      out.funds = (stored.funds || []).map(f => byId[f.id] && Array.isArray(byId[f.id].positions) ? { ...f, positions: byId[f.id].positions } : f);
+    }
+    if (Array.isArray(out.funds) && out.funds !== stored.funds && !c.can("view_amounts")) {
+      const old = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).map(p => [f.id + "|" + p.id, p])));
+      out.funds = out.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => { const o = old[f.id + "|" + p.id]; return { ...p, amount: o?.amount ?? "", outstanding: o?.outstanding ?? "" }; }) }));
+    }
+    // Membres : internes (droit Membres) et externes (droit Accès externes) ; les codes d'invitation ne sont jamais écrits par le navigateur.
     const canInt = c.isAdmin || c.can("members"), canExt = c.isAdmin || c.can("externals");
+    if (canInt || canExt) any = true;
     const incMembers = Array.isArray(inc.members) ? inc.members : stored.members || [];
     const result = [];
-    for (const s of stored.members || []) {
-      const allowed = s.external ? canExt : canInt;
-      const m = incMembers.find(x => x.id === s.id);
-      if (!allowed) { result.push(s); continue; }
+    for (const s0 of stored.members || []) {
+      const ok = s0.external ? canExt : canInt;
+      const m = incMembers.find(x => x.id === s0.id);
+      if (!ok) { result.push(s0); continue; }
       if (!m) continue;
-      result.push({ ...m, code: s.code ?? null, invitedAt: s.invitedAt ?? null });
+      result.push({ ...m, code: s0.code ?? null, invitedAt: s0.invitedAt ?? null });
     }
     for (const m of incMembers) {
-      if ((stored.members || []).some(s => s.id === m.id)) continue;
+      if ((stored.members || []).some(s0 => s0.id === m.id)) continue;
       if (m.external ? canExt : canInt) result.push({ ...m, code: null, invitedAt: null });
     }
-    inc.members = result;
-    if (!c.isAdmin && !c.can("funds")) { inc.funds = stored.funds; inc.fundRoot = stored.fundRoot; }
-    else if (!c.can("view_amounts") && Array.isArray(inc.funds)) {
-      const old = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).map(p => [f.id + "|" + p.id, p])));
-      inc.funds = inc.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => { const o = old[f.id + "|" + p.id]; return { ...p, amount: o?.amount ?? "", outstanding: o?.outstanding ?? "" }; }) }));
-    }
-    if (!c.isAdmin && !c.can("workflows")) { inc.workflows = stored.workflows; inc.customFields = stored.customFields; }
-    if (!c.isAdmin && !c.can("automations")) inc.automations = stored.automations;
-    return inc;
+    out.members = result;
+    if (!any) throw new Denied("Seuls les administrateurs peuvent modifier les paramètres.");
+    return out;
   }
   if (coll === "dossiers") {
     if (!existing) {
