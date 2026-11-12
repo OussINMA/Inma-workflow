@@ -500,6 +500,9 @@ a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoratio
 @media print{body.fc-printing .app,body.fc-printing #layer,body.fc-printing .toast{display:none!important}body.fc-printing .fc-scrim{position:static;background:none;display:block}body.fc-printing .fc-drawer{width:100%;height:auto;overflow:visible;box-shadow:none;animation:none}body.fc-printing .fc-toc,body.fc-printing .fc-head .btn{display:none!important}body.fc-printing .fc-body{display:block;padding:0}body.fc-printing .fc-head{position:static}body.fc-printing .fc-sec{break-inside:avoid;margin-bottom:10px}body.fc-printing .btn{display:none!important}}
 
 .ro input:disabled,.ro select:disabled,.ro textarea:disabled{border-color:transparent;background:transparent;color:var(--ink);-webkit-text-fill-color:var(--ink);opacity:1;padding-left:0;padding-right:0;cursor:default;appearance:none;-webkit-appearance:none;box-shadow:none;resize:none;overflow:hidden;min-height:0;font-size:13.5px}
+.ro .ro-hidden{display:none!important}
+.ro .ro-val{display:block;padding:calc(7px*var(--pad)) 0;font-size:13.5px;color:var(--ink);font-weight:500}
+.ro .ro-val.muted{color:var(--muted)}
 .ro input:disabled::placeholder,.ro textarea:disabled::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
 .ro input[type=date]:disabled::-webkit-calendar-picker-indicator{display:none}
 .ro select:disabled{background-image:none}
@@ -515,6 +518,26 @@ a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoratio
 
 .pl-miss{color:var(--bad);border-color:color-mix(in oklab,var(--bad) 45%,transparent);background:var(--bad-bg);font-weight:600}
 .pl-banner{align-items:center}
+
+.modal.wide:has(.vl-wrap){width:min(1180px,100%)}
+.vl-kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.vl-kpis .kpi .v{font-size:19px}
+.vl-wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.vl-form{display:flex;flex-direction:column;gap:12px;min-width:0}
+.vl-sec{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.vl-sec h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;margin:0}
+.vl-hint{font-size:11.5px;color:var(--muted);margin:0}
+.vl-fcf{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.vl-w{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.vl-res{position:sticky;top:0;display:flex;flex-direction:column;gap:10px;font-size:12.5px}
+.vl-card{border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:var(--r);padding:10px 12px;background:var(--surface)}
+.vl-big{font-family:var(--f-mono);font-size:22px;font-weight:600;margin:2px 0}
+.vl-range{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:12px}
+.vl-mt{font-size:12px}.vl-mt td,.vl-mt th{padding:4px 6px}
+.vl-nav{display:flex;gap:10px;align-items:flex-end;overflow-x:auto;padding-top:8px}
+.vl-bar{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:84px}
+.vl-b{width:38px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.vl-bv{font-size:10.5px;font-family:var(--f-mono)}.vl-bl{font-size:11px;color:var(--muted)}
+@media (max-width:900px){.vl-wrap{grid-template-columns:1fr}.vl-res{position:static}.vl-fcf,.vl-w{grid-template-columns:1fr 1fr}}
 </style>
 
 <div class="app" id="app">
@@ -1498,7 +1521,7 @@ function fundFieldInput(x, v) {
 }
 
 /* ---------- onglet Fonds : hub par fonds, relié au reste de l'outil ---------- */
-const FH_TABS = { overview: "Vue d'ensemble", dossiers: "Dossiers", portfolio: "Portefeuille", tree: "Arborescence & documents", projects: "Projets & jalons", deadlines: "Échéances", info: "Fiche du fonds" };
+const FH_TABS = { overview: "Vue d'ensemble", dossiers: "Dossiers", portfolio: "Portefeuille", tree: "Arborescence & documents", projects: "Projets & jalons", deadlines: "Échéances", valo: "Valorisation", info: "Fiche du fonds" };
 const FH_KPIS_DEFAULT = ["dossiers", "amount", "study", "positions", "crd", "unpaid", "dl30", "lateTasks", "projects"];
 const fhView = () => ({ tabs: Object.keys(FH_TABS).map(k => ({ id: k, on: true })), kpis: FH_KPIS_DEFAULT, home: "overview", ...(S.cfg.fundView || {}) });
 const fhTabs = () => { const v = fhView(); const known = (v.tabs || []).filter(t => FH_TABS[t.id]); const missing = Object.keys(FH_TABS).filter(k => !known.some(t => t.id === k)).map(id => ({ id, on: true })); return [...known, ...missing]; };
@@ -1538,7 +1561,7 @@ function fhHub(f) {
       ${f.description ? `<p class="muted" style="margin:6px 0 0;font-size:13px;max-width:900px">${h(f.description)}</p>` : ""}</div>
       <div class="row" style="gap:6px;flex:none">${isURL(f.url) ? `<a class="btn" href="${h(f.url)}" target="_blank" rel="noopener">${ic("ext")}Dossier du fonds</a>` : ""}${cpOn() ? `<button class="btn cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}</div></div></div>
     <nav class="fh-tabs" role="tablist">${tabs.map(t => `<button role="tab" class="${t.id === cur ? "on" : ""}" data-ftab="${t.id}">${h(FH_TABS[t.id])}${t.id === "dossiers" ? ` <span class="fh-count">${st.ds.length}</span>` : t.id === "portfolio" ? ` <span class="fh-count">${livePositions(f).length}</span>` : ""}</button>`).join("")}</nav></div>`;
-  const body = { overview: fhOverview, dossiers: fhDossiers, portfolio: fhPortfolio, tree: fhTree, projects: fhProjects, deadlines: fhDeadlines, info: fhInfo }[cur](f);
+  const body = { overview: fhOverview, dossiers: fhDossiers, portfolio: fhPortfolio, tree: fhTree, projects: fhProjects, deadlines: fhDeadlines, valo: fhValo, info: fhInfo }[cur](f);
   return head + body;
 }
 function fhOverview(f) {
@@ -3429,7 +3452,7 @@ function schCard(o, open) {
       <div class="sch-kpi"><span>Prochaine échéance</span><b>${s.next ? `${fdate(s.next.d)}` : "—"}</b>${s.next ? `<span class="muted">${m(schAmt(s.next))}</span>` : ""}</div>
       <div class="sch-kpi"><span>Remboursé</span><b>${s.paid}/${s.n}</b><span class="msbar" style="min-width:70px"><span style="width:${pct}%"></span></span></div></div></summary>
     <div class="body" style="border-top:1px solid var(--line)">${s.lateN ? `<div class="banner warn" style="margin-bottom:10px">${s.lateN} échéance(s) impayée(s) pour ${m(s.lateAmt)}.</div>` : ""}${s.est ? `<p class="muted" style="font-size:12px;margin:0 0 8px">« estimé » : montant calculé avec un TMM futur (hypothèse) ou un chiffre d'affaires prévisionnel. Mettez à jour le TMM (Paramètres) ou le CA réel puis cliquez « Recalculer ».</p>` : ""}${schTable(o)}
-      <div class="row" style="margin-top:10px">${d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : ""}${o.posRef ? `<button class="btn sm" data-pos="${h(o.posRef)}">Fiche de la ligne</button>` : ""}${isURL(o.url) ? linkBtn(o.url, "Contrat / dossier OneDrive") : ""}<span class="spacer"></span><button class="btn sm" data-sch-csv="${o.id}">Exporter (Excel)</button>${canManageDl() && L.amount && can("view_amounts") ? `<button class="btn sm" data-sch-recalc="${o.id}" title="Recalcule les échéances non payées avec le TMM et le CA à jour">Recalculer</button>` : ""}${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier l'échéancier</button>` : ""}</div></div></details>`;
+      <div class="row" style="margin-top:10px">${d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : ""}${o.posRef ? `<button class="btn sm" data-pos="${h(o.posRef)}">Fiche de la ligne</button>` : ""}${isURL(o.url) ? linkBtn(o.url, "Contrat / dossier OneDrive") : ""}<span class="spacer"></span><button class="btn sm" data-sch-csv="${o.id}">Exporter (Excel)</button>${canManageDl() && L.amount && can("view_amounts") ? `<button class="btn sm" data-sch-recalc="${o.id}" title="Recalcule les échéances non payées avec le TMM et le CA à jour">Recalculer</button>` : ""}${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier l'échéancier</button><button class="btn sm ghost danger" data-sch-del="${o.id}">Supprimer</button>` : ""}</div></div></details>`;
 }
 function vSchedules(refFilter) {
   const f = S.ui.dl || {};
@@ -3511,7 +3534,7 @@ function schModal(o0, preset = {}) {
     <div class="grid2"><label class="f"><span>Rappel (jours avant chaque échéance)</span><input type="number" id="sc-reminder" min="0" max="60" value="${h(o.reminder ?? 3)}"></label><label class="f"><span>Contrat / dossier OneDrive</span><input type="url" id="sc-url" value="${h(o.url || "")}" placeholder="https://…"></label></div>
     <label class="f"><span>Notes (garanties, covenants, conditions particulières)</span><textarea id="sc-notes" rows="2">${h(o.notes || "")}</textarea></label>
     <label class="chk"><input type="checkbox" id="sc-active" ${o.active !== false ? "checked" : ""}>Échéancier actif</label>`;
-  S._ro = isNew ? null : { editable: can("deadlines") }; modal(isNew ? "Nouvel échéancier" : `Échéancier · ${schOwnerName(o)}`, inner, `${!isNew ? `<button class="btn danger" id="sc-del">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="sc-save">${isNew ? "Créer l'échéancier" : "Enregistrer"}</button>`, Lm => {
+  S._ro = isNew ? null : { editable: can("deadlines") }; modal(isNew ? "Nouvel échéancier" : `Échéancier · ${schOwnerName(o)}`, inner, `${!isNew ? `<button class="btn danger" id="sc-del" data-ro-keep="1">Supprimer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="sc-save">${isNew ? "Créer l'échéancier" : "Enregistrer"}</button>`, Lm => {
     let rt = L.rateType === "tmm" ? "tmm" : "fixed"; let rules = clone(L.caRules || []); let computed = null;
     const segs = () => [...new Set(rules.map(r => (r.seg || "").trim()).filter(Boolean))];
     const syncRules = () => { rules = $$("[data-cr]", Lm).map(row => ({ label: "", seg: $("[data-crf=seg]", row).value.trim(), from: $("[data-crf=from]", row).value, to: $("[data-crf=to]", row).value, pct: $("[data-crf=pct]", row).value })); };
@@ -3573,7 +3596,7 @@ function schModal(o0, preset = {}) {
       await putDoc("deadlines", live); await log(`${isNew ? "Échéancier créé" : "Échéancier modifié"} : ${schOwnerName(live)} (${items.length} échéances)`, { dossierId: live.dossierId || null });
       Lm.remove(); toast(isNew ? "Échéancier créé" : "Échéancier enregistré"); S.ui.dl = { ...(S.ui.dl || {}), view: "schedules" }; saveUI(); if (S.view !== "deadlines") S.view = "deadlines"; render();
     };
-    const del = $("#sc-del", Lm); del && (del.onclick = () => { Lm.remove(); confirmBox(`Supprimer l'échéancier de ${schOwnerName(o)} et l'historique des paiements ?`, "Supprimer", async () => { await delDoc("deadlines", o.id); toast("Échéancier supprimé"); render(); }); });
+    const del = $("#sc-del", Lm); del && (del.onclick = () => { Lm.remove(); schDelete(o.id); });
   }, true);
 }
 /* ---- historique du TMM ---- */
@@ -5001,9 +5024,12 @@ function ficheHTML(fid, pid, ed) {
   const canEd = !isExt(me()) && (can("funds") || can("portfolio")); const resp = fc.resp || (p.dossierId && dossierById(p.dossierId)?.ownerId) || "";
   const pct = ficheCompletion(f, p);
   const groups = []; for (const s of [{ id: "suivi", title: "Suivi INMA" }, ...t.sections]) { const g = s.group || s.title; const last = groups[groups.length - 1]; if (last && last.g === g) last.items.push(s); else groups.push({ g, items: [s] }); }
+  if (ficheTplId(f) !== "finance" && p.kind !== "debt" && !ed) groups.push({ g: "Valorisation", items: [{ id: "valo", title: "Valorisation" }] });
   const toc = groups.map(g => g.items.length === 1 && g.items[0].title === g.g ? `<a href="#fc-${g.items[0].id}" data-fiche="go">${h(g.g)}</a>` : `<div class="fc-tg">${h(g.g)}</div>${g.items.map(s => `<a href="#fc-${s.id}" data-fiche="go" class="sub">${h(s.title)}</a>`).join("")}`).join("");
   let body = (ed ? "" : posLinkBanner(f, p)) + ficheSuivi(f, p, ed), lastG = null;
   for (const s of t.sections) { if (s.group && s.group !== lastG && s.group !== s.title) body += `<div class="fc-group">${h(s.group)}</div>`; lastG = s.group; body += ficheSection(s, f, p, fc, ed); }
+  const withValo = ficheTplId(f) !== "finance" && p.kind !== "debt";
+  if (withValo && !ed) body += ficheValoSection(f, p);
   return `<div class="scrim fc-scrim" id="fiche" data-fid="${fid}" data-pid="${pid}" data-ed="${ed ? 1 : 0}"><div class="drawer fc-drawer" role="dialog" aria-modal="true" aria-label="${h(t.label)} ${h(p.name)}">
     <header class="fc-head"><div class="row" style="gap:10px;align-items:flex-start">
       <div style="flex:1;min-width:0"><div class="eyebrow">${h(t.label)} · ${h(f.name)}</div><h1 class="fc-title">${hdot(p.health)} ${h(p.name)}</h1></div>
@@ -5051,7 +5077,7 @@ async function ficheSave() {
   render(); ficheOpen(f.id, p.id, false, true);
 }
 document.addEventListener("click", e => {
-  const pos = e.target.closest("[data-pos]"); if (pos && !e.target.closest("#fiche")) { e.stopImmediatePropagation(); const [fid, pid] = pos.dataset.pos.split("|"); ficheOpen(fid, pid); return; }
+  const pos = e.target.closest("[data-pos]"); if (pos && !e.target.closest("#fiche")) { e.stopImmediatePropagation(); const [fid, pid] = pos.dataset.pos.split("|"); ficheOpen(fid, pid); if (pos.dataset.goto) setTimeout(() => $("#fc-" + pos.dataset.goto)?.scrollIntoView({ block: "start" }), 60); return; }
   const el = e.target.closest("#fiche"); if (!el) return;
   if (e.target === el) { ficheClose(); return; }
   const b = e.target.closest("[data-fiche]"); if (!b) { if (e.target.closest("[data-open],[data-act7]")) ficheClose(true); return; } const a = b.dataset.fiche;
@@ -5082,8 +5108,10 @@ function roLock(scope, opt = {}) {
     if (el.closest("[data-live]") || ["hidden", "file"].includes(el.type) || el.closest("footer")) continue;
     if (!el.disabled) { el.disabled = true; el.dataset.roDis = "1"; }
     if (el.type === "checkbox" || el.type === "radio") { if (!el.checked) { const lab = el.closest("label"); if (lab && !lab.hidden) { lab.hidden = true; lab.dataset.roHide = "1"; } } continue; }
-    if (el.value && ["date", "number"].includes(el.type)) { el.dataset.roVal = el.value; el.dataset.roType = el.type; const v = el.value; el.type = "text"; el.value = v.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(v) ? fdate(v) : (isNaN(+v) ? v : (+v).toLocaleString("fr-FR", { maximumFractionDigits: 3 })); continue; }
-    if (!el.value && el.tagName !== "SELECT") { el.dataset.roPh = el.getAttribute("placeholder") ?? "\u0001"; el.placeholder = "—"; if (["date", "time", "datetime-local", "month"].includes(el.type)) { el.dataset.roType = el.type; el.type = "text"; } }
+    // affichage formaté dans un libellé à côté du champ, sans jamais toucher à sa valeur
+    if (["date", "number", "time", "datetime-local", "month"].includes(el.type)) { const v = el.value; const txt = !v ? "—" : el.type === "date" ? fdate(v) : el.type === "number" ? (isNaN(+v) ? v : (+v).toLocaleString("fr-FR", { maximumFractionDigits: 3 })) : v;
+      el.classList.add("ro-hidden"); el.insertAdjacentHTML("afterend", `<span class="ro-val${v ? "" : " muted"}">${h(txt)}</span>`); continue; }
+    if (!el.value && el.tagName !== "SELECT") { el.dataset.roPh = el.getAttribute("placeholder") ?? "\u0001"; el.placeholder = "—"; }
     if (el.tagName === "TEXTAREA") { el.dataset.roH = el.style.height || "\u0001"; requestAnimationFrame(() => { el.style.height = "auto"; el.style.height = Math.max(24, el.scrollHeight + 2) + "px"; }); }
   }
   for (const lab of $$("label[data-ro-hide]", scope)) { const p = lab.parentElement; if (p && !p.querySelector(":scope > .ro-dash") && ![...p.children].some(c => c.tagName === "LABEL" && !c.hidden)) p.insertAdjacentHTML("beforeend", '<span class="muted ro-dash">—</span>'); }
@@ -5111,7 +5139,8 @@ function roUnlock(scope) {
   for (const el of $$("[data-ro-hide]", scope)) { el.hidden = false; delete el.dataset.roHide; }
   for (const el of $$("[data-ro-hid]", scope)) { el.hidden = false; delete el.dataset.roHid; }
   for (const el of $$("[data-ro-txt]", scope)) { el.textContent = el.dataset.roTxt; delete el.dataset.roTxt; }
-  for (const el of $$(".ro-dash,[data-ro-added]", scope)) el.remove();
+  for (const el of $$(".ro-dash,[data-ro-added],.ro-val", scope)) el.remove();
+  for (const el of $$(".ro-hidden", scope)) el.classList.remove("ro-hidden");
   const first = $$("input,select,textarea", scope).find(x => !x.disabled && x.offsetParent && !x.closest("[data-live]"));
   first?.focus();
   scope.classList.add("ro-editing");
@@ -5193,6 +5222,168 @@ document.addEventListener("click", async e => {
   if (b.dataset.pl === "link-s") return posPickModal("s", fid, pid);
   if (b.dataset.pl === "new-d") { b.disabled = true; const d = await posCreateDossier(fid, pid); if (d) { toast(`Dossier ${d.code} créé et rattaché`); render(); ficheOpen(fid, pid, false, true); } }
 }, true);
+
+/* ---------- valorisation des participations (multi-méthodes, IPEV adapté) ---------- */
+const VALO_M = [["comps", "Multiples de comparables boursiers"], ["trans", "Transactions comparables"], ["dcf", "DCF"], ["anr", "Actif net réévalué"], ["tour", "Prix du dernier tour"]];
+const VALO_DEF_W = { comps: 40, trans: 20, dcf: 40, anr: 0, tour: 0 };
+const vNum = v => (v === "" || v == null) ? null : (isFinite(num(v)) ? num(v) : null);
+const vList = s => String(s || "").split(/[;\n]+|\s{2,}|\s(?=\d)/).map(x => x.trim()).filter(Boolean).map(num).filter(x => isFinite(x) && x > 0);
+const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const monthsBetween = (a, b) => (Date.parse(b) - Date.parse(a)) / (864e5 * 30.4375);
+const valoCanEdit = () => !isExt(me()) && can("view_amounts") && (can("funds") || can("portfolio"));
+const valoCanValidate = () => !isExt(me()) && (can("funds") || can("stage_approve"));
+const quarterEnd = iso => { const d = new Date((iso || todayISO()) + "T12:00:00"); const q = Math.floor(d.getMonth() / 3); return new Date(Date.UTC(d.getFullYear(), q * 3 + 3, 0)).toISOString().slice(0, 10); };
+const quarterLabel = iso => { const d = new Date(iso + "T12:00:00"); return `T${Math.floor(d.getMonth() / 3) + 1} ${d.getFullYear()}`; };
+function valoStakeDefault(p) { if (num(p.stake)) return num(p.stake); const row = (p.fiche?.t?.captable || []).find(r => /inma/i.test(r.actionnaire || "")); return row ? num(row.pcap) : ""; }
+function valoMultMethod(x, I, k) {
+  const me_ = median(vList(x.ebitda)), mc = median(vList(x.ca)); const ebitda = vNum(I.ebitda), ca = vNum(I.ca), dn = vNum(I.dn) || 0;
+  const parts = []; if (me_ != null && ebitda != null) parts.push(["EV/EBITDA", ebitda * me_ * k, me_]); if (mc != null && ca != null) parts.push(["EV/CA", ca * mc * k, mc]);
+  const use = x.basis === "ebitda" ? parts.filter(p => p[0] === "EV/EBITDA") : x.basis === "ca" ? parts.filter(p => p[0] === "EV/CA") : parts;
+  if (!use.length) return { ok: false, why: "Saisissez l'agrégat et au moins un multiple" };
+  const ve0 = use.reduce((s, p) => s + p[1], 0) / use.length, dec = (vNum(x.decote) || 0) / 100, ve = ve0 * (1 - dec);
+  return { ok: true, ve, eq: ve - dn, detail: use.map(p => `${p[0]} médian ${fmtN(p[2])}x`).join(" · ") + (dec ? ` · décote ${fmtN(dec * 100)} %` : "") };
+}
+function valoDcf(x, I, dw = 0, dg = 0) {
+  const fcf = (x.fcf || []).map(vNum).filter(v => v != null); const w = (vNum(x.wacc) ?? NaN) / 100 + dw, g = (vNum(x.g) ?? NaN) / 100 + dg, dn = vNum(I.dn) || 0;
+  if (!fcf.length || !isFinite(w) || !isFinite(g)) return { ok: false, why: "Saisissez les flux, le WACC et la croissance à l'infini" };
+  if (w <= g) return { ok: false, why: "Le WACC doit être supérieur à la croissance à l'infini" };
+  const pv = fcf.reduce((s, f, i) => s + f / Math.pow(1 + w, i + 1), 0); const n = fcf.length; const tv = fcf[n - 1] * (1 + g) / (w - g) / Math.pow(1 + w, n);
+  return { ok: true, ve: pv + tv, eq: pv + tv - dn, detail: `Flux actualisés ${fmtN(Math.round(pv))} + valeur terminale ${fmtN(Math.round(tv))} (${Math.round(tv / (pv + tv) * 100)} % de la VE)` };
+}
+function valoCalc(v, p, opt = {}) {
+  const I = v.inputs || {}; const k = opt.k || 1; const out = {};
+  out.comps = valoMultMethod(I.comps || {}, I, k); out.trans = valoMultMethod(I.trans || {}, I, k);
+  out.dcf = valoDcf(I.dcf || {}, I, opt.dw || 0);
+  const a = I.anr || {}; out.anr = vNum(a.actifs) != null && vNum(a.passifs) != null ? { ok: true, ve: null, eq: vNum(a.actifs) - vNum(a.passifs), detail: "Actifs réévalués − passifs réévalués" } : { ok: false, why: "Saisissez les actifs et les passifs réévalués" };
+  const t = I.tour || {}; const titres = vNum(t.titres) ?? vNum(p?.fiche?.v?.cap_titres);
+  if (vNum(t.prix) != null && titres != null && t.date) { const age = monthsBetween(t.date, v.date || todayISO()); const usable = age <= 12 && !t.event;
+    out.tour = { ok: usable, eq: vNum(t.prix) * titres, ve: null, age, why: usable ? "" : t.event ? "Événement significatif depuis le tour : méthode écartée" : `Tour de plus de 12 mois (${Math.floor(age)} mois) : méthode écartée`, detail: `${fmtN(vNum(t.prix))} par titre × ${fmtN(titres)} titres · tour du ${fdate(t.date)}` }; }
+  else out.tour = { ok: false, why: "Saisissez le prix par titre, le nombre de titres et la date du tour" };
+  const W = { ...VALO_DEF_W, ...(v.weights || {}) }; let sw = 0, sv = 0; const warn = [];
+  for (const [m, l] of VALO_M) { const w = vNum(W[m]) || 0; if (!w) continue; if (!out[m].ok) { warn.push(`${l} pondérée à ${w} % mais non disponible (${out[m].why})`); continue; } sw += w; sv += w * out[m].eq; }
+  const tot = VALO_M.reduce((s, [m]) => s + (vNum(W[m]) || 0), 0); if (Math.abs(tot - 100) > 0.01) warn.unshift(`La somme des pondérations fait ${fmtN(tot)} % au lieu de 100 %`);
+  const eq = sw ? sv / sw : null; const stake = vNum(v.stake) ?? vNum(valoStakeDefault(p || {}));
+  return { m: out, W, eq, stake, inma: eq != null && stake != null ? eq * stake / 100 : null, warn };
+}
+function valoRange(v, p) { const lo = valoCalc(v, p, { k: 0.9, dw: 0.01 }), hi = valoCalc(v, p, { k: 1.1, dw: -0.01 }); return [lo.inma, hi.inma]; }
+const vFmt = x => x == null || !isFinite(x) ? "—" : money(Math.round(x));
+const posValos = p => [...(p.valos || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+const lastValo = (p, onlyValid, until) => posValos(p).find(v => (!onlyValid || v.status === "validated") && (!until || v.date <= until));
+
+/* section de la fiche participation */
+function ficheValoSection(f, p) {
+  if (!can("view_amounts")) return `<section class="panel fc-sec" id="fc-valo"><header><h2>Valorisation</h2></header><div class="body"><p class="muted" style="margin:0">Les valorisations sont réservées aux rôles qui ont le droit « Voir les montants ».</p></div></section>`;
+  const vs = posValos(p), cur = vs[0], ed = valoCanEdit();
+  const add = ed ? `<button class="btn sm pri" data-valo="new">${ic("plus")}Nouvelle valorisation</button>` : "";
+  if (!cur) return `<section class="panel fc-sec" id="fc-valo"><header><h2>Valorisation</h2><span class="spacer"></span>${add}</header><div class="body"><p class="muted" style="margin:0">Aucune valorisation. Une valorisation par trimestre alimente la valeur liquidative du portefeuille (onglet Valorisation du fonds).</p></div></section>`;
+  const r = valoCalc(cur, p), [lo, hi] = valoRange(cur, p);
+  const rows = VALO_M.map(([m, l]) => { const x = r.m[m], w = vNum(r.W[m]) || 0; return `<tr${!w ? ' class="muted"' : ""}><td>${h(l)}${x.ok ? `<div class="muted" style="font-size:11.5px">${h(x.detail || "")}</div>` : `<div class="muted" style="font-size:11.5px">${h(x.why)}</div>`}</td><td class="r">${x.ok && x.ve != null ? vFmt(x.ve) : "—"}</td><td class="r">${x.ok || x.eq != null ? vFmt(x.eq) : "—"}</td><td class="r">${w ? fmtN(w) + " %" : "—"}</td></tr>`; }).join("");
+  const hist = vs.map((v, i) => { const c = valoCalc(v, p), prev = vs[i + 1] ? valoCalc(vs[i + 1], p) : null; const d = prev && prev.inma ? (c.inma - prev.inma) / prev.inma * 100 : null;
+    return `<tr class="click" data-valo="open" data-vid="${v.id}"><td>${h(quarterLabel(v.date))} <span class="muted">· ${h(fdate(v.date))}</span></td><td>${v.status === "validated" ? chip("Validée", "var(--ok)") : chip("Brouillon", "#7B8794")}</td><td class="r">${vFmt(c.eq)}</td><td class="r">${c.stake != null ? fmtN(c.stake) + " %" : "—"}</td><td class="r"><b>${vFmt(c.inma)}</b></td><td class="r">${d == null ? "—" : `<span style="color:${d >= 0 ? "var(--ok)" : "var(--bad)"}">${d >= 0 ? "+" : ""}${fmtN(Math.round(d * 10) / 10)} %</span>`}</td></tr>`; }).join("");
+  const cost = vNum(p.amount); const moic = cost && r.inma ? r.inma / cost : null;
+  return `<section class="panel fc-sec" id="fc-valo"><header><h2>Valorisation</h2>${cur.status === "validated" ? chip("Validée", "var(--ok)") : chip("Brouillon", "#7B8794")}<span class="muted" style="font-size:12px">${h(quarterLabel(cur.date))} · au ${h(fdate(cur.date))}</span><span class="spacer"></span><button class="btn sm" data-valo="open" data-vid="${cur.id}">Détail</button>${add}</header>
+    <div class="body" style="display:flex;flex-direction:column;gap:12px">
+      <div class="kpis vl-kpis"><div class="kpi"><span class="l">Valeur des titres (100 %)</span><span class="v">${vFmt(r.eq)}</span></div><div class="kpi"><span class="l">Part détenue par INMA</span><span class="v">${r.stake != null ? fmtN(r.stake) + " %" : "—"}</span></div>
+        <div class="kpi"><span class="l">Valeur de la participation</span><span class="v" style="color:var(--accent)">${vFmt(r.inma)}</span></div><div class="kpi"><span class="l">Fourchette basse / haute</span><span class="v" style="font-size:15px">${vFmt(lo)}<br>${vFmt(hi)}</span></div>
+        ${moic ? `<div class="kpi"><span class="l">Multiple sur coût investi</span><span class="v">${fmtN(Math.round(moic * 100) / 100)}x</span></div>` : ""}</div>
+      ${r.warn.length ? `<div class="banner warn" style="font-size:12.5px">${r.warn.map(h).join("<br>")}</div>` : ""}
+      <div class="tablewrap"><table class="t"><thead><tr><th>Méthode</th><th class="r">Valeur d'entreprise</th><th class="r">Valeur des titres</th><th class="r">Pondération</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${cur.justif ? `<div><div class="eyebrow" style="margin-bottom:4px">Justification des pondérations</div><div class="fc-txt" style="font-size:13px">${h(cur.justif)}</div></div>` : ""}
+      <div><div class="eyebrow" style="margin-bottom:4px">Historique trimestriel</div><div class="tablewrap"><table class="t"><thead><tr><th>Trimestre</th><th>Statut</th><th class="r">Valeur des titres</th><th class="r">% INMA</th><th class="r">Valeur INMA</th><th class="r">Variation</th></tr></thead><tbody>${hist}</tbody></table></div></div>
+    </div></section>`;
+}
+
+/* fenêtre d'une valorisation : lecture, puis « Modifier » */
+function valoModal(fid, pid, vid) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  const isNew = !vid; const prev = posValos(p)[0];
+  const v = isNew ? { id: uid("val"), date: quarterEnd(todayISO()), status: "draft", inputs: clone(prev?.inputs || { ca: "", ebitda: "", dn: "", comps: { basis: "avg", decote: 20 }, trans: { basis: "avg", decote: 0 }, dcf: { fcf: ["", "", "", "", ""] }, anr: {}, tour: {} }), weights: { ...(prev?.weights || VALO_DEF_W) }, justif: prev?.justif || "", stake: prev?.stake ?? valoStakeDefault(p), by: me()?.id || null }
+    : clone((p.valos || []).find(x => x.id === vid) || {}); if (!v.id) return;
+  const I = v.inputs = v.inputs || {}; for (const k of ["comps", "trans", "dcf", "anr", "tour"]) I[k] = I[k] || {}; I.dcf.fcf = (I.dcf.fcf || []).concat(["", "", "", "", ""]).slice(0, 5);
+  const ed = valoCanEdit() && (v.status !== "validated" || valoCanValidate()); const cur = S.cfg.general.currency;
+  const F = (id, l, val, ph = "", type = "text", hint = "") => `<label class="f"><span>${l}</span><input type="${type}" ${type === "number" ? 'step="any"' : ""} data-vf="${id}" value="${h(val ?? "")}" placeholder="${h(ph)}">${hint ? `<span class="muted" style="font-weight:400;font-size:11px">${hint}</span>` : ""}</label>`;
+  const TA = (id, l, val, ph = "") => `<label class="f"><span>${l}</span><textarea data-vf="${id}" rows="2" placeholder="${h(ph)}">${h(val ?? "")}</textarea></label>`;
+  const basis = (id, val) => `<label class="f"><span>Agrégat retenu</span><select data-vf="${id}"><option value="avg" ${val === "avg" || !val ? "selected" : ""}>Moyenne EV/EBITDA et EV/CA</option><option value="ebitda" ${val === "ebitda" ? "selected" : ""}>EV/EBITDA seulement</option><option value="ca" ${val === "ca" ? "selected" : ""}>EV/CA seulement</option></select></label>`;
+  const multHint = "Un multiple par ligne ou séparés par « ; » (ex. 8,5 ; 7 ; 9,2) : la médiane est retenue.";
+  const inner = `<div class="vl-wrap"><div class="vl-form">
+    <div class="grid3">${F("date", "Date de valorisation", v.date, "", "date", "Fin de trimestre en général")}${F("stake", "Part détenue par INMA (%)", v.stake, "", "number", "Reprise de la table de capitalisation")}
+      <label class="f"><span>Statut</span><input type="text" value="${v.status === "validated" ? `Validée${v.validatedBy ? " par " + mname(v.validatedBy) : ""}` : "Brouillon"}" disabled></label></div>
+    <div class="vl-sec"><h3>Agrégats de l'année</h3><div class="grid3">${F("ca", `Chiffre d'affaires (${cur})`, I.ca, "", "number")}${F("ebitda", `EBITDA (${cur})`, I.ebitda, "", "number")}${F("dn", `Dette nette (${cur})`, I.dn, "", "number", "Dette financière − trésorerie")}</div></div>
+    <div class="vl-sec"><h3>1. Multiples de comparables boursiers</h3><div class="grid3">${TA("comps.ebitda", "Panel EV/EBITDA", I.comps.ebitda, "8,5\n7\n9,2")}${TA("comps.ca", "Panel EV/CA", I.comps.ca, "1,4\n1,1")}<div style="display:flex;flex-direction:column;gap:10px">${basis("comps.basis", I.comps.basis)}${F("comps.decote", "Décote d'illiquidité (%)", I.comps.decote, "20", "number")}</div></div><p class="vl-hint">${multHint} VE = agrégat × multiple médian, après décote ; valeur des titres = VE − dette nette.</p></div>
+    <div class="vl-sec"><h3>2. Transactions comparables</h3><div class="grid3">${TA("trans.ebitda", "Multiples EV/EBITDA de transactions", I.trans.ebitda)}${TA("trans.ca", "Multiples EV/CA de transactions", I.trans.ca)}<div style="display:flex;flex-direction:column;gap:10px">${basis("trans.basis", I.trans.basis)}${F("trans.decote", "Décote (%)", I.trans.decote, "0", "number")}</div></div>${F("trans.source", "Transactions retenues (source, date)", I.trans.source, "Ex. rachat de X par Y, 2025")}</div>
+    <div class="vl-sec"><h3>3. DCF</h3><div class="vl-fcf">${I.dcf.fcf.map((x, i) => F(`dcf.fcf.${i}`, `Flux année ${i + 1}`, x, "", "number")).join("")}</div><div class="grid3">${F("dcf.wacc", "WACC (%)", I.dcf.wacc, "14", "number")}${F("dcf.g", "Croissance à l'infini (%)", I.dcf.g, "3", "number")}${F("dcf.source", "Source des flux", I.dcf.source, "Business plan 2026-2030")}</div><p class="vl-hint">VE = flux actualisés + valeur terminale (Gordon-Shapiro) ; valeur des titres = VE − dette nette.</p></div>
+    <div class="vl-sec"><h3>4. Actif net réévalué</h3><div class="grid3">${F("anr.actifs", `Actifs réévalués (${cur})`, I.anr.actifs, "", "number")}${F("anr.passifs", `Passifs réévalués (${cur})`, I.anr.passifs, "", "number")}${F("anr.note", "Principaux retraitements", I.anr.note, "Réévaluation immobilière…")}</div></div>
+    <div class="vl-sec"><h3>5. Prix du dernier tour</h3><div class="grid3">${F("tour.prix", `Prix par titre (${cur})`, I.tour.prix, "", "number")}${F("tour.titres", "Nombre de titres", I.tour.titres, p.fiche?.v?.cap_titres || "", "number", "Vide : nombre total de la fiche")}${F("tour.date", "Date du tour", I.tour.date, "", "date")}</div>
+      <label class="chk"><input type="checkbox" data-vf="tour.event" ${I.tour.event ? "checked" : ""}>Un événement significatif est survenu depuis le tour (méthode écartée)</label><p class="vl-hint">Retenu seulement si le tour a moins de 12 mois à la date de valorisation.</p></div>
+    <div class="vl-sec"><h3>Pondération des méthodes</h3><div class="vl-w">${VALO_M.map(([m, l]) => F(`w.${m}`, l, v.weights?.[m] ?? VALO_DEF_W[m], "0", "number")).join("")}</div>
+      ${TA("justif", "Justification des pondérations", v.justif, "Ex. peu de comparables cotés en Tunisie : DCF privilégié ; transactions régionales retenues à 20 %.")}</div>
+  </div><aside class="vl-res" id="vl-res"></aside></div>`;
+  const foot = `${!isNew && ed ? `<button class="btn ghost danger" id="vl-del">Supprimer</button>` : ""}<span class="spacer"></span>${!isNew && valoCanValidate() && v.status !== "validated" ? `<button class="btn" id="vl-validate" data-ro-keep="1">Valider la valorisation</button>` : ""}${!isNew && valoCanValidate() && v.status === "validated" ? `<button class="btn" id="vl-unvalidate">Repasser en brouillon</button>` : ""}<button class="btn" data-mclose="1">Annuler</button>${ed ? `<button class="btn pri" id="vl-save">${isNew ? "Créer la valorisation" : "Enregistrer"}</button>` : ""}`;
+  S._ro = isNew ? null : { editable: ed };
+  modal(`${isNew ? "Nouvelle valorisation" : "Valorisation"} · ${p.name} · ${quarterLabel(v.date)}`, inner, foot, L => {
+    const read = () => { for (const el of $$("[data-vf]", L)) { const k = el.dataset.vf, val = el.type === "checkbox" ? el.checked : el.value;
+        if (k === "date") v.date = val || v.date; else if (k === "stake") v.stake = val; else if (k === "justif") v.justif = val;
+        else if (k.startsWith("w.")) v.weights[k.slice(2)] = val;
+        else { const ps = k.split("."); if (ps[0] === "dcf" && ps[1] === "fcf") I.dcf.fcf[+ps[2]] = val; else if (ps.length === 1) I[ps[0]] = val; else I[ps[0]][ps[1]] = val; } } return v; };
+    const draw = () => { const vv = read(); const r = valoCalc(vv, p), [lo, hi] = valoRange(vv, p);
+      const sens = [-0.2, -0.1, 0, 0.1, 0.2].map(k => [k, valoCalc(vv, p, { k: 1 + k }).inma]);
+      const dcfGrid = [-0.02, -0.01, 0, 0.01, 0.02].map(dw => [dw, [-0.005, 0, 0.005].map(dg => valoDcf(vv.inputs.dcf, vv.inputs, dw, dg))]);
+      $("#vl-res", L).innerHTML = `<div class="vl-card"><div class="eyebrow">Valeur de la participation</div><div class="vl-big">${vFmt(r.inma)}</div><div class="muted" style="font-size:12px">${vFmt(r.eq)} × ${r.stake != null ? fmtN(r.stake) + " %" : "— %"}</div>
+        <div class="vl-range"><span>Basse ${vFmt(lo)}</span><span>Haute ${vFmt(hi)}</span></div><p class="vl-hint" style="margin:4px 0 0">Fourchette : multiples ∓10 %, WACC ±1 point.</p></div>
+        ${r.warn.length ? `<div class="banner warn" style="font-size:12px">${r.warn.map(h).join("<br>")}</div>` : ""}
+        <table class="t vl-mt"><thead><tr><th>Méthode</th><th class="r">Titres</th><th class="r">Poids</th></tr></thead><tbody>${VALO_M.map(([m, l]) => `<tr${!(vNum(r.W[m]) || 0) ? ' class="muted"' : ""}><td title="${h(r.m[m].ok ? r.m[m].detail || "" : r.m[m].why)}">${h(l)}${r.m[m].ok ? "" : ' <span style="color:var(--warn)" title="' + h(r.m[m].why) + '">●</span>'}</td><td class="r">${r.m[m].eq != null ? vFmt(r.m[m].eq) : "—"}</td><td class="r">${fmtN(vNum(r.W[m]) || 0)} %</td></tr>`).join("")}</tbody></table>
+        <div class="eyebrow" style="margin-top:6px">Sensibilité au multiple (valeur INMA)</div><table class="t vl-mt"><tbody>${sens.map(([k, x]) => `<tr${!k ? ' style="font-weight:700"' : ""}><td>Multiples ${k > 0 ? "+" : ""}${k * 100} %</td><td class="r">${vFmt(x)}</td></tr>`).join("")}</tbody></table>
+        <div class="eyebrow" style="margin-top:6px">Sensibilité DCF (valeur des titres)</div><table class="t vl-mt"><thead><tr><th>WACC \\ g</th>${[-0.5, 0, 0.5].map(x => `<th class="r">${x > 0 ? "+" : ""}${x} pt</th>`).join("")}</tr></thead><tbody>${dcfGrid.map(([dw, row]) => `<tr${!dw ? ' style="font-weight:700"' : ""}><td>${dw > 0 ? "+" : ""}${dw * 100} pt</td>${row.map(x => `<td class="r">${x.ok ? vFmt(x.eq) : "—"}</td>`).join("")}</tr>`).join("")}</tbody></table>
+        <p class="vl-hint">Cadre de méthode : recommandations IPEV, adaptées au contexte tunisien.</p>`; };
+    draw(); L.addEventListener("input", draw); L.addEventListener("change", draw);
+    const save = async (status, msg) => { const vv = read(); if (!vv.date) { toast("Indiquez la date de valorisation."); return; }
+      const live = fundById(fid), lp = live.positions.find(x => x.id === pid); const list = (lp.valos || []).filter(x => x.id !== vv.id);
+      if (list.some(x => quarterEnd(x.date) === quarterEnd(vv.date))) { toast(`Une valorisation existe déjà pour ${quarterLabel(vv.date)} : ouvrez-la plutôt.`); return; }
+      const r = valoCalc(vv, p); const rec = { ...vv, status: status || vv.status || "draft", updatedAt: new Date().toISOString(), updatedBy: me()?.id || null, result: { eq: r.eq, inma: r.inma, stake: r.stake } };
+      if (status === "validated") { rec.validatedBy = me()?.id || null; rec.validatedAt = new Date().toISOString(); } if (status === "draft") { delete rec.validatedBy; delete rec.validatedAt; }
+      lp.valos = [...list, rec]; L.remove(); await saveCfg(msg || "Valorisation enregistrée");
+      if (status === "validated") await log(`Valorisation ${quarterLabel(rec.date)} de « ${p.name} » validée`, { dossierId: p.dossierId || null });
+      render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); };
+    $("#vl-save", L) && ($("#vl-save", L).onclick = () => save(null));
+    $("#vl-validate", L) && ($("#vl-validate", L).onclick = () => { const r = valoCalc(read(), p); if (r.eq == null) { toast("Aucune méthode pondérée ne donne de valeur : complétez la valorisation."); return; } if (r.warn.length) { confirmBox(`Valider malgré ${r.warn.length} point(s) d'attention ? ${r.warn[0]}`, "Valider", () => save("validated", "Valorisation validée")); return; } save("validated", "Valorisation validée"); });
+    $("#vl-unvalidate", L) && ($("#vl-unvalidate", L).onclick = () => save("draft", "Valorisation repassée en brouillon"));
+    $("#vl-del", L) && ($("#vl-del", L).onclick = () => { L.remove(); confirmBox(`Supprimer la valorisation ${quarterLabel(v.date)} de « ${p.name} » ?`, "Supprimer", async () => { const live = fundById(fid), lp = live.positions.find(x => x.id === pid); lp.valos = (lp.valos || []).filter(x => x.id !== v.id); await saveCfg("Valorisation supprimée"); render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); }); });
+  }, true);
+}
+
+/* onglet « Valorisation » du fonds : valeur liquidative du portefeuille */
+function fhValo(f) {
+  if (!can("view_amounts")) return `<div class="empty"><b>Valorisation réservée</b><span>Le droit « Voir les montants » est nécessaire.</span></div>`;
+  if (ficheTplId(f) === "finance") return `<div class="empty"><b>Pas de valorisation pour ${h(f.name)}</b><span>Les financements sont suivis par leur capital restant dû, dans les échéanciers.</span></div>`;
+  const ps = livePositions(f).filter(p => p.kind !== "debt");
+  if (!ps.length) return `<div class="empty"><b>Aucune participation</b><span>Ajoutez les participations dans l'onglet Portefeuille.</span></div>`;
+  const qs = []; let q = quarterEnd(todayISO()); for (let i = 0; i < 8; i++) { qs.unshift(q); const d = new Date(q + "T12:00:00"); d.setDate(1); d.setMonth(d.getMonth() - 2); q = quarterEnd(new Date(d.getTime() - 864e5 * 2).toISOString().slice(0, 10)); }
+  const nav = qs.map(qe => ({ qe, v: ps.reduce((s, p) => { const v = lastValo(p, true, qe); return s + (v ? (valoCalc(v, p).inma || 0) : 0); }, 0), n: ps.filter(p => lastValo(p, true, qe)).length }));
+  const max = Math.max(1, ...nav.map(x => x.v));
+  let tCost = 0, tVal = 0, tPrev = 0;
+  const rows = ps.map(p => { const v = lastValo(p, true), d = lastValo(p, false); const c = v ? valoCalc(v, p) : null; const pv = v ? posValos(p).find(x => x.status === "validated" && x.date < v.date) : null; const pc = pv ? valoCalc(pv, p) : null;
+    const [lo, hi] = v ? valoRange(v, p) : [null, null]; const cost = vNum(p.amount); tCost += cost || 0; tVal += c?.inma || 0; tPrev += pc?.inma || 0;
+    const var_ = c && pc && pc.inma ? (c.inma - pc.inma) / pc.inma * 100 : null;
+    return `<tr class="click" data-pos="${f.id}|${p.id}" data-goto="valo"><td><b>${h(p.name)}</b>${d && d.status !== "validated" ? `<div class="muted" style="font-size:11px">Brouillon ${h(quarterLabel(d.date))} en cours</div>` : ""}</td><td>${v ? h(quarterLabel(v.date)) : '<span class="pl-miss tag">Aucune valorisation validée</span>'}</td><td class="r">${vFmt(cost)}</td><td class="r">${c ? vFmt(c.eq) : "—"}</td><td class="r">${c?.stake != null ? fmtN(c.stake) + " %" : "—"}</td><td class="r"><b>${c ? vFmt(c.inma) : "—"}</b></td><td class="r" style="font-size:12px">${v ? `${vFmt(lo)} – ${vFmt(hi)}` : "—"}</td><td class="r">${c && cost ? fmtN(Math.round(c.inma / cost * 100) / 100) + "x" : "—"}</td><td class="r">${var_ == null ? "—" : `<span style="color:${var_ >= 0 ? "var(--ok)" : "var(--bad)"}">${var_ >= 0 ? "+" : ""}${fmtN(Math.round(var_ * 10) / 10)} %</span>`}</td></tr>`; }).join("");
+  return `<div class="kpis"><div class="kpi"><span class="l">Valeur liquidative du portefeuille</span><span class="v">${vFmt(tVal)}</span></div><div class="kpi"><span class="l">Coût investi</span><span class="v">${vFmt(tCost || null)}</span></div><div class="kpi"><span class="l">Multiple sur coût</span><span class="v">${tCost ? fmtN(Math.round(tVal / tCost * 100) / 100) + "x" : "—"}</span></div><div class="kpi"><span class="l">Participations valorisées</span><span class="v">${ps.filter(p => lastValo(p, true)).length} / ${ps.length}</span></div></div>
+    <div class="panel"><header><h2>Valorisation par participation</h2><span class="muted" style="font-size:12px">Dernière valorisation validée · cliquez une ligne pour ouvrir la fiche</span></header><div class="body tablewrap"><table class="t"><thead><tr><th>Participation</th><th>Trimestre</th><th class="r">Coût investi</th><th class="r">Valeur des titres (100 %)</th><th class="r">% INMA</th><th class="r">Valeur INMA</th><th class="r">Fourchette</th><th class="r">Multiple</th><th class="r">Variation</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th>Total</th><th></th><th class="r">${vFmt(tCost || null)}</th><th></th><th></th><th class="r">${vFmt(tVal)}</th><th></th><th class="r">${tCost ? fmtN(Math.round(tVal / tCost * 100) / 100) + "x" : "—"}</th><th class="r">${tPrev ? `${tVal >= tPrev ? "+" : ""}${fmtN(Math.round((tVal - tPrev) / tPrev * 1000) / 10)} %` : "—"}</th></tr></tfoot></table></div></div>
+    <div class="panel"><header><h2>Historique de la valeur liquidative</h2><span class="muted" style="font-size:12px">Somme des dernières valorisations validées à chaque fin de trimestre</span></header><div class="body"><div class="vl-nav">${nav.map(x => `<div class="vl-bar" title="${h(quarterLabel(x.qe))} : ${x.n} participation(s) valorisée(s)"><span class="vl-bv">${x.v ? vFmt(x.v) : ""}</span><span class="vl-b" style="height:${Math.round(x.v / max * 140)}px"></span><span class="vl-bl">${h(quarterLabel(x.qe))}</span></div>`).join("")}</div></div></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-valo]"); if (!b) return; const fe = $("#fiche"); if (!fe) return; e.stopPropagation();
+  if (b.dataset.valo === "new") return valoModal(fe.dataset.fid, fe.dataset.pid, null);
+  if (b.dataset.valo === "open") return valoModal(fe.dataset.fid, fe.dataset.pid, b.dataset.vid);
+}, true);
+
+/* suppression d'un échéancier */
+function schDelete(id) {
+  const o = (S.deadlines || []).find(x => x.id === id); if (!o) return;
+  const ref = o.posRef && (() => { const [a, b] = o.posRef.split("|"); const f = fundById(a); const p = f?.positions?.find(x => x.id === b); return p && posNeedsSched(f) ? `${p.name} (${f.name})` : ""; })();
+  const paid = Object.values(o.done || {}).filter(x => x.status === "sent").length;
+  confirmBox(`Supprimer l'échéancier de ${schOwnerName(o)} (${schItems(o).length} échéances${paid ? `, dont ${paid} payée(s) avec leur historique` : ""}) ?${ref ? ` ${ref} n'aura plus d'échéancier : il faudra en lier un autre, c'est obligatoire.` : ""} Cette action est définitive.`, "Supprimer l'échéancier", async () => {
+    await delDoc("deadlines", o.id); await log(`Échéancier supprimé : ${schOwnerName(o)}`, { dossierId: o.dossierId || null }); toast("Échéancier supprimé"); render(); });
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-sch-del]"); if (!b) return; e.preventDefault(); e.stopPropagation(); schDelete(b.dataset.schDel); }, true);
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
