@@ -532,24 +532,30 @@ const PERMS = [
   ["workflows","Workflows, champs & statuts"],["automations","Automatisations"],["view_all","Voir tous les dossiers"],
   ["view_amounts","Voir les montants"],["dossier_create","Créer des dossiers"],["dossier_edit_all","Modifier tous les dossiers"],
   ["dossier_delete","Supprimer / archiver"],["stage_advance","Faire avancer les étapes"],["stage_approve","Valider les étapes soumises à approbation"],
-  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["meetings","Rédiger les comptes rendus de réunion"],["ai","Utiliser l'assistant IA"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"],["kpis","Créer des indicateurs personnalisés"],["compliance","Contrôle conformité (valider les documents)"]
+  ["task_create","Créer des tâches"],["task_edit_all","Modifier toutes les tâches"],["onedrive","Gérer les liens OneDrive"],["deadlines","Gérer les échéances & reportings"],["projects","Gérer les projets corporate & transverses"],["meetings","Rédiger les comptes rendus de réunion"],["ai","Utiliser l'assistant IA"],["funds","Fonds & architecture (modifier)"],["externals","Inviter des externes & gérer leurs accès"],["export","Exporter / importer les données"],["kpis","Créer des indicateurs personnalisés"],["compliance","Contrôle conformité (valider les documents)"],["guide","Gérer le Guide INMA (modèles et documents)"],["portfolio","Mettre à jour le portefeuille (participations, sans modifier les fonds)"],["meetings_view","Consulter tous les comptes rendus (sinon : seulement ceux où il a participé)"],["projects_view","Voir tous les projets (sinon : seulement ceux dont il fait partie)"]
 ];
+const PERMS_DEFAULT_ON = ["meetings_view", "projects_view"]; // un rôle qui ne les mentionne pas les conserve
 const ALL = Object.fromEntries(PERMS.map(p => [p[0], true]));
 const pset = keys => Object.fromEntries(PERMS.map(p => [p[0], keys.includes(p[0])]));
 const st = (name, roleId, sla, approval = false, checklist = []) => ({ id: uid("s"), name, roleId, sla, approval, checklist });
 
 const DEF_POS = fid => ({ f_holding: [["Groupe Institution Laghmani", ""], ["Gourmandise", ""], ["Les Écoles Idéales", ""], ["ABK Groupe", ""], ["Sindbad Group", ""], ["Polypharma", ""]].map(([n, sec], i) => ({ id: "pos_h" + i, name: n, kind: "equity", sector: sec, instrument: "", amount: "", outstanding: "", stake: "", date: "", status: "active", health: "green", boardSeat: false, lastReport: "", dossierId: "", url: "", note: "" })),
   f_finance: [["Biosphere", ""], ["DAAM", ""], ["Enda Tamweel", ""]].map(([n, sec], i) => ({ id: "pos_f" + i, name: n, kind: "debt", sector: sec, instrument: "", amount: "", outstanding: "", stake: "", date: "", status: "active", health: "green", boardSeat: false, lastReport: "", dossierId: "", url: "", note: "" })) }[fid] || []);
+// Structure Lead (structuration d'INMA Workflow) : intègre les dossiers qu'on lui ouvre, échéanciers, covenants, reporting,
+// processus et Guide INMA ; ne voit ni le pipeline, ni les autres dossiers, ni les comptes rendus et projets dont il ne fait pas partie,
+// et ne touche ni à la charte, ni aux rôles, ni aux membres, ni aux accès externes, ni à l'export des données.
+const LEAD_ROLE = () => ({ id: "r_structure_lead", name: "Structure Lead", color: "#C2410C", perms: pset(["view_amounts","dossier_create","stage_advance","task_create","onedrive","deadlines","kpis","ai","workflows","automations","guide","portfolio"]) });
 const DEFAULT_CFG = () => fixIds({
   version: 1,
   general: { appName: "INMA Workflow", tagline: "Partenaire de votre développement", brand: "#212121", accent: "#E22529", font: "Montserrat", density: "1", currency: "TND", dateFormat: "fr", weekStart: 1, home: "dashboard", logo: "", defaultRoleId: "r_guest", fiscalYearStart: "01", appUrl: "https://claude.ai/artifact/MesFgynywcYAoxqDWS6ksV",
     modules: { dashboard: true, meeting: true, funds: true, projects: true, deadlines: true, dossiers: true, tasks: true, calendar: true, team: true, onedrive: true } },
   roles: [
     { id: "r_partner", name: "Associé", color: "#E22529", perms: { ...ALL } },
-    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","kpis","onedrive","export","workflows","automations","funds","externals","deadlines","projects","meetings","ai"]) },
-    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","kpis","onedrive","export","deadlines","projects","meetings","ai"]) },
-    { id: "r_junior", name: "Analyste junior", color: "#7A5BB0", perms: pset(["view_all","task_create","onedrive","ai"]) },
-    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","kpis","onedrive","export","members","deadlines","projects","meetings","ai"]) },
+    { id: "r_associate", name: "Associate", color: "#2F6FB0", perms: pset(["view_all","view_amounts","dossier_create","dossier_edit_all","dossier_delete","stage_advance","task_create","task_edit_all","kpis","onedrive","export","workflows","automations","funds","externals","deadlines","projects","meetings","ai","guide","portfolio","meetings_view","projects_view"]) },
+    { id: "r_analyst", name: "Analyste", color: "#2F8A5B", perms: pset(["view_all","view_amounts","dossier_create","stage_advance","task_create","kpis","onedrive","export","deadlines","projects","meetings","ai","meetings_view","projects_view"]) },
+    { id: "r_junior", name: "Analyste junior", color: "#7A5BB0", perms: pset(["view_all","task_create","onedrive","ai","meetings_view","projects_view"]) },
+    { id: "r_admin", name: "Administration & Finance", color: "#8A6D3B", perms: pset(["view_all","view_amounts","task_create","kpis","onedrive","export","members","deadlines","projects","meetings","ai","guide","meetings_view","projects_view"]) },
+    LEAD_ROLE(),
     { id: "r_guest", name: "Invité externe", color: "#7B8794", perms: pset([]) }
   ],
   teams: ["Direction Générale","Investissement","Financement (dette privée)","Finance & Comptabilité","Juridique","Ressources Humaines","Informatique","Support"],
@@ -703,7 +709,7 @@ function myRole() {
   if (S.isOwner || S.mode === "local") return { id: "_owner", name: "Propriétaire", perms: { ...ALL } };
   return role(S.cfg.general.defaultRoleId) || { id: "_none", name: "Invité", perms: {} };
 }
-const can = k => { if (!S.sim && S.isOwner) return true; const r = myRole(); return !!(r && r.perms && r.perms[k]); };
+const can = k => { if (!S.sim && S.isOwner) return true; const r = myRole(); if (!r || !r.perms) return false; return !!(k in r.perms ? r.perms[k] : PERMS_DEFAULT_ON.includes(k)); };
 function canSeeDossier(d) { const mm = me(); if (isExt(mm)) return !!extGrant(d); if (can("view_all")) return true; const m = me(); return !!m && (d.ownerId === m.id || (d.members || []).includes(m.id)); }
 function canEditDossier(d) { if (can("dossier_edit_all")) return true; const m = me(); return !!m && (d.ownerId === m.id || (d.coOwners || []).includes(m.id) || (d.members || []).includes(m.id)); }
 function canEditTask(t) { if (can("task_edit_all")) return true; const m = me(); if (!m) return false; if ((t.assignees || []).includes(m.id) || t.createdBy === m.id) return true; const d = dossierById(t.dossierId); return !!d && d.ownerId === m.id; }
@@ -773,8 +779,16 @@ function applyPrefs() {
 }
 function migrateCfg(raw) {
   if (S._migrated || !raw) return; S._migrated = true; let ch = !raw.funds || !raw.projectCategories || !raw.meetingTypes; const D = DEFAULT_CFG();
-  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects", "meetings", "ai", "kpis", "compliance"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : k === "ai" ? r.id !== "r_guest" : !!(r.perms.settings && r.perms.roles); ch = true; } }
+  for (const r of S.cfg.roles) { const dr = D.roles.find(x => x.id === r.id); for (const k of ["funds", "externals", "deadlines", "projects", "meetings", "ai", "kpis", "compliance", "guide", "portfolio"]) if (r.perms[k] === undefined) { r.perms[k] = dr ? !!dr.perms[k] : k === "ai" ? r.id !== "r_guest" : !!(r.perms.settings && r.perms.roles); ch = true; } }
   for (const f of S.cfg.funds || []) if (!Array.isArray(f.positions)) { f.positions = DEF_POS(f.id); ch = true; }
+  for (const r of S.cfg.roles) for (const k of PERMS_DEFAULT_ON) if (r.perms[k] === undefined && (S.isOwner || can("roles"))) { r.perms[k] = r.id !== "r_guest"; ch = true; }
+  const seeds = S.cfg.general.seeds = S.cfg.general.seeds || [];
+  if (!seeds.includes("structlead") && (S.isOwner || can("roles"))) { // rôle et profil Structure Lead, ajoutés une seule fois
+    const old = S.cfg.roles.find(r => r.id === "r_intern"); // ancienne version (« Stagiaire — Structuration »)
+    if (old) { old.id = "r_structure_lead"; old.name = "Structure Lead"; for (const m of S.cfg.members) if (m.roleId === "r_intern") { m.roleId = "r_structure_lead"; if (m.title === "Stagiaire — Structuration INMA Workflow") m.title = "Structure Lead — INMA Workflow"; } }
+    else if (!S.cfg.roles.some(r => r.id === "r_structure_lead")) S.cfg.roles.splice(Math.max(0, S.cfg.roles.findIndex(r => r.id === "r_guest")), 0, LEAD_ROLE());
+    if (!S.cfg.members.some(m => m.roleId === "r_structure_lead")) S.cfg.members.push({ id: "m_structure_lead", name: "Structure Lead (à renommer)", title: "Structure Lead — INMA Workflow", email: "", roleId: "r_structure_lead", team: "Investissement", userId: null, color: "#C2410C", code: genCode() });
+    seeds.push("structlead"); ch = true; }
   if (!window.INMA) for (const m of S.cfg.members) if (!m.code) { m.code = genCode(); ch = true; }
   if (ch && (S.isOwner || can("settings") || can("members"))) saveCfg("Espace mis à jour : fonds, accès externes et codes d'accès");
 }
@@ -1134,7 +1148,7 @@ function sGeneral() {
 }
 function sRoles() {
   return `<div class="panel"><header><h2>Rôles & permissions</h2><span class="spacer"></span><button class="btn sm" data-act="role-add">${ic("plus")}Ajouter un rôle</button></header><div class="body tablewrap">
-    <table class="t permgrid"><thead><tr><th>Permission</th>${S.cfg.roles.map(r => `<th style="min-width:120px"><input type="text" data-role-name="${r.id}" value="${h(r.name)}" style="font-weight:700"><div class="row" style="margin-top:4px;justify-content:center"><input type="color" data-role-color="${r.id}" value="${h(r.color)}">${S.cfg.members.some(m => m.roleId === r.id) || S.cfg.general.defaultRoleId === r.id ? "" : `<button class="btn sm ghost danger" data-role-del="${r.id}" aria-label="Supprimer">${ic("trash")}</button>`}</div></th>`).join("")}</tr></thead>
+    <table class="t permgrid"><thead><tr><th>Permission</th>${S.cfg.roles.map(r => `<th style="min-width:120px"><input type="text" data-role-name="${r.id}" value="${h(r.name)}" style="font-weight:700"><div class="row" style="margin-top:4px;justify-content:center"><input type="color" data-role-color="${r.id}" value="${h(r.color)}"><button class="btn sm ghost" data-act="role-dup" data-rid="${r.id}" title="Dupliquer ce rôle" aria-label="Dupliquer ce rôle">${ic("copy")}</button>${S.cfg.members.some(m => m.roleId === r.id) || S.cfg.general.defaultRoleId === r.id ? "" : `<button class="btn sm ghost danger" data-role-del="${r.id}" aria-label="Supprimer">${ic("trash")}</button>`}</div></th>`).join("")}</tr></thead>
     <tbody>${PERMS.map(p => `<tr><td>${h(p[1])}</td>${S.cfg.roles.map(r => `<td><input type="checkbox" class="cb" data-perm="${r.id}|${p[0]}" ${r.perms[p[0]] ? "checked" : ""}></td>`).join("")}</tr>`).join("")}</tbody></table></div></div>
     <div class="panel"><header><h2>Tester un rôle</h2></header><div class="body row"><span class="muted">Voir l'outil exactement comme le verrait :</span><select id="sim-role" style="width:auto">${S.cfg.roles.map(r => `<option value="${r.id}">${h(r.name)}</option>`).join("")}</select><select id="sim-member" style="width:auto"><option value="">(sans membre)</option>${S.cfg.members.map(m => `<option value="${m.id}">${h(m.name)}</option>`).join("")}</select><button class="btn" data-act="sim-on">Lancer la simulation</button></div></div>
     <p class="muted" style="font-size:12px;margin:0">Les droits s'appliquent dans l'interface. Les personnes doivent aussi avoir accès à la page publiée (partage claude.ai) pour l'ouvrir.</p>`;
@@ -2186,7 +2200,7 @@ const HEALTH = { green: ["Bonne santé", "var(--ok)"], amber: ["À surveiller", 
 const hdot = (hv, title) => `<span class="hdot" style="background:${(HEALTH[hv] || HEALTH.green)[1]}" title="${h(title || (HEALTH[hv] || HEALTH.green)[0])}"></span>`;
 const livePositions = f => (f.positions || []).filter(p => p.status !== "exited" && p.status !== "repaid");
 function positionsPanel(f) {
-  const ef = can("funds"), list = f.positions || [];
+  const ef = can("funds") || can("portfolio"), list = f.positions || [];
   const act = livePositions(f); const eq = act.filter(p => p.kind !== "debt"), debt = act.filter(p => p.kind === "debt");
   const totEq = eq.reduce((s, p) => s + (+p.amount || 0), 0), totDebt = debt.reduce((s, p) => s + (+(p.outstanding || p.amount) || 0), 0);
   return `<div class="panel"><header><h2>Participations et financements actuels · ${h(f.name)}</h2><span class="muted" style="font-size:12px">${act.length} en portefeuille${eq.length ? ` · investi ${money(totEq)}` : ""}${debt.length ? ` · encours ${money(totDebt)}` : ""}</span><span class="spacer"></span>${cpOn() && S.view === "funds" ? `<button class="btn sm cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${ef ? `<button class="btn sm pri" data-pos-new="${f.id}">${ic("plus")}Ajouter</button>` : ""}</header>
@@ -2195,7 +2209,7 @@ function positionsPanel(f) {
   </tbody></table>` : `<p class="muted" style="margin:0">Aucune participation ni aucun financement enregistré.${ef ? " Cliquez « Ajouter »." : ""}</p>`}</div></div>`;
 }
 function posModal(fid, pid) {
-  const f = fundById(fid); if (!f) return; const ef = can("funds"), dis = ef ? "" : "disabled";
+  const f = fundById(fid); if (!f) return; const ef = can("funds") || can("portfolio"), dis = ef ? "" : "disabled";
   const isNew = !pid; const p = isNew ? { id: uid("pos"), name: "", kind: /finance/i.test(f.name) || f.type === "Dette privée" ? "debt" : "equity", sector: "", instrument: "", amount: "", outstanding: "", stake: "", date: "", status: "active", health: "green", boardSeat: false, lastReport: "", dossierId: "", url: "", note: "" } : clone((f.positions || []).find(x => x.id === pid) || {});
   const inner = `<div class="grid2"><label class="f"><span>Société</span><input type="text" id="ps-name" value="${h(p.name)}" ${dis}></label>
       <label class="f"><span>Nature</span><select id="ps-kind" ${dis}><option value="equity" ${p.kind !== "debt" ? "selected" : ""}>Participation (fonds propres / quasi-fonds propres)</option><option value="debt" ${p.kind === "debt" ? "selected" : ""}>Financement (dette)</option></select></label></div>
@@ -2232,7 +2246,7 @@ function posModal(fid, pid) {
 /* ---------- projets corporate & transverses ---------- */
 const PRJ_STATUS = [["todo", "Pas démarré", "#7B8794"], ["doing", "En cours", "#2F6FB0"], ["paused", "En pause", "#B7791F"], ["done", "Terminé", "#2F8A5B"]];
 const prjStatus = id => PRJ_STATUS.find(s => s[0] === id) || PRJ_STATUS[0];
-const visProjects = () => isExt(me()) ? [] : (S.projects || []);
+const visProjects = () => isExt(me()) ? [] : (S.projects || []).filter(p => can("projects_view") || can("projects") || (!!me() && (p.ownerId === me().id || (p.members || []).includes(me().id))));
 const scopeName = s => s === "inma" ? (S.cfg.fundRoot?.name || "INMA Capital") : (fundById(s)?.name || "—");
 function prjProgress(p) { const ms = p.milestones || []; return ms.length ? Math.round(ms.filter(m => m.done).length / ms.length * 100) : (+p.progress || 0); }
 const canEditProject = p => can("projects") || (!!me() && (p.ownerId === me().id || (p.members || []).includes(me().id)));
@@ -2462,6 +2476,7 @@ function canSeeMeeting(m) {
   if (!m) return false; if (!S.sim && S.isOwner) return true;
   const u = me(); if (!u || isExt(u)) return false;
   if (m.createdBy === u.id || m.secretaryId === u.id || (m.participants || []).includes(u.id)) return true;
+  if (!can("meetings_view")) return false;
   if (!m.visibility || m.visibility === "all") return true;
   if (m.visibility === "roles") return (m.roles || []).includes(u.roleId);
   return false;
@@ -3169,7 +3184,7 @@ function aiPlanOne(a) {
       if (a.add_milestone) { up.milestones = [...(up.milestones || []), { text: String(a.add_milestone), done: false, due: "" }]; ch.push("jalon ajouté"); }
       if (!ch.length) return N(`Modifier « ${p.title} »`, "aucune modification précisée");
       return P(`Projet « ${p.title} » : ${ch.join(", ")}`, async () => { up.updatedAt = new Date().toISOString(); await putDoc("projects", up); await log(`Projet mis à jour : « ${up.title} »`); return "projet mis à jour"; }); }
-    if (T === "upsert_position") { const f = aiFund(a.fund); const label = `${f ? f.name : a.fund} · ${a.company}`; if (!f) return N(label, "fonds introuvable"); if (!can("funds")) return N(label, "votre rôle ne permet pas de modifier le portefeuille"); if (!a.company) return N(label, "société manquante");
+    if (T === "upsert_position") { const f = aiFund(a.fund); const label = `${f ? f.name : a.fund} · ${a.company}`; if (!f) return N(label, "fonds introuvable"); if (!can("funds") && !can("portfolio")) return N(label, "votre rôle ne permet pas de modifier le portefeuille"); if (!a.company) return N(label, "société manquante");
       const ex = aiFind(f.positions || [], a.company, ["name"]); const ch = Object.entries({ amount: "montant", outstanding: "encours", status: "statut", health: "santé", sector: "secteur", instrument: "instrument", date: "date", last_report: "dernier reporting", note: "commentaire" }).filter(([k]) => a[k] != null && a[k] !== "").map(([, v]) => v);
       if ((a.amount != null || a.outstanding != null) && !can("view_amounts")) return N(label, "votre rôle ne gère pas les montants");
       return P(`${ex ? "Mettre à jour" : "Ajouter"} ${a.company} dans ${f.name}${ch.length ? " : " + ch.join(", ") : ""}`, async () => { const live = fundById(f.id); const p = ex ? live.positions.find(x => x.id === ex.id) : { id: uid("pos"), name: String(a.company), kind: a.kind === "debt" ? "debt" : "equity", sector: "", instrument: "", amount: "", outstanding: "", stake: "", date: "", status: "active", health: "green", boardSeat: false, lastReport: "", dossierId: "", url: "", note: "" };
@@ -4681,7 +4696,7 @@ const gdType = name => { const e = (/\.([a-z0-9]+)$/i.exec(name || "")?.[1] || "
 const gdBase = n => String(n || "").replace(/\.[a-z0-9]{2,5}$/i, "");
 const gdIsTpl = x => /\.(dotx?|xltx?|potx?)$/i.test(x.name || "") || [...(x.path || []), x.cat || ""].some(p => /mod[eè]le|template|canevas|trame/i.test(p));
 function gdCfg() { const g = S.cfg.guide || {}; return { intro: g.intro ?? "Retrouvez ici les modèles, procédures, chartes et documents de référence d'INMA Capital. Utilisez toujours la dernière version publiée ici plutôt qu'une copie locale.", roots: g.roots || [], items: g.items || [], pins: g.pins || [], depth: g.depth || 3 }; }
-const gdCanEdit = () => can("settings");
+const gdCanEdit = () => can("guide") || can("settings");
 const GD_CACHE_KEY = "inma-guide-cache";
 S.gdCache = S.gdCache || store.get(GD_CACHE_KEY, {}) || {};
 const gdLive = () => !!(window.INMA?.graph?.available?.() && window.INMA.graph.listTree);
@@ -4865,6 +4880,7 @@ document.addEventListener("click", async e => {
   if (A === "od-save") { const d = dossierById(S.openDossier); const u = $("#od-url").value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; } d.oneDriveUrl = u; d.subfolders = $$("[data-subf]").map(x => ({ name: x.dataset.subf, url: x.value.trim() })).filter(x => isURL(x.url)); await putDoc("dossiers", d); await log(`${d.code} : liens OneDrive mis à jour`, { dossierId: d.id }); toast("Liens OneDrive enregistrés"); renderDrawer(); render(); odFillNames(d, "dossiers", dossierUrls(d)); }
   if (A === "doc-add") { const d = dossierById(S.openDossier); const u = $("#doc-url").value.trim(); if (!isURL(u)) { toast("Collez un lien https:// valide."); return; } const nm = $("#doc-name").value.trim() || await odResolve(u) || odNameFromUrl(u) || "Document"; d.docs = [...(d.docs || []), { name: nm, url: u, folder: $("#doc-folder").value, by: me()?.id || null, at: todayISO() }]; await putDoc("dossiers", d); await log(`${d.code} : document ajouté`, { dossierId: d.id }); renderDrawer(); }
   if (A === "cols") { modal("Colonnes de la liste", `<div class="grid2">${Object.entries(COLS).map(([k, v]) => `<label class="chk"><input type="checkbox" data-colk="${k}" ${S.ui.cols.includes(k) ? "checked" : ""}>${v}</label>`).join("")}</div>`, `<button class="btn pri" id="cols-ok">Appliquer</button>`, L => $("#cols-ok", L).onclick = () => { S.ui.cols = $$("[data-colk]", L).filter(x => x.checked).map(x => x.dataset.colk); saveUI(); L.remove(); render(); }); }
+  if (A === "role-dup") { const r0 = S.cfg.roles.find(r => r.id === ds.rid); if (!r0) return; const i = S.cfg.roles.indexOf(r0); S.cfg.roles.splice(i + 1, 0, { ...clone(r0), id: uid("r"), name: r0.name + " (copie)" }); saveCfg("Rôle dupliqué : renommez-le et ajustez ses droits"); render(); return; }
   if (A === "role-add") { S.cfg.roles.push({ id: uid("r"), name: "Nouveau rôle", color: "#4C6A88", perms: pset(["view_all","task_create"]) }); saveCfg("Rôle ajouté"); render(); }
   if (A === "member-add") { S.cfg.members.push({ id: uid("m"), name: "Nouveau membre", title: "", email: "", roleId: S.cfg.general.defaultRoleId, team: S.cfg.teams[0], userId: null, color: "#4C6A88" }); saveCfg("Membre ajouté"); render(); }
   if (A === "wf-add") { const w = { id: uid("w"), name: "Nouveau workflow", prefix: "WF", color: "#4C6A88", vehicle: vehicles()[0], autoTasks: true, stages: [st("À démarrer", S.cfg.roles[0].id, 7), st("En cours", S.cfg.roles[0].id, 14), st("Validation", S.cfg.roles[0].id, 3, true), st("Terminé", S.cfg.roles[0].id, 0)], folders: ["01_Documents"] }; S.cfg.workflows.push(w); S.ui.wfEdit = w.id; saveCfg("Workflow créé"); render(); }
