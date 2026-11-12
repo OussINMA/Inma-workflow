@@ -538,6 +538,12 @@ a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoratio
 .vl-b{width:38px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
 .vl-bv{font-size:10.5px;font-family:var(--f-mono)}.vl-bl{font-size:11px;color:var(--muted)}
 @media (max-width:900px){.vl-wrap{grid-template-columns:1fr}.vl-res{position:static}.vl-fcf,.vl-w{grid-template-columns:1fr 1fr}}
+
+.vx-bar,.vx-file{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px dashed var(--line);border-radius:var(--r);padding:8px 12px;background:var(--surface-2)}
+.vx-bar>svg,.vx-file>svg{width:18px;height:18px;color:#217346;flex:none}
+.vx-bar .grow,.vx-file .grow{flex:1;min-width:200px}
+.vx-src{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);white-space:nowrap}
+details.vl-sec>summary{cursor:pointer}
 </style>
 
 <div class="app" id="app">
@@ -5250,7 +5256,22 @@ function valoDcf(x, I, dw = 0, dg = 0) {
   const pv = fcf.reduce((s, f, i) => s + f / Math.pow(1 + w, i + 1), 0); const n = fcf.length; const tv = fcf[n - 1] * (1 + g) / (w - g) / Math.pow(1 + w, n);
   return { ok: true, ve: pv + tv, eq: pv + tv - dn, detail: `Flux actualisés ${fmtN(Math.round(pv))} + valeur terminale ${fmtN(Math.round(tv))} (${Math.round(tv / (pv + tv) * 100)} % de la VE)` };
 }
+function vxCalc(v, p, opt) {
+  const x = v.excel || {}, out = {}; const dn = x.dn ?? 0;
+  const base = v.base === "sop" && x.sop ? { ve: x.sop.ve, eq: x.sop.eqg ?? x.sop.eq, l: "somme des parties" } : { ve: x.ve, eq: x.eq, l: "DCF consolidé" };
+  let eqD = base.eq; if (opt.scen && (x.scenarios || []).length) { const vals = x.scenarios.map(s => s.eq); eqD = opt.scen === "min" ? Math.min(...vals) : Math.max(...vals); }
+  out.dcf = eqD != null ? { ok: true, ve: base.ve, eq: eqD, detail: `${base.l} lu dans ${x.file?.name || "le classeur"}` } : { ok: false, why: "Valeur absente du fichier" };
+  const k = opt.k || 1; const mult = (m, l) => m && x.ebitda ? { ok: true, ve: x.ebitda * m * k, eq: x.ebitda * m * k - dn, detail: `EBITDA implicite × ${l} médian ${fmtN(Math.round(m * 100) / 100)}x` } : { ok: false, why: "Multiple ou EBITDA absent du fichier" };
+  out.comps = mult(x.comps?.evEbitda, "EV/EBITDA boursier"); out.trans = mult(x.trans?.evEbitda, "EV/EBITDA de transactions");
+  out.anr = { ok: false, why: "Non utilisée avec le fichier" }; out.tour = { ok: false, why: "Non utilisée avec le fichier" };
+  const W = { dcf: 100, comps: 0, trans: 0, anr: 0, tour: 0, ...(v.weights || {}) }; let sw = 0, sv = 0; const warn = [];
+  for (const m of ["dcf", "comps", "trans"]) { const w = vNum(W[m]) || 0; if (!w) continue; if (!out[m].ok) { warn.push(`${m === "dcf" ? "DCF" : m === "comps" ? "Comparables" : "Transactions"} pondéré à ${w} % mais non disponible`); continue; } sw += w; sv += w * out[m].eq; }
+  const tot = ["dcf", "comps", "trans"].reduce((s, m) => s + (vNum(W[m]) || 0), 0); if (Math.abs(tot - 100) > 0.01) warn.unshift(`La somme des pondérations fait ${fmtN(tot)} % au lieu de 100 %`);
+  const eq = sw ? sv / sw : null; const stake = vNum(v.stake) ?? (x.stakeFile != null ? x.stakeFile : vNum(valoStakeDefault(p || {})));
+  return { m: out, W, eq, stake, inma: eq != null && stake != null ? eq * stake / 100 : null, warn };
+}
 function valoCalc(v, p, opt = {}) {
+  if (v.source === "excel") return vxCalc(v, p, opt);
   const I = v.inputs || {}; const k = opt.k || 1; const out = {};
   out.comps = valoMultMethod(I.comps || {}, I, k); out.trans = valoMultMethod(I.trans || {}, I, k);
   out.dcf = valoDcf(I.dcf || {}, I, opt.dw || 0);
@@ -5265,7 +5286,7 @@ function valoCalc(v, p, opt = {}) {
   const eq = sw ? sv / sw : null; const stake = vNum(v.stake) ?? vNum(valoStakeDefault(p || {}));
   return { m: out, W, eq, stake, inma: eq != null && stake != null ? eq * stake / 100 : null, warn };
 }
-function valoRange(v, p) { const lo = valoCalc(v, p, { k: 0.9, dw: 0.01 }), hi = valoCalc(v, p, { k: 1.1, dw: -0.01 }); return [lo.inma, hi.inma]; }
+function valoRange(v, p) { const lo = valoCalc(v, p, { k: 0.9, dw: 0.01, scen: "min" }), hi = valoCalc(v, p, { k: 1.1, dw: -0.01, scen: "max" }); return [lo.inma, hi.inma]; }
 const vFmt = x => x == null || !isFinite(x) ? "—" : money(Math.round(x));
 const posValos = p => [...(p.valos || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
 const lastValo = (p, onlyValid, until) => posValos(p).find(v => (!onlyValid || v.status === "validated") && (!until || v.date <= until));
@@ -5274,15 +5295,16 @@ const lastValo = (p, onlyValid, until) => posValos(p).find(v => (!onlyValid || v
 function ficheValoSection(f, p) {
   if (!can("view_amounts")) return `<section class="panel fc-sec" id="fc-valo"><header><h2>Valorisation</h2></header><div class="body"><p class="muted" style="margin:0">Les valorisations sont réservées aux rôles qui ont le droit « Voir les montants ».</p></div></section>`;
   const vs = posValos(p), cur = vs[0], ed = valoCanEdit();
-  const add = ed ? `<button class="btn sm pri" data-valo="new">${ic("plus")}Nouvelle valorisation</button>` : "";
-  if (!cur) return `<section class="panel fc-sec" id="fc-valo"><header><h2>Valorisation</h2><span class="spacer"></span>${add}</header><div class="body"><p class="muted" style="margin:0">Aucune valorisation. Une valorisation par trimestre alimente la valeur liquidative du portefeuille (onglet Valorisation du fonds).</p></div></section>`;
+  const add = ed ? `<button class="btn sm${p.valoFile?.url ? "" : " pri"}" data-valo="new" title="Saisie manuelle, méthode par méthode">${ic("plus")}${p.valoFile?.url ? "Saisie manuelle" : "Nouvelle valorisation"}</button>` : "";
+  if (!cur) return `<section class="panel fc-sec" id="fc-valo"><header><h2>Valorisation</h2><span class="spacer"></span>${add}</header><div class="body">${vxBar(f, p)}<p class="muted" style="margin:0">Aucune valorisation. Une valorisation par trimestre alimente la valeur liquidative du portefeuille (onglet Valorisation du fonds).</p></div></section>`;
   const r = valoCalc(cur, p), [lo, hi] = valoRange(cur, p);
   const rows = VALO_M.map(([m, l]) => { const x = r.m[m], w = vNum(r.W[m]) || 0; return `<tr${!w ? ' class="muted"' : ""}><td>${h(l)}${x.ok ? `<div class="muted" style="font-size:11.5px">${h(x.detail || "")}</div>` : `<div class="muted" style="font-size:11.5px">${h(x.why)}</div>`}</td><td class="r">${x.ok && x.ve != null ? vFmt(x.ve) : "—"}</td><td class="r">${x.ok || x.eq != null ? vFmt(x.eq) : "—"}</td><td class="r">${w ? fmtN(w) + " %" : "—"}</td></tr>`; }).join("");
   const hist = vs.map((v, i) => { const c = valoCalc(v, p), prev = vs[i + 1] ? valoCalc(vs[i + 1], p) : null; const d = prev && prev.inma ? (c.inma - prev.inma) / prev.inma * 100 : null;
     return `<tr class="click" data-valo="open" data-vid="${v.id}"><td>${h(quarterLabel(v.date))} <span class="muted">· ${h(fdate(v.date))}</span></td><td>${v.status === "validated" ? chip("Validée", "var(--ok)") : chip("Brouillon", "#7B8794")}</td><td class="r">${vFmt(c.eq)}</td><td class="r">${c.stake != null ? fmtN(c.stake) + " %" : "—"}</td><td class="r"><b>${vFmt(c.inma)}</b></td><td class="r">${d == null ? "—" : `<span style="color:${d >= 0 ? "var(--ok)" : "var(--bad)"}">${d >= 0 ? "+" : ""}${fmtN(Math.round(d * 10) / 10)} %</span>`}</td></tr>`; }).join("");
   const cost = vNum(p.amount); const moic = cost && r.inma ? r.inma / cost : null;
   return `<section class="panel fc-sec" id="fc-valo"><header><h2>Valorisation</h2>${cur.status === "validated" ? chip("Validée", "var(--ok)") : chip("Brouillon", "#7B8794")}<span class="muted" style="font-size:12px">${h(quarterLabel(cur.date))} · au ${h(fdate(cur.date))}</span><span class="spacer"></span><button class="btn sm" data-valo="open" data-vid="${cur.id}">Détail</button>${add}</header>
-    <div class="body" style="display:flex;flex-direction:column;gap:12px">
+    <div class="body" style="display:flex;flex-direction:column;gap:12px">${vxBar(f, p)}
+      ${cur.source === "excel" ? `<div class="muted" style="font-size:12px">Lu dans <b>${h(cur.excel?.file?.name || "le classeur")}</b> le ${h(new Date(cur.excel?.readAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}${cur.excel?.wacc != null ? ` · WACC ${vxPct(cur.excel.wacc)}` : ""}${cur.excel?.tri != null ? ` · TRI INMA ${vxPct(cur.excel.tri)}` : ""}${cur.excel?.evEbitda ? ` · VE/EBITDA ${fmtN(Math.round(cur.excel.evEbitda * 100) / 100)}x` : ""}</div>` : ""}
       <div class="kpis vl-kpis"><div class="kpi"><span class="l">Valeur des titres (100 %)</span><span class="v">${vFmt(r.eq)}</span></div><div class="kpi"><span class="l">Part détenue par INMA</span><span class="v">${r.stake != null ? fmtN(r.stake) + " %" : "—"}</span></div>
         <div class="kpi"><span class="l">Valeur de la participation</span><span class="v" style="color:var(--accent)">${vFmt(r.inma)}</span></div><div class="kpi"><span class="l">Fourchette basse / haute</span><span class="v" style="font-size:15px">${vFmt(lo)}<br>${vFmt(hi)}</span></div>
         ${moic ? `<div class="kpi"><span class="l">Multiple sur coût investi</span><span class="v">${fmtN(Math.round(moic * 100) / 100)}x</span></div>` : ""}</div>
@@ -5296,6 +5318,7 @@ function ficheValoSection(f, p) {
 /* fenêtre d'une valorisation : lecture, puis « Modifier » */
 function valoModal(fid, pid, vid) {
   const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  if (vid && (p.valos || []).find(x => x.id === vid)?.source === "excel") return vxModal(fid, pid, vid);
   const isNew = !vid; const prev = posValos(p)[0];
   const v = isNew ? { id: uid("val"), date: quarterEnd(todayISO()), status: "draft", inputs: clone(prev?.inputs || { ca: "", ebitda: "", dn: "", comps: { basis: "avg", decote: 20 }, trans: { basis: "avg", decote: 0 }, dcf: { fcf: ["", "", "", "", ""] }, anr: {}, tour: {} }), weights: { ...(prev?.weights || VALO_DEF_W) }, justif: prev?.justif || "", stake: prev?.stake ?? valoStakeDefault(p), by: me()?.id || null }
     : clone((p.valos || []).find(x => x.id === vid) || {}); if (!v.id) return;
@@ -5384,6 +5407,178 @@ function schDelete(id) {
     await delDoc("deadlines", o.id); await log(`Échéancier supprimé : ${schOwnerName(o)}`, { dossierId: o.dossierId || null }); toast("Échéancier supprimé"); render(); });
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-sch-del]"); if (!b) return; e.preventDefault(); e.stopPropagation(); schDelete(b.dataset.schDel); }, true);
+
+/* lecture d'un classeur de valorisation (format BP INMA : feuille « Récap Valo », scénarios, comparables, transactions) */
+function vxParse(XL, buf, refDate) {
+  const wb = XL.read(buf, { type: "array", cellDates: true });
+  const names = wb.SheetNames, src = {};
+  const grid = n => { const ws = wb.Sheets[n]; if (!ws || !ws["!ref"]) return { rows: [], ws }; return { rows: XL.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: true }), ws, r0: XL.utils.decode_range(ws["!ref"]).s }; };
+  const addr = (g, r, c) => XL.utils.encode_cell({ r: r + (g.r0?.r || 0), c: c + (g.r0?.c || 0) });
+  const isNum = v => typeof v === "number" && isFinite(v);
+  const txt = v => typeof v === "string" ? v.replace(/\s+/g, " ").trim() : "";
+  // valeur numérique à droite d'un libellé
+  function findLV(g, re, opt = {}) {
+    for (let r = opt.from || 0; r < g.rows.length; r++) { const row = g.rows[r] || [];
+      for (let c = 0; c < row.length; c++) if (re.test(txt(row[c]))) { for (let k = c + 1; k < row.length; k++) if (isNum(row[k]) && (!opt.ok || opt.ok(row[k]))) return { v: row[k], at: addr(g, r, k), r }; } }
+    return null;
+  }
+  const findSheet = re => names.find(n => re.test(n));
+  const out = { sheets: names.length, src };
+  // unités
+  const unitOf = g => { const all = g.rows.slice(0, 6).flat().map(txt).join(" ").toLowerCase(); return /million/.test(all) ? 1e6 : /ktnd|milliers|k tnd/.test(all) ? 1e3 : 1; };
+  // 1. récapitulatif
+  const rn = findSheet(/r[ée]cap.*valo/i) || findSheet(/synth[eè]se.*valo/i);
+  if (rn) { const g = grid(rn); const U = unitOf(g); out.recap = rn; out.unit = U;
+    const start = g.rows.findIndex(row => (row || []).some(c => /consolid/i.test(txt(c))));
+    const from = start >= 0 ? start : 0;
+    const take = (key, re, mult = U) => { const x = findLV(g, re, { from }); if (x) { out[key] = x.v * mult; src[key] = `${rn}!${x.at}`; } };
+    take("ve", /^valeur d.entreprise$/i); take("dn", /^dette nette/i); take("eq", /^valeur des fonds propres$/i);
+    take("evEbitda", /^ve ?\/ ?ebitda/i, 1); take("wacc", /^wacc/i, 1); take("tri", /^tri\b/i, 1);
+    // tableau par société et somme des parties
+    const hr = g.rows.findIndex(row => (row || []).some(c => /^soci[ée]t[ée]$/i.test(txt(c))) && (row || []).some(c => /valeur d.entreprise/i.test(txt(c))));
+    if (hr >= 0) { const H = g.rows[hr].map(txt); const col = re => H.findIndex(x => re.test(x)); const unitH = h => /ktnd/i.test(h) ? 1e3 : U;
+      const C = { name: col(/^soci[ée]t[ée]$/i), metier: col(/m[ée]tier/i), pct: col(/d[ée]tention/i), ca: col(/^ca\b/i), ebitda: col(/^ebitda/i), ve: col(/valeur d.entreprise/i), dn: col(/dette nette/i), eq: col(/fonds propres.*100/i), eqg: col(/part du groupe/i), mult: col(/ve ?\/ ?ebitda/i) };
+      out.subs = [];
+      for (let r = hr + 1; r < g.rows.length; r++) { const row = g.rows[r] || []; const nm = txt(row[C.name]); if (!nm) { if (out.subs.length) break; continue; }
+        const val = (k, m = U) => C[k] >= 0 && isNum(row[C[k]]) ? row[C[k]] * m : null;
+        const rec = { name: nm, metier: C.metier >= 0 ? txt(row[C.metier]) : "", pct: val("pct", 1), ca: val("ca", unitH(H[C.ca] || "")), ebitda: val("ebitda", unitH(H[C.ebitda] || "")), ve: val("ve"), dn: val("dn"), eq: val("eq"), eqg: val("eqg"), mult: val("mult", 1) };
+        if (/somme des parties|total/i.test(nm)) { out.sop = rec; src.sop = `${rn}!${addr(g, r, C.name)}`; break; } out.subs.push(rec); } }
+  }
+  // 2. scénarios de sensibilité
+  out.scenarios = [];
+  for (const n of names.filter(n => /sc[ée]nario/i.test(n))) { const g = grid(n); const U = out.unit || unitOf(g);
+    const head = g.rows.slice(0, 4).flat().map(txt).join(" "); const nm = /«\s*([^»]+?)\s*»/.exec(head)?.[1] || n.replace(/^.*sc[ée]nario\s*/i, "Scénario ");
+    const x = findLV(g, /^(equity value|valeur des fonds propres)$/i); if (x) out.scenarios.push({ name: nm, sheet: n, eq: x.v * U, at: `${n}!${x.at}` }); }
+  // 3. comparables boursiers (médiane EV/EBITDA et EV/CA de l'année de valorisation)
+  const cn = findSheet(/comparable/i);
+  if (cn) { const g = grid(cn); const yr = String(new Date((refDate || new Date().toISOString().slice(0, 10)) + "T12:00:00").getFullYear());
+    const mr = g.rows.findIndex(row => (row || []).some(c => /^m[ée]dian/i.test(txt(c))));
+    const hr = g.rows.findIndex(row => (row || []).some(c => /ev ?\/ ?ebitda/i.test(txt(c))));
+    if (mr >= 0 && hr >= 0) { const H = g.rows[hr].map(txt), sub = (g.rows[hr + 1] || []).map(txt);
+      const pick = re => { const c0 = H.findIndex(x => re.test(x)); if (c0 < 0) return null; let c = c0; for (let k = c0; k < c0 + 4 && k < H.length; k++) { if (k > c0 && H[k]) break; if (sub[k].includes(yr)) { c = k; break; } } const v = g.rows[mr][c]; return isNum(v) ? { v, at: `${cn}!${addr(g, mr, c)}`, yr: sub[c] } : null; };
+      const e = pick(/ev ?\/ ?ebitda/i), s = pick(/ev ?\/ ?(sales|ca)/i); out.comps = { evEbitda: e?.v ?? null, evSales: s?.v ?? null, year: e?.yr || "" }; if (e) src.comps = e.at; } }
+  // 4. transactions comparables
+  const tn = findSheet(/transaction/i);
+  if (tn) { const g = grid(tn); const e = findLV(g, /m[ée]dian.*ev ?\/ ?ebitda/i), s = findLV(g, /m[ée]dian.*ev ?\/ ?(sales|ca)/i); out.trans = { evEbitda: e?.v ?? null, evSales: s?.v ?? null }; if (e) src.trans = `${tn}!${e.at}`; }
+  // 5. part détenue par INMA
+  for (const n of names.filter(n => !/sc[ée]nario/i.test(n))) { const g = grid(n); const x = findLV(g, /(inma stake|% ?(de )?d[ée]tention inma|part (d.)?inma|participation inma|% ?inma)/i, { ok: v => v > 0 && v <= 100 }); if (x) { out.stakeFile = x.v <= 1 ? x.v * 100 : x.v; src.stake = `${n}!${x.at}`; break; } }
+  if (out.ve != null && out.evEbitda) out.ebitda = out.ve / out.evEbitda;
+  out.ok = out.eq != null || out.sop?.eqg != null;
+  return out;
+}
+
+/* ---------- valorisation à partir du classeur Excel de valorisation lié dans OneDrive ---------- */
+let VX_LIB = null;
+function vxLib() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (VX_LIB) return VX_LIB;
+  VX_LIB = new Promise((res, rej) => { const s = document.createElement("script"); s.src = window.INMA ? "/vendor/xlsx.full.min.js" : "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    s.onload = () => window.XLSX ? res(window.XLSX) : rej(new Error("lecteur Excel indisponible")); s.onerror = () => { VX_LIB = null; rej(new Error("lecteur Excel indisponible (réseau)")); }; document.head.appendChild(s); });
+  return VX_LIB;
+}
+const vxGraph = () => !!(window.INMA?.graph?.available?.() && window.INMA.graph.readFile);
+const vxPct = x => x == null ? "—" : fmtN(Math.round(x * 1000) / 10) + " %";
+// lit le classeur (OneDrive ou fichier choisi sur l'ordinateur) et crée / met à jour la valorisation du trimestre
+async function vxImport(fid, pid, file) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  let meta;
+  try {
+    toast("Lecture du fichier de valorisation…");
+    const XL = await vxLib();
+    if (file) meta = { buf: await file.arrayBuffer(), name: file.name, webUrl: p.valoFile?.url || "", modified: file.lastModified ? new Date(file.lastModified).toISOString() : "", by: "" };
+    else meta = await window.INMA.graph.readFile(p.valoFile.url);
+    const date = quarterEnd(todayISO()); const x = vxParse(XL, new Uint8Array(meta.buf), date);
+    if (!x.ok) { toast("Aucune valorisation reconnue : le classeur doit contenir une feuille « Récap Valo » avec la valeur des fonds propres."); return; }
+    const live = fundById(fid), lp = live.positions.find(y => y.id === pid);
+    const ex = (lp.valos || []).find(v => quarterEnd(v.date) === date);
+    if (ex && ex.status === "validated") { toast(`La valorisation ${quarterLabel(date)} est déjà validée : repassez-la en brouillon pour la mettre à jour.`); return; }
+    const excel = { ...x, file: { name: meta.name, url: meta.webUrl || p.valoFile?.url || "", modified: meta.modified, by: meta.by }, readAt: new Date().toISOString(), readBy: me()?.id || null };
+    const rec = ex ? { ...ex, source: "excel", excel } : { id: uid("val"), date, status: "draft", source: "excel", excel, base: "conso", weights: { dcf: 100, comps: 0, trans: 0, anr: 0, tour: 0 }, stake: vNum(lp.stake) ?? (x.stakeFile != null ? Math.round(x.stakeFile * 100) / 100 : ""), justif: "", by: me()?.id || null };
+    const r = valoCalc(rec, lp); rec.result = { eq: r.eq, inma: r.inma, stake: r.stake }; rec.updatedAt = new Date().toISOString(); rec.updatedBy = me()?.id || null;
+    lp.valos = [...(lp.valos || []).filter(v => v.id !== rec.id), rec];
+    if (!lp.valoFile?.name && meta.name) lp.valoFile = { ...(lp.valoFile || {}), name: meta.name };
+    await saveCfg(`Valorisation ${quarterLabel(date)} de « ${p.name} » mise à jour depuis ${meta.name}`);
+    await log(`Valorisation ${quarterLabel(date)} de « ${p.name} » lue depuis le fichier ${meta.name}`, { dossierId: p.dossierId || null });
+    render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); setTimeout(() => valoModal(fid, pid, rec.id), 60);
+  } catch (er) { toast("Lecture impossible : " + (er.message || "erreur")); }
+}
+function vxLinkModal(fid, pid) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  modal(`Fichier de valorisation · ${p.name}`, `<p class="muted" style="margin:0;font-size:12.5px">Liez le classeur Excel de valorisation à date de la participation, rangé dans OneDrive / SharePoint (par exemple le BP avec sa feuille « Récap Valo »). L'outil en lit la valeur d'entreprise, la dette nette, la valeur des fonds propres, le WACC, le TRI, la somme des parties, les scénarios de sensibilité et les multiples de comparables et de transactions.</p>
+    <label class="f"><span>Lien du fichier Excel</span><input type="url" id="vx-url" value="${h(p.valoFile?.url || "")}" placeholder="https://…sharepoint.com/…/BP_Novembre_2026.xlsx"></label>
+    ${vxGraph() ? "" : '<p class="muted" style="margin:0;font-size:12px">Dans cette version, l\'outil ne peut pas ouvrir OneDrive : après avoir lié le lien, utilisez « Lire un fichier » pour choisir le même classeur sur votre ordinateur. La version déployée le lit directement dans OneDrive.</p>'}`,
+    `${p.valoFile?.url ? '<button class="btn ghost danger" id="vx-unlink">Délier</button><span class="spacer"></span>' : ""}<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="vx-ok">${vxGraph() ? "Lier et lire le fichier" : "Lier"}</button>`, L => {
+      $("#vx-ok", L).onclick = async () => { const u = $("#vx-url", L).value.trim(); if (!isURL(u)) { toast("Collez le lien https:// du fichier Excel."); return; } L.remove();
+        const live = fundById(fid), lp = live.positions.find(y => y.id === pid); lp.valoFile = { url: u, name: lp.valoFile?.url === u && lp.valoFile.name ? lp.valoFile.name : (n => /\.xls[xm]?$/i.test(n) ? n : "")((() => { try { return decodeURIComponent(u.split(/[?#]/)[0].split("/").pop()); } catch { return ""; } })()) };
+        await saveCfg("Fichier de valorisation lié"); render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); if (vxGraph()) vxImport(fid, pid); };
+      $("#vx-unlink", L) && ($("#vx-unlink", L).onclick = async () => { L.remove(); const live = fundById(fid), lp = live.positions.find(y => y.id === pid); delete lp.valoFile; await saveCfg("Fichier de valorisation délié"); render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); });
+    });
+}
+function vxPickLocal(fid, pid) { const i = document.createElement("input"); i.type = "file"; i.accept = ".xlsx,.xlsm,.xls"; i.onchange = () => { if (i.files[0]) vxImport(fid, pid, i.files[0]); }; i.click(); }
+function vxBar(f, p) {
+  if (!valoCanEdit() && !p.valoFile) return "";
+  const vf = p.valoFile;
+  return `<div class="vx-bar">${ic("file")}<div class="grow"><b>Fichier de valorisation</b><div class="muted" style="font-size:12px">${vf?.url ? `${odLink(vf.url, null, "file", vf.name || "Ouvrir le fichier")}` : "Aucun fichier lié : la valorisation peut être lue directement dans le classeur Excel à date."}</div></div>
+    ${valoCanEdit() ? `${vf?.url && vxGraph() ? `<button class="btn sm pri" data-valo="xl-read">Mettre à jour depuis le fichier</button>` : ""}${!vxGraph() ? `<button class="btn sm${vf?.url ? " pri" : ""}" data-valo="xl-local">Lire un fichier</button>` : ""}<button class="btn sm" data-valo="xl-link">${vf?.url ? "Changer" : "Lier le fichier"}</button>` : ""}</div>`;
+}
+// fenêtre d'une valorisation lue dans Excel : chiffres du fichier en lecture, choix de la base, pondérations et part INMA
+function vxModal(fid, pid, vid) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  const v = clone((p.valos || []).find(x => x.id === vid) || {}); if (!v.id) return; const x = v.excel || {};
+  const ed = valoCanEdit() && (v.status !== "validated" || valoCanValidate()); const r0 = valoCalc(v, p);
+  const S_ = k => x.src?.[k] ? `<span class="vx-src" title="Cellule lue">${h(x.src[k])}</span>` : "";
+  const kv = (l, val, k) => `<tr><td>${l}</td><td class="r">${val}</td><td>${S_(k)}</td></tr>`;
+  const subs = (x.subs || []).map(s => `<tr><td>${h(s.name)}<div class="muted" style="font-size:11px">${h(s.metier || "")}</div></td><td class="r">${s.pct != null ? vxPct(s.pct) : "—"}</td><td class="r">${vFmt(s.ebitda)}</td><td class="r">${vFmt(s.ve)}</td><td class="r">${vFmt(s.dn)}</td><td class="r">${vFmt(s.eqg ?? s.eq)}</td><td class="r">${s.mult != null ? fmtN(Math.round(s.mult * 10) / 10) + "x" : "—"}</td></tr>`).join("");
+  const sc = (x.scenarios || []).map(s => `<tr><td>${h(s.name)}</td><td class="r">${vFmt(s.eq)}</td><td class="r">${r0.stake != null ? vFmt(s.eq * r0.stake / 100) : "—"}</td><td>${S_k(s.at)}</td></tr>`).join("");
+  function S_k(a) { return a ? `<span class="vx-src">${h(a)}</span>` : ""; }
+  const W = { dcf: 100, comps: 0, trans: 0, ...(v.weights || {}) };
+  const inner = `<div class="vl-wrap"><div class="vl-form">
+    <div class="vx-file">${ic("file")}<div class="grow"><b>${h(x.file?.name || "Classeur de valorisation")}</b><div class="muted" style="font-size:12px">Lu le ${h(new Date(x.readAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}${x.readBy ? " par " + h(mname(x.readBy)) : ""}${x.file?.modified ? ` · fichier modifié le ${h(new Date(x.file.modified).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }))}${x.file.by ? " par " + h(x.file.by) : ""}` : ""} · ${x.sheets || "?"} feuilles</div></div>${isURL(x.file?.url) ? `<a class="btn sm" href="${h(x.file.url)}" target="_blank" rel="noopener" data-ro-keep="1">Ouvrir</a>` : ""}</div>
+    <div class="grid3"><label class="f"><span>Date de valorisation</span><input type="date" data-vx="date" value="${h(v.date)}"></label><label class="f"><span>Part détenue par INMA (%)</span><input type="number" step="any" data-vx="stake" value="${h(v.stake ?? "")}"><span class="muted" style="font-weight:400;font-size:11px">${x.stakeFile != null ? `Fichier : ${fmtN(Math.round(x.stakeFile * 100) / 100)} % (${h(x.src?.stake || "")})` : ""}${vNum(p.stake) != null ? ` · fiche : ${fmtN(vNum(p.stake))} %` : ""}</span></label>
+      <label class="f"><span>Base de la valorisation DCF</span><select data-vx="base"><option value="conso" ${v.base !== "sop" ? "selected" : ""}>DCF consolidé du groupe</option>${x.sop ? `<option value="sop" ${v.base === "sop" ? "selected" : ""}>Somme des parties (part du groupe)</option>` : ""}</select></label></div>
+    <div class="vl-sec"><h3>Valorisation consolidée lue dans le fichier</h3><table class="t vl-mt"><tbody>
+      ${kv("Valeur d'entreprise", vFmt(x.ve), "ve")}${kv("Dette nette et ajustements", vFmt(x.dn), "dn")}${kv("<b>Valeur des fonds propres (100 %)</b>", `<b>${vFmt(x.eq)}</b>`, "eq")}${kv("VE / EBITDA", x.evEbitda != null ? fmtN(Math.round(x.evEbitda * 100) / 100) + "x" : "—", "evEbitda")}${kv("WACC", vxPct(x.wacc), "wacc")}${kv("TRI INMA", vxPct(x.tri), "tri")}
+      ${x.sop ? kv("Somme des parties : fonds propres part du groupe", vFmt(x.sop.eqg), "sop") : ""}</tbody></table></div>
+    ${subs ? `<details class="vl-sec"><summary><b>Valorisation par société (${(x.subs || []).length})</b></summary><div class="tablewrap"><table class="t vl-mt"><thead><tr><th>Société</th><th class="r">Détention</th><th class="r">EBITDA</th><th class="r">VE</th><th class="r">Dette nette</th><th class="r">Fonds propres (part groupe)</th><th class="r">VE/EBITDA</th></tr></thead><tbody>${subs}</tbody>${x.sop ? `<tfoot><tr><th>Somme des parties</th><th></th><th class="r">${vFmt(x.sop.ebitda)}</th><th class="r">${vFmt(x.sop.ve)}</th><th class="r">${vFmt(x.sop.dn)}</th><th class="r">${vFmt(x.sop.eqg)}</th><th></th></tr></tfoot>` : ""}</table></div></details>` : ""}
+    ${sc ? `<details class="vl-sec" open><summary><b>Scénarios de sensibilité (${x.scenarios.length})</b> <span class="muted">— ils donnent la fourchette basse / haute</span></summary><div class="tablewrap"><table class="t vl-mt"><thead><tr><th>Scénario</th><th class="r">Fonds propres (100 %)</th><th class="r">Part INMA</th><th>Cellule</th></tr></thead><tbody>${sc}</tbody></table></div></details>` : ""}
+    <div class="vl-sec"><h3>Méthodes de recoupement</h3><p class="vl-hint">Calculées par l'outil avec l'EBITDA implicite du fichier (VE ÷ VE/EBITDA = ${vFmt(x.ebitda)}) et la dette nette consolidée.</p><table class="t vl-mt"><tbody>
+      ${kv(`Comparables boursiers : EV/EBITDA médian ${x.comps?.evEbitda != null ? fmtN(Math.round(x.comps.evEbitda * 100) / 100) + "x" : "—"}${x.comps?.year ? " (" + h(x.comps.year) + ")" : ""}`, vFmt(r0.m.comps.ok ? r0.m.comps.eq : null), "comps")}
+      ${kv(`Transactions : EV/EBITDA médian ${x.trans?.evEbitda != null ? fmtN(Math.round(x.trans.evEbitda * 100) / 100) + "x" : "—"}`, vFmt(r0.m.trans.ok ? r0.m.trans.eq : null), "trans")}</tbody></table></div>
+    <div class="vl-sec"><h3>Pondération</h3><div class="vl-w" style="grid-template-columns:repeat(3,minmax(0,1fr))">${[["dcf", "DCF du fichier"], ["comps", "Comparables boursiers"], ["trans", "Transactions"]].map(([k, l]) => `<label class="f"><span>${l} (%)</span><input type="number" step="any" data-vx="w.${k}" value="${h(W[k] ?? 0)}"></label>`).join("")}</div>
+      <label class="f"><span>Justification</span><textarea data-vx="justif" rows="2" placeholder="Ex. DCF consolidé retenu à 100 % ; comparables cotés peu représentatifs du marché tunisien.">${h(v.justif || "")}</textarea></label></div>
+  </div><aside class="vl-res" id="vx-res"></aside></div>`;
+  const foot = `${ed ? `<button class="btn ghost danger" id="vl-del">Supprimer</button>` : ""}<span class="spacer"></span>${valoCanEdit() && v.status !== "validated" ? (vxGraph() && p.valoFile?.url ? `<button class="btn" id="vx-reread" data-ro-keep="1">Relire le fichier</button>` : `<button class="btn" id="vx-local" data-ro-keep="1">Relire un fichier</button>`) : ""}${valoCanValidate() && v.status !== "validated" ? `<button class="btn" id="vl-validate" data-ro-keep="1">Valider la valorisation</button>` : ""}${valoCanValidate() && v.status === "validated" ? `<button class="btn" id="vl-unvalidate">Repasser en brouillon</button>` : ""}<button class="btn" data-mclose="1">Annuler</button>${ed ? `<button class="btn pri" id="vl-save">Enregistrer</button>` : ""}`;
+  S._ro = { editable: ed };
+  modal(`Valorisation · ${p.name} · ${quarterLabel(v.date)} · ${v.status === "validated" ? "validée" : "brouillon"}`, inner, foot, L => {
+    const read = () => { for (const el of $$("[data-vx]", L)) { const k = el.dataset.vx; if (k === "date") v.date = el.value || v.date; else if (k === "stake") v.stake = el.value; else if (k === "base") v.base = el.value; else if (k === "justif") v.justif = el.value; else if (k.startsWith("w.")) v.weights = { ...(v.weights || {}), [k.slice(2)]: el.value }; } return v; };
+    const draw = () => { const vv = read(), r = valoCalc(vv, p), [lo, hi] = valoRange(vv, p);
+      $("#vx-res", L).innerHTML = `<div class="vl-card"><div class="eyebrow">Valeur de la participation</div><div class="vl-big">${vFmt(r.inma)}</div><div class="muted" style="font-size:12px">${vFmt(r.eq)} × ${r.stake != null ? fmtN(r.stake) + " %" : "— %"}</div>
+        <div class="vl-range"><span>Basse ${vFmt(lo)}</span><span>Haute ${vFmt(hi)}</span></div><p class="vl-hint" style="margin:4px 0 0">${(x.scenarios || []).length ? `Fourchette : scénarios les plus bas et les plus hauts du fichier (${x.scenarios.length}).` : "Fourchette : multiples ∓10 %."}</p></div>
+        ${r.warn.length ? `<div class="banner warn" style="font-size:12px">${r.warn.map(h).join("<br>")}</div>` : ""}
+        <table class="t vl-mt"><thead><tr><th>Méthode</th><th class="r">Titres</th><th class="r">Poids</th></tr></thead><tbody>${[["dcf", vv.base === "sop" ? "DCF (somme des parties)" : "DCF consolidé"], ["comps", "Comparables boursiers"], ["trans", "Transactions"]].map(([m, l]) => `<tr${!(vNum(r.W[m]) || 0) ? ' class="muted"' : ""}><td>${l}</td><td class="r">${r.m[m].ok ? vFmt(r.m[m].eq) : "—"}</td><td class="r">${fmtN(vNum(r.W[m]) || 0)} %</td></tr>`).join("")}</tbody></table>
+        <p class="vl-hint">Les chiffres viennent du classeur : pour les changer, modifiez le fichier dans OneDrive puis « Relire le fichier ».</p>`; };
+    draw(); L.addEventListener("input", draw); L.addEventListener("change", draw);
+    const save = async (status, msg) => { const vv = read(); const live = fundById(fid), lp = live.positions.find(y => y.id === pid); const list = (lp.valos || []).filter(y => y.id !== vv.id);
+      if (list.some(y => quarterEnd(y.date) === quarterEnd(vv.date))) { toast(`Une valorisation existe déjà pour ${quarterLabel(vv.date)}.`); return; }
+      const r = valoCalc(vv, p); const rec = { ...vv, status: status || vv.status || "draft", updatedAt: new Date().toISOString(), updatedBy: me()?.id || null, result: { eq: r.eq, inma: r.inma, stake: r.stake } };
+      if (status === "validated") { rec.validatedBy = me()?.id || null; rec.validatedAt = new Date().toISOString(); } if (status === "draft") { delete rec.validatedBy; delete rec.validatedAt; }
+      lp.valos = [...list, rec]; L.remove(); await saveCfg(msg || "Valorisation enregistrée");
+      if (status === "validated") await log(`Valorisation ${quarterLabel(rec.date)} de « ${p.name} » validée`, { dossierId: p.dossierId || null });
+      render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); };
+    $("#vl-save", L) && ($("#vl-save", L).onclick = () => save(null));
+    $("#vl-validate", L) && ($("#vl-validate", L).onclick = () => { const r = valoCalc(read(), p); if (r.eq == null) { toast("Aucune valeur retenue : vérifiez les pondérations."); return; } if (r.warn.length) { confirmBox(`Valider malgré ${r.warn.length} point(s) d'attention ? ${r.warn[0]}`, "Valider", () => save("validated", "Valorisation validée")); return; } save("validated", "Valorisation validée"); });
+    $("#vl-unvalidate", L) && ($("#vl-unvalidate", L).onclick = () => save("draft", "Valorisation repassée en brouillon"));
+    $("#vx-reread", L) && ($("#vx-reread", L).onclick = () => { L.remove(); vxImport(fid, pid); });
+    $("#vx-local", L) && ($("#vx-local", L).onclick = () => { L.remove(); vxPickLocal(fid, pid); });
+    $("#vl-del", L) && ($("#vl-del", L).onclick = () => { L.remove(); confirmBox(`Supprimer la valorisation ${quarterLabel(v.date)} de « ${p.name} » ?`, "Supprimer", async () => { const live = fundById(fid), lp = live.positions.find(y => y.id === pid); lp.valos = (lp.valos || []).filter(y => y.id !== v.id); await saveCfg("Valorisation supprimée"); render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); }); });
+  }, true);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-valo]"); if (!b || !b.dataset.valo.startsWith("xl-")) return; const fe = $("#fiche"); if (!fe) return; e.stopImmediatePropagation(); const fid = fe.dataset.fid, pid = fe.dataset.pid;
+  if (b.dataset.valo === "xl-link") return vxLinkModal(fid, pid);
+  if (b.dataset.valo === "xl-read") return vxImport(fid, pid);
+  if (b.dataset.valo === "xl-local") return vxPickLocal(fid, pid);
+}, true);
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
