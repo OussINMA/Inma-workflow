@@ -202,6 +202,13 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
       const byId = Object.fromEntries(inc.funds.map(f => [f.id, f]));
       out.funds = (stored.funds || []).map(f => byId[f.id] && Array.isArray(byId[f.id].positions) ? { ...f, positions: byId[f.id].positions } : f);
     }
+    if (Array.isArray(out.funds) && out.funds !== stored.funds) { // tout élément du portefeuille reste rattaché à un dossier
+      const before = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).map(p => [f.id + "|" + p.id, p])));
+      for (const f of out.funds) for (const p of f.positions || []) {
+        const o = before[f.id + "|" + p.id];
+        if (!p.dossierId && (!o || o.dossierId)) throw new Denied(`« ${p.name || "Élément"} » doit être rattaché à un dossier.`);
+      }
+    }
     if (Array.isArray(out.funds) && out.funds !== stored.funds && !c.can("view_amounts")) {
       const old = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).map(p => [f.id + "|" + p.id, p])));
       out.funds = out.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => { const o = old[f.id + "|" + p.id];
