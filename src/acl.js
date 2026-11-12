@@ -73,6 +73,13 @@ function pruneTree(nodes, granted) {
   }
   return out;
 }
+// Fiches des participations : montants (investi, capital, accordé, restant dû, prochaine échéance) soumis à « view_amounts ».
+const FICHE_MONEY = ["id_montant", "cap_capital", "fi_montant", "rb_crd", "rb_next_amt"];
+function stripFicheAmounts(p) {
+  if (!p.fiche?.v) return p;
+  const v = { ...p.fiche.v }; for (const k of FICHE_MONEY) delete v[k];
+  return { ...p, fiche: { ...p.fiche, v } };
+}
 function sanitizeConfig(c) {
   const cfg = JSON.parse(JSON.stringify(c.cfg)); delete cfg.__v;
   const seesCodes = c.isAdmin || c.can("members") || c.can("externals");
@@ -88,7 +95,8 @@ function sanitizeConfig(c) {
     if (cfg.onedrive) cfg.onedrive = { ...cfg.onedrive, rootUrl: "", perWorkflowRoot: {} };
     cfg.funds = cfg.funds.map(f => ({ ...f, positions: [] }));
   }
-  if (!c.can("view_amounts")) cfg.funds = (cfg.funds || []).map(f => ({ ...f, positions: (f.positions || []).map(({ amount, outstanding, ...rest }) => rest) })); else if (!seesCodes) {
+  if (!c.can("view_amounts")) cfg.funds = (cfg.funds || []).map(f => ({ ...f, positions: (f.positions || []).map(({ amount, outstanding, ...rest }) => stripFicheAmounts(rest)) }));
+  if (!c.isExt && !seesCodes) {
     cfg.members = (cfg.members || []).map(m => { const x = { ...m }; delete x.code; if (m.external) delete x.grants; return x; });
   }
   return cfg;
@@ -196,7 +204,10 @@ export function checkWrite(c, coll, id, data, existing, dossierOf) {
     }
     if (Array.isArray(out.funds) && out.funds !== stored.funds && !c.can("view_amounts")) {
       const old = Object.fromEntries((stored.funds || []).flatMap(f => (f.positions || []).map(p => [f.id + "|" + p.id, p])));
-      out.funds = out.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => { const o = old[f.id + "|" + p.id]; return { ...p, amount: o?.amount ?? "", outstanding: o?.outstanding ?? "" }; }) }));
+      out.funds = out.funds.map(f => ({ ...f, positions: (f.positions || []).map(p => { const o = old[f.id + "|" + p.id];
+        const r = { ...p, amount: o?.amount ?? "", outstanding: o?.outstanding ?? "" };
+        if (r.fiche) { const v = { ...(r.fiche.v || {}) }; for (const k of FICHE_MONEY) { if (o?.fiche?.v?.[k] !== undefined) v[k] = o.fiche.v[k]; else delete v[k]; } r.fiche = { ...r.fiche, v }; }
+        return r; }) }));
     }
     // Membres : internes (droit Membres) et externes (droit Accès externes) ; les codes d'invitation ne sont jamais écrits par le navigateur.
     const canInt = c.isAdmin || c.can("members"), canExt = c.isAdmin || c.can("externals");
