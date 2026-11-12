@@ -512,6 +512,9 @@ a.fh-open{color:inherit;font-weight:600;text-decoration:underline;text-decoratio
 [hidden]{display:none!important}
 .ro-note{font-size:12.5px;background:var(--info-bg);border-radius:6px;padding:6px 10px}
 .modal.ro-editing,.ro-editing .modal{box-shadow:0 0 0 2px var(--accent),var(--shadow)}
+
+.pl-miss{color:var(--bad);border-color:color-mix(in oklab,var(--bad) 45%,transparent);background:var(--bad-bg);font-weight:600}
+.pl-banner{align-items:center}
 </style>
 
 <div class="app" id="app">
@@ -2253,9 +2256,10 @@ function positionsPanel(f) {
   const ef = can("funds") || can("portfolio"), list = f.positions || [];
   const act = livePositions(f); const eq = act.filter(p => p.kind !== "debt"), debt = act.filter(p => p.kind === "debt");
   const totEq = eq.reduce((s, p) => s + (+p.amount || 0), 0), totDebt = debt.reduce((s, p) => s + (+(p.outstanding || p.amount) || 0), 0);
-  return `<div class="panel"><header><h2>Participations et financements actuels · ${h(f.name)}</h2><span class="muted" style="font-size:12px">${act.length} en portefeuille${eq.length ? ` · investi ${money(totEq)}` : ""}${debt.length ? ` · encours ${money(totDebt)}` : ""}</span><span class="spacer"></span>${cpOn() && S.view === "funds" ? `<button class="btn sm cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${ef ? `<button class="btn sm pri" data-pos-new="${f.id}">${ic("plus")}Ajouter</button>` : ""}</header>
+  const nIss = list.filter(p => posIssues(f, p).length).length;
+  return `<div class="panel"><header><h2>Participations et financements actuels · ${h(f.name)}</h2>${nIss ? `<span class="tag pl-miss" title="Chaque élément doit être rattaché à un dossier${posNeedsSched(f) ? " et à son échéancier" : ""}">${nIss} à rattacher</span>` : ""}<span class="muted" style="font-size:12px">${act.length} en portefeuille${eq.length ? ` · investi ${money(totEq)}` : ""}${debt.length ? ` · encours ${money(totDebt)}` : ""}</span><span class="spacer"></span>${cpOn() && S.view === "funds" ? `<button class="btn sm cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}${ef ? `<button class="btn sm pri" data-pos-new="${f.id}">${ic("plus")}Ajouter</button>` : ""}</header>
   <div class="body tablewrap">${list.length ? `<table class="t"><thead><tr><th></th><th>Société</th><th>Nature</th><th>Secteur</th><th>Instrument</th><th class="r">Investi / financé</th><th class="r">Encours</th><th>Entrée</th><th>Dernier reporting</th><th>Statut</th><th>Fiche</th></tr></thead><tbody>
-    ${list.map(p => `<tr class="click" data-pos="${f.id}|${p.id}" style="${p.status === "exited" || p.status === "repaid" ? "opacity:.55" : ""}"><td>${hdot(p.health)}</td><td><b>${h(p.name)}</b>${p.boardSeat ? ' <span class="tag">Siège CA</span>' : ""}</td><td>${p.kind === "debt" ? "Financement" : "Participation"}</td><td>${h(p.sector || "—")}</td><td>${h(p.instrument || "—")}</td><td class="r">${p.amount ? money(p.amount) : '<span class="muted">—</span>'}</td><td class="r">${(() => { const sc = visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`); if (p.kind === "debt" && p.outstanding) return money(p.outstanding); if (sc) return `${money(schSummary(sc).crd)}<div class="muted" style="font-size:10.5px">selon échéancier</div>`; return '<span class="muted">—</span>'; })()}</td><td>${p.date ? h(fdate(p.date)) : "—"}</td><td>${p.lastReport ? due(p.lastReport, true) : '<span class="muted">—</span>'}</td><td>${chip(posStatus(p.status)[1], posStatus(p.status)[2])}</td><td title="Fiche complétée à ${ficheCompletion(f, p)} %"><span class="pgr"><span style="width:${ficheCompletion(f, p)}%"></span></span><span class="pgr-n">${ficheCompletion(f, p)} %</span></td></tr>`).join("")}
+    ${list.map(p => `<tr class="click" data-pos="${f.id}|${p.id}" style="${p.status === "exited" || p.status === "repaid" ? "opacity:.55" : ""}"><td>${hdot(p.health)}</td><td><b>${h(p.name)}</b>${p.boardSeat ? ' <span class="tag">Siège CA</span>' : ""}${posIssues(f, p).length ? `<div style="margin-top:3px">${posIssueTags(f, p)}</div>` : ""}</td><td>${p.kind === "debt" ? "Financement" : "Participation"}</td><td>${h(p.sector || "—")}</td><td>${h(p.instrument || "—")}</td><td class="r">${p.amount ? money(p.amount) : '<span class="muted">—</span>'}</td><td class="r">${(() => { const sc = visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`); if (p.kind === "debt" && p.outstanding) return money(p.outstanding); if (sc) return `${money(schSummary(sc).crd)}<div class="muted" style="font-size:10.5px">selon échéancier</div>`; return '<span class="muted">—</span>'; })()}</td><td>${p.date ? h(fdate(p.date)) : "—"}</td><td>${p.lastReport ? due(p.lastReport, true) : '<span class="muted">—</span>'}</td><td>${chip(posStatus(p.status)[1], posStatus(p.status)[2])}</td><td title="Fiche complétée à ${ficheCompletion(f, p)} %"><span class="pgr"><span style="width:${ficheCompletion(f, p)}%"></span></span><span class="pgr-n">${ficheCompletion(f, p)} %</span></td></tr>`).join("")}
   </tbody></table>` : `<p class="muted" style="margin:0">Aucune participation ni aucun financement enregistré.${ef ? " Cliquez « Ajouter »." : ""}</p>`}</div></div>`;
 }
 function posModal(fid, pid) {
@@ -2272,22 +2276,31 @@ function posModal(fid, pid) {
       <label class="f"><span>Statut</span><select id="ps-status" ${dis}>${POS_STATUS.map(s => `<option value="${s[0]}" ${p.status === s[0] ? "selected" : ""}>${s[1]}</option>`).join("")}</select></label>
       <label class="f"><span>Santé</span><select id="ps-health" ${dis}>${Object.entries(HEALTH).map(([k, v]) => `<option value="${k}" ${p.health === k ? "selected" : ""}>${v[0]}</option>`).join("")}</select></label>
       <label class="f"><span>Dernier reporting reçu</span><input type="date" id="ps-rep" value="${h(p.lastReport || "")}" ${dis}></label></div>
-    <div class="grid2"><label class="f"><span>Dossier de travail lié</span><select id="ps-dossier" ${dis}><option value="">—</option>${visDossiers().map(d => `<option value="${d.id}" ${p.dossierId === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
+    <div class="grid2"><label class="f"><span>Dossier de travail lié (obligatoire)</span><select id="ps-dossier" ${dis}><option value="">— choisir —</option>${can("dossier_create") ? `<option value="__new" ${isNew ? "selected" : ""}>+ Créer le dossier de suivi</option>` : ""}${visDossiers().map(d => `<option value="${d.id}" ${p.dossierId === d.id ? "selected" : ""}>${h(d.code)} · ${h(d.name)}</option>`).join("")}</select></label>
       <label class="f"><span>Dossier OneDrive / SharePoint</span><input type="url" id="ps-url" value="${h(p.url || "")}" ${dis}></label></div>
     <label class="chk"><input type="checkbox" id="ps-board" ${p.boardSeat ? "checked" : ""} ${dis}>INMA siège au conseil d'administration</label>
     <label class="f"><span>Commentaire (faits marquants, points d'attention)</span><textarea id="ps-note" rows="3" ${dis}>${h(p.note || "")}</textarea></label>
     ${isURL(p.url) ? `<div>${linkBtn(p.url, "Ouvrir le dossier")}</div>` : ""}
     ${!isNew ? (() => { const sc = visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`); return sc ? `<div class="row"><button class="btn" data-act7="sch-show" data-ref="${h(sc.dossierId ? "d:" + sc.dossierId : "c:" + (sc.company || ""))}">Voir l'échéancier de remboursement</button><span class="muted" style="font-size:12px">${schSummary(sc).paid}/${schSummary(sc).n} échéances payées${schSummary(sc).lateN ? ` · <b style="color:var(--bad)">${schSummary(sc).lateN} impayée(s)</b>` : ""}</span></div>` : can("deadlines") ? `<div><button class="btn" data-act7="sch-new" data-schpos="${f.id}|${p.id}">${ic("plus")}Créer l'échéancier de remboursement</button></div>` : ""; })() : ""}`;
   modal(isNew ? "Nouvelle participation / nouveau financement" : p.name, inner, `${!isNew && ef ? `<button class="btn danger" id="ps-del">Retirer</button><span class="spacer"></span>` : ""}<button class="btn" data-mclose="1">Fermer</button>${ef ? `<button class="btn pri" id="ps-save">Enregistrer</button>` : ""}`, L => {
-    const sb = $("#ps-save", L); sb && (sb.onclick = () => {
+    const sb = $("#ps-save", L); sb && (sb.onclick = async () => {
       const name = $("#ps-name", L).value.trim(); if (!name) { toast("Indiquez le nom de la société."); return; }
+      const dsel = $("#ps-dossier", L).value; if (!dsel) { toast("Rattachez cet élément à un dossier : c'est obligatoire."); $("#ps-dossier", L).focus(); return; }
       const u = $("#ps-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
       const live = fundById(fid); if (!live) { L.remove(); return; }
       const cur = (live.positions || []).find(x => x.id === p.id) || {};
-      const data = { ...cur, id: p.id, name, kind: $("#ps-kind", L).value, sector: $("#ps-sector", L).value, instrument: $("#ps-instr", L).value.trim(), date: $("#ps-date", L).value, stake: $("#ps-stake", L).value, status: $("#ps-status", L).value, health: $("#ps-health", L).value, lastReport: $("#ps-rep", L).value, dossierId: $("#ps-dossier", L).value || "", url: u, boardSeat: $("#ps-board", L).checked, note: $("#ps-note", L).value };
+      const data = { ...cur, id: p.id, name, kind: $("#ps-kind", L).value, sector: $("#ps-sector", L).value, instrument: $("#ps-instr", L).value.trim(), date: $("#ps-date", L).value, stake: $("#ps-stake", L).value, status: $("#ps-status", L).value, health: $("#ps-health", L).value, lastReport: $("#ps-rep", L).value, dossierId: dsel === "__new" ? "" : dsel, url: u, boardSeat: $("#ps-board", L).checked, note: $("#ps-note", L).value };
       if ($("#ps-amount", L)) { data.amount = $("#ps-amount", L).value; data.outstanding = $("#ps-out", L).value; }
       live.positions = (live.positions || []).some(x => x.id === p.id) ? live.positions.map(x => x.id === p.id ? data : x) : [...(live.positions || []), data];
-      L.remove(); saveCfg("Portefeuille mis à jour"); render();
+      if (dsel === "__new") { L.remove(); live.positions = (live.positions || []).filter(x => x.id !== p.id); live.positions.push({ ...data, dossierId: "__pending" });
+        const wf = posFollowWf(live); const st = [...wf.stages].reverse().find(x => /suivi/i.test(x.name)) || wf.stages[wf.stages.length - 1]; const owner = me()?.id || internals()[0]?.id;
+        const d = { id: uid("d"), code: nextCode(wf), name, workflowId: wf.id, stageId: st.id, vehicle: live.name, ownerId: owner, coOwners: [], members: [owner].filter(Boolean), sector: data.sector || "", priority: (S.cfg.priorities || []).find(x => x.id === "normal")?.id || (S.cfg.priorities || [])[0]?.id || "", amount: data.amount || "", startDate: data.date || todayISO(), dueDate: "", oneDriveUrl: u, description: `Dossier de suivi de « ${name} » (${live.name}).`, createdAt: todayISO(), history: [] };
+        await putDoc("dossiers", d); await log(`Dossier de suivi créé depuis le portefeuille : ${d.code} · ${d.name}`, { dossierId: d.id }); await enterStage(d, st.id, false);
+        live.positions = live.positions.map(x => x.id === p.id ? { ...x, dossierId: d.id } : x); await saveCfg(`« ${name} » ajouté et rattaché à ${d.code}`); }
+      else { L.remove(); await saveCfg("Portefeuille mis à jour"); }
+      render();
+      if (isNew && posNeedsSched(live)) { toast("Dernière étape obligatoire : l'échéancier de remboursement"); const pp = live.positions.find(x => x.id === p.id); schModal(null, { posRef: `${live.id}|${p.id}`, company: pp.name, fund: live.name, dossierId: pp.dossierId || "" }); }
+      else if (isNew) ficheOpen(live.id, p.id);
     });
     const db = $("#ps-del", L); db && (db.onclick = () => { L.remove(); confirmBox(`Retirer « ${p.name} » du portefeuille de ${f.name} ? Pour garder l'historique, choisissez plutôt le statut « Sortie » ou « Remboursé ».`, "Retirer", async () => { const live = fundById(fid); live.positions = (live.positions || []).filter(x => x.id !== p.id); saveCfg("Ligne retirée"); render(); }); });
   }, true);
@@ -4979,7 +4992,7 @@ function ficheSuivi(f, p, ed) {
     ${R("Nature", sel("fs-kind", [["equity", "Participation (fonds propres)"], ["debt", "Financement (dette)"]], p.kind === "debt" ? "debt" : "equity"))}${R("Participation détenue (%)", `<input type="number" step="any" id="fs-stake" value="${h(p.stake || "")}">`)}
     ${can("view_amounts") ? R("Encours restant", `<input type="number" step="any" id="fs-out" value="${h(p.outstanding || "")}">`) : ""}${R("Dernier reporting reçu", `<input type="date" id="fs-rep" value="${h(p.lastReport || "")}">`)}
     ${R("Siège au conseil", `<label class="chk"><input type="checkbox" id="fs-board" ${p.boardSeat ? "checked" : ""}>INMA siège au conseil</label>`)}
-    ${R("Dossier de travail", `<select id="fs-dossier"><option value="">—</option>${visDossiers().map(x => `<option value="${x.id}" ${p.dossierId === x.id ? "selected" : ""}>${h(x.code)} · ${h(x.name)}</option>`).join("")}</select>`)}
+    ${R("Dossier de travail (obligatoire)", `<select id="fs-dossier"><option value="">— choisir —</option>${can("dossier_create") ? '<option value="__new">+ Créer le dossier de suivi</option>' : ""}${visDossiers().map(x => `<option value="${x.id}" ${p.dossierId === x.id ? "selected" : ""}>${h(x.code)} · ${h(x.name)}</option>`).join("")}</select>`)}
     ${R("Dossier OneDrive", `<input type="url" id="fs-url" value="${h(p.url || "")}" placeholder="https://…">`, true)}
     ${R("Commentaire (faits marquants, points d'attention)", `<textarea id="fs-note" rows="2">${h(p.note || "")}</textarea>`, true)}</div></section>`;
 }
@@ -4989,7 +5002,7 @@ function ficheHTML(fid, pid, ed) {
   const pct = ficheCompletion(f, p);
   const groups = []; for (const s of [{ id: "suivi", title: "Suivi INMA" }, ...t.sections]) { const g = s.group || s.title; const last = groups[groups.length - 1]; if (last && last.g === g) last.items.push(s); else groups.push({ g, items: [s] }); }
   const toc = groups.map(g => g.items.length === 1 && g.items[0].title === g.g ? `<a href="#fc-${g.items[0].id}" data-fiche="go">${h(g.g)}</a>` : `<div class="fc-tg">${h(g.g)}</div>${g.items.map(s => `<a href="#fc-${s.id}" data-fiche="go" class="sub">${h(s.title)}</a>`).join("")}`).join("");
-  let body = ficheSuivi(f, p, ed), lastG = null;
+  let body = (ed ? "" : posLinkBanner(f, p)) + ficheSuivi(f, p, ed), lastG = null;
   for (const s of t.sections) { if (s.group && s.group !== lastG && s.group !== s.title) body += `<div class="fc-group">${h(s.group)}</div>`; lastG = s.group; body += ficheSection(s, f, p, fc, ed); }
   return `<div class="scrim fc-scrim" id="fiche" data-fid="${fid}" data-pid="${pid}" data-ed="${ed ? 1 : 0}"><div class="drawer fc-drawer" role="dialog" aria-modal="true" aria-label="${h(t.label)} ${h(p.name)}">
     <header class="fc-head"><div class="row" style="gap:10px;align-items:flex-start">
@@ -5023,16 +5036,19 @@ async function ficheSave() {
   const el = $("#fiche"); if (!el) return; const x = fichePos(el.dataset.fid, el.dataset.pid); if (!x) return; const { f, p } = x;
   const bad = $$("input[type=email]", el).find(i => i.value && !i.checkValidity()); if (bad) { toast("Une adresse e-mail n'est pas valide."); bad.focus(); return; }
   const u = $("#fs-url", el)?.value.trim(); if (u && !isURL(u)) { toast("Le lien OneDrive doit commencer par https://"); $("#fs-url", el).focus(); return; }
+  const dsel = $("#fs-dossier", el)?.value; if (!dsel) { toast("Rattachez cet élément à un dossier : c'est obligatoire."); $("#fs-dossier", el).focus(); $("#fs-dossier", el).scrollIntoView({ block: "center" }); return; }
   const fc = ficheRead(el, f, p); fc.updatedAt = new Date().toISOString(); fc.updatedBy = me()?.id || null;
   const np = { ...p, fiche: fc, status: $("#fs-status", el).value, health: $("#fs-health", el).value, kind: $("#fs-kind", el).value, stake: $("#fs-stake", el).value, lastReport: $("#fs-rep", el).value,
-    boardSeat: $("#fs-board", el).checked, dossierId: $("#fs-dossier", el).value || "", url: u, note: $("#fs-note", el).value.trim() };
+    boardSeat: $("#fs-board", el).checked, dossierId: dsel === "__new" ? p.dossierId || "" : dsel, url: u, note: $("#fs-note", el).value.trim() };
   if ($("#fs-out", el)) np.outstanding = $("#fs-out", el).value;
   // les champs d'identité alimentent aussi la ligne du portefeuille
   const v = fc.v; const fin = ficheTplId(f) === "finance";
   if (v.id_raison) np.name = v.id_raison; if (v.id_secteur) np.sector = v.id_secteur; if (v.id_date) np.date = v.id_date; if (v.id_instr) np.instrument = v.id_instr;
   if (can("view_amounts")) { const amt = (fin && np.kind === "debt" && v.fi_montant) || v.id_montant; if (amt) np.amount = amt; }
   const live = fundById(f.id); live.positions = (live.positions || []).map(y => y.id === p.id ? np : y);
-  S.ficheDirty = false; await saveCfg("Fiche enregistrée"); render(); ficheOpen(f.id, p.id, false, true);
+  S.ficheDirty = false; await saveCfg("Fiche enregistrée");
+  if (dsel === "__new") await posCreateDossier(f.id, p.id);
+  render(); ficheOpen(f.id, p.id, false, true);
 }
 document.addEventListener("click", e => {
   const pos = e.target.closest("[data-pos]"); if (pos && !e.target.closest("#fiche")) { e.stopImmediatePropagation(); const [fid, pid] = pos.dataset.pos.split("|"); ficheOpen(fid, pid); return; }
@@ -5114,6 +5130,68 @@ function roDossier(d, ed) {
 document.addEventListener("click", e => {
   if (e.target.closest("[data-ro-cancel]")) { S.dEdit = null; renderDrawer(); return; }
   if (e.target.closest('[data-act="d-save"]')) S.dEdit = null;
+}, true);
+
+/* ---------- rattachements obligatoires du portefeuille : un dossier pour chaque élément, un échéancier pour INMA Finance ---------- */
+const posNeedsSched = f => ficheTplId(f) === "finance";
+const posSchedOf = (f, p) => visDeadlines().find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`);
+function posIssues(f, p) {
+  const out = []; if (p.status === "exited" || p.status === "repaid") return out;
+  if (!p.dossierId) out.push("dossier");
+  if (posNeedsSched(f) && !posSchedOf(f, p)) out.push("sched");
+  return out;
+}
+const POS_ISSUE_LBL = { dossier: "Dossier à rattacher", sched: "Échéancier à lier" };
+const posIssueTags = (f, p) => posIssues(f, p).map(k => `<span class="tag pl-miss">${POS_ISSUE_LBL[k]}</span>`).join(" ");
+// workflow et étape de suivi pour un dossier créé depuis le portefeuille
+function posFollowWf(f) {
+  const fin = posNeedsSched(f); const ws = S.cfg.workflows || [];
+  return ws.find(w => w.vehicle === f.name && (fin ? /financ/i.test(w.name) : /invest|particip/i.test(w.name))) || ws.find(w => w.vehicle === f.name) || ws.find(w => fin ? w.id === "w_fin" : w.id === "w_inv") || ws[0];
+}
+async function posCreateDossier(fid, pid) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return null;
+  const w = posFollowWf(f); const st = [...w.stages].reverse().find(s => /suivi/i.test(s.name)) || w.stages[w.stages.length - 1];
+  const owner = me()?.id || internals()[0]?.id;
+  const d = { id: uid("d"), code: nextCode(w), name: p.name, workflowId: w.id, stageId: st.id, vehicle: f.name, ownerId: owner, coOwners: [], members: [owner].filter(Boolean), sector: p.sector || "", priority: "normal", amount: p.amount || "", startDate: p.date || todayISO(), dueDate: "", oneDriveUrl: isURL(p.url) ? p.url : "", description: `Dossier de suivi de la participation « ${p.name} » (${f.name}).`, createdAt: todayISO(), history: [] };
+  if (!(S.cfg.priorities || []).some(x => x.id === "normal")) d.priority = (S.cfg.priorities || [])[0]?.id || "";
+  await putDoc("dossiers", d); await log(`Dossier de suivi créé depuis le portefeuille : ${d.code} · ${d.name}`, { dossierId: d.id });
+  await enterStage(d, st.id, false);
+  const live = fundById(fid); live.positions = live.positions.map(x => x.id === pid ? { ...x, dossierId: d.id } : x); await saveCfg(`« ${p.name} » rattaché à ${d.code}`);
+  return d;
+}
+async function posLinkSched(fid, pid, oid) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  for (const o of (S.deadlines || []).filter(o => isSched(o) && o.posRef === `${fid}|${pid}` && o.id !== oid)) { await putDoc("deadlines", { ...o, posRef: "" }); }
+  const o = (S.deadlines || []).find(x => x.id === oid); if (!o) return;
+  await putDoc("deadlines", { ...o, posRef: `${fid}|${pid}`, company: o.company || p.name, fund: o.fund || f.name, dossierId: o.dossierId || p.dossierId || "" });
+}
+const posFreeScheds = (fid, pid) => (S.deadlines || []).filter(o => isSched(o) && (!o.posRef || o.posRef === `${fid}|${pid}` || !(() => { const [a, b] = o.posRef.split("|"); return fundById(a)?.positions?.some(x => x.id === b); })()));
+function posLinkBanner(f, p) {
+  const iss = posIssues(f, p); if (!iss.length) return "";
+  const canE = can("funds") || can("portfolio");
+  return `<div class="banner bad pl-banner"><div style="flex:1;min-width:220px"><b>Rattachement obligatoire</b><div style="font-size:12.5px">${iss.includes("dossier") ? "Chaque élément du portefeuille doit être rattaché à un dossier de travail." : ""}${iss.includes("sched") ? ` Un financement d'${h(f.name)} doit être lié à son échéancier de remboursement.` : ""}</div></div>
+    ${canE && iss.includes("dossier") ? `<button class="btn sm" data-pl="link-d">Rattacher un dossier existant</button>${can("dossier_create") ? `<button class="btn sm pri" data-pl="new-d">Créer le dossier de suivi</button>` : ""}` : ""}
+    ${can("deadlines") && iss.includes("sched") ? `${posFreeScheds(f.id, p.id).length ? `<button class="btn sm" data-pl="link-s">Lier un échéancier existant</button>` : ""}<button class="btn sm pri" data-act7="sch-new" data-schpos="${f.id}|${p.id}">Créer l'échéancier</button>` : ""}</div>`;
+}
+function posPickModal(kind, fid, pid) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  const opts = kind === "d" ? visDossiers().filter(d => !d.archived).sort((a, b) => (b.vehicle === f.name) - (a.vehicle === f.name) || a.name.localeCompare(b.name, "fr")).map(d => [d.id, `${d.code} · ${d.name}${d.vehicle ? " · " + d.vehicle : ""}`])
+    : posFreeScheds(fid, pid).map(o => [o.id, `${schOwnerName(o)} · ${o.fund || "—"}${schItems(o).length ? ` · ${schItems(o).length} échéances` : ""}`]);
+  const guess = kind === "d" ? visDossiers().find(d => d.name.toLowerCase().includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(d.name.toLowerCase().split(" — ")[0]))?.id : posFreeScheds(fid, pid).find(o => (schOwnerName(o) || "").toLowerCase().includes(p.name.toLowerCase()))?.id;
+  modal(kind === "d" ? `Rattacher « ${p.name} » à un dossier` : `Lier l'échéancier de « ${p.name} »`, `<label class="f"><span>${kind === "d" ? "Dossier de travail" : "Échéancier de remboursement"}</span><select id="pl-sel"><option value="">— choisir —</option>${opts.map(o => `<option value="${o[0]}" ${o[0] === guess ? "selected" : ""}>${h(o[1])}</option>`).join("")}</select></label>`,
+    `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="pl-ok">${kind === "d" ? "Rattacher" : "Lier"}</button>`, L => {
+      $("#pl-ok", L).onclick = async () => { const v = $("#pl-sel", L).value; if (!v) { toast("Choisissez dans la liste."); return; } L.remove();
+        if (kind === "d") { const live = fundById(fid); live.positions = live.positions.map(x => x.id === pid ? { ...x, dossierId: v } : x); await saveCfg(`« ${p.name} » rattaché au dossier`); }
+        else { await posLinkSched(fid, pid, v); toast("Échéancier lié"); }
+        render(); if ($("#fiche")) ficheOpen(fid, pid, false, true); };
+    });
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-pl]"); if (!b) return; const fe = $("#fiche"); if (!fe) return; const fid = fe.dataset.fid, pid = fe.dataset.pid;
+  e.stopPropagation();
+  if (b.dataset.pl === "link-d") return posPickModal("d", fid, pid);
+  if (b.dataset.pl === "link-s") return posPickModal("s", fid, pid);
+  if (b.dataset.pl === "new-d") { b.disabled = true; const d = await posCreateDossier(fid, pid); if (d) { toast(`Dossier ${d.code} créé et rattaché`); render(); ficheOpen(fid, pid, false, true); } }
 }, true);
 
 /* ---------- events ---------- */
