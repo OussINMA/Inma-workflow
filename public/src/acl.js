@@ -106,7 +106,7 @@ function sanitizeConfig(c) {
 // Échéanciers : les montants (capital, intérêts, conditions du prêt, montants payés) suivent le droit « view_amounts ».
 function stripDeadlineAmounts(o) {
   const { amount, ...rest } = o;
-  if (rest.rule?.type === "schedule") rest.rule = { ...rest.rule, items: (rest.rule.items || []).map(({ p, i, v, ...it }) => it), loan: {}, ca: [] };
+  if (rest.rule?.type === "schedule") rest.rule = { ...rest.rule, items: (rest.rule.items || []).map(({ p, i, v, lo, ...it }) => it), loan: {}, ca: [], draws: [] };
   if (rest.done) rest.done = Object.fromEntries(Object.entries(rest.done).map(([k, v]) => [k, (({ paid, ...r }) => r)(v || {})]));
   return rest;
 }
