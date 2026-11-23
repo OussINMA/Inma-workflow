@@ -8,7 +8,20 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" id="app-favicon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}.tri-ok{color:var(--ok);font-weight:600}
+.tri-t tr.tri-off td{opacity:.55}
+.tri-t td .linkish{font-weight:700}
+.tri-y tr.tri-sum td{font-weight:700;border-top:2px solid var(--line)}
+.tri-y td,.tri-y th{white-space:nowrap;font-size:12px}
+.tri-l td{font-size:12px;white-space:nowrap}.tri-l td:nth-child(2){white-space:normal;min-width:180px}
+.tri-bars{display:flex;gap:6px;align-items:flex-end;height:90px;margin-top:12px;padding:0 4px}
+.tri-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:2px;min-width:0}
+.tri-bar span{display:block;width:100%;max-width:36px;background:var(--accent);border-radius:3px 3px 0 0;min-height:1px}
+.tri-bar em{font-style:normal;font-size:10.5px;color:var(--muted)}
+.tri-t th,.tri-t td{padding-left:7px;padding-right:7px}.tri-t td.num,.tri-t th.r{font-size:12.5px;white-space:nowrap}.tri-t th{letter-spacing:.04em}
+.tri-mini{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:12px}.tri-mini .kpi .v{font-size:20px}
+.tri-syn table td{font-size:13px}.tri-syn table td:first-child{color:var(--muted)}
+</style>
 <script src="/vendor/msal-browser.min.js"></script>
 <script src="/inma-standalone.js"></script>
 </head>
@@ -1527,7 +1540,7 @@ function fundFieldInput(x, v) {
 }
 
 /* ---------- onglet Fonds : hub par fonds, relié au reste de l'outil ---------- */
-const FH_TABS = { overview: "Vue d'ensemble", dossiers: "Dossiers", portfolio: "Portefeuille", tree: "Arborescence & documents", projects: "Projets & jalons", deadlines: "Échéances", valo: "Valorisation", info: "Fiche du fonds" };
+const FH_TABS = { overview: "Vue d'ensemble", dossiers: "Dossiers", portfolio: "Portefeuille", tree: "Arborescence & documents", projects: "Projets & jalons", deadlines: "Échéances", valo: "Valorisation", tri: "TRI", info: "Fiche du fonds" };
 const FH_KPIS_DEFAULT = ["dossiers", "amount", "study", "positions", "crd", "unpaid", "dl30", "lateTasks", "projects"];
 const fhView = () => ({ tabs: Object.keys(FH_TABS).map(k => ({ id: k, on: true })), kpis: FH_KPIS_DEFAULT, home: "overview", ...(S.cfg.fundView || {}) });
 const fhTabs = () => { const v = fhView(); const known = (v.tabs || []).filter(t => FH_TABS[t.id]); const missing = Object.keys(FH_TABS).filter(k => !known.some(t => t.id === k)).map(id => ({ id, on: true })); return [...known, ...missing]; };
@@ -1560,14 +1573,14 @@ function fhGroup(funds) {
   return org + table;
 }
 function fhHub(f) {
-  const tabs = fhTabs().filter(t => t.on !== false); let cur = S.ui.ftab || fhView().home || "overview"; if (!tabs.some(t => t.id === cur)) cur = tabs[0]?.id || "overview";
+  const tabs = fhTabs().filter(t => t.on !== false && (t.id !== "tri" || ficheTplId(f) === "finance") && (t.id !== "valo" || ficheTplId(f) !== "finance")); let cur = S.ui.ftab || fhView().home || "overview"; if (!tabs.some(t => t.id === cur)) cur = tabs[0]?.id || "overview";
   const s = fstatus(f.status), st = fundStats(f);
   const head = `<div class="panel fh-head" style="--fc:${h(f.color || "#212121")}"><div class="body"><div class="row" style="gap:12px;align-items:flex-start;flex-wrap:nowrap"><span class="fh-bar"></span><div class="grow" style="min-width:0">
       <div class="row" style="gap:8px"><h2 style="margin:0;font-size:20px">${h(f.name)}</h2>${chip(s.label, s.color)}<span class="muted" style="font-size:12.5px">${h(f.type || "Type à définir")}${f.year ? " · depuis " + h(f.year) : ""}</span></div>
       ${f.description ? `<p class="muted" style="margin:6px 0 0;font-size:13px;max-width:900px">${h(f.description)}</p>` : ""}</div>
       <div class="row" style="gap:6px;flex:none">${isURL(f.url) ? `<a class="btn" href="${h(f.url)}" target="_blank" rel="noopener">${ic("ext")}Dossier du fonds</a>` : ""}${cpOn() ? `<button class="btn cp-btn" data-cp="fund|${f.id}">${ic("spark")}${aiAllowed() ? "Assistant" : "Copilot"}</button>` : ""}</div></div></div>
     <nav class="fh-tabs" role="tablist">${tabs.map(t => `<button role="tab" class="${t.id === cur ? "on" : ""}" data-ftab="${t.id}">${h(FH_TABS[t.id])}${t.id === "dossiers" ? ` <span class="fh-count">${st.ds.length}</span>` : t.id === "portfolio" ? ` <span class="fh-count">${livePositions(f).length}</span>` : ""}</button>`).join("")}</nav></div>`;
-  const body = { overview: fhOverview, dossiers: fhDossiers, portfolio: fhPortfolio, tree: fhTree, projects: fhProjects, deadlines: fhDeadlines, valo: fhValo, info: fhInfo }[cur](f);
+  const body = { overview: fhOverview, dossiers: fhDossiers, portfolio: fhPortfolio, tree: fhTree, projects: fhProjects, deadlines: fhDeadlines, valo: fhValo, tri: fhTri, info: fhInfo }[cur](f);
   return head + body;
 }
 function fhOverview(f) {
@@ -1606,7 +1619,7 @@ function fhDossiers(f) {
         <td onclick="event.stopPropagation()">${isURL(d.oneDriveUrl) ? `<a class="btn sm" href="${h(d.oneDriveUrl)}" target="_blank" rel="noopener">${ic("ext")}${h(linkKind(d.oneDriveUrl))}</a>` : `<button class="btn sm ghost" data-open="${d.id}" data-tab="onedrive">Lier</button>`}</td></tr>`; }).join("")}</tbody></table></div>`;
 }
 function fhPortfolio(f) {
-  return positionsPanel(f) + `<div class="panel"><header><h2>Remboursements (échéanciers)</h2><span class="spacer"></span>${can("deadlines") ? `<button class="btn sm" data-act7="sch-new">${ic("plus")}Nouvel échéancier</button>` : ""}<button class="btn sm ghost" data-act7="sch-show" data-ref="">Voir tous les échéanciers</button></header><div class="body">${mbCustomSlide({ type: "schedules", fund: f.id }, {}).html}</div></div>`;
+  return positionsPanel(f) + `<div class="panel"><header><h2>Remboursements (échéanciers)</h2><span class="spacer"></span>${ficheTplId(f) === "finance" && (can("funds") || can("portfolio")) && can("deadlines") && can("view_amounts") ? `<button class="btn sm" data-tri="import">Importer le BP Excel</button>` : ""}${can("deadlines") ? `<button class="btn sm" data-act7="sch-new">${ic("plus")}Nouvel échéancier</button>` : ""}<button class="btn sm ghost" data-act7="sch-show" data-ref="">Voir tous les échéanciers</button></header><div class="body">${mbCustomSlide({ type: "schedules", fund: f.id }, {}).html}</div></div>`;
 }
 function fhProjects(f) {
   const ef = can("funds"); const ms = f.milestones || [];
@@ -3437,7 +3450,7 @@ const schToText = items => items.map(it => [it.d.split("-").reverse().join("/"),
 function schTable(o, opts = {}) {
   const items = schItems(o), t = todayISO(), m0 = v => can("view_amounts") ? fmtN(v) : "•••"; let crd = items.reduce((s, it) => s + num(it.p), 0);
   const hasV = items.some(it => num(it.v));
-  return `<div class="tablewrap"><table class="t sch-t"><thead><tr><th>N°</th><th>Date</th><th class="r">Capital</th><th class="r">Intérêts</th>${hasV ? '<th class="r">Part variable (CA)</th>' : ""}<th class="r">Total</th><th class="r">Capital restant dû</th><th>Statut</th>${opts.compact ? "" : "<th>Paiement</th>"}</tr></thead><tbody>
+  return `<div class="tablewrap"><table class="t sch-t"><thead><tr><th>N°</th><th>Date</th><th class="r">Capital</th><th class="r">Intérêts</th>${hasV ? `<th class="r">${o.rule?.src ? "Commissions / variable" : "Part variable (CA)"}</th>` : ""}<th class="r">Total</th><th class="r">Capital restant dû</th><th>Statut</th>${opts.compact ? "" : "<th>Paiement</th>"}</tr></thead><tbody>
     ${items.map((it, k) => { crd = r3(crd - num(it.p)); const key = schKey(o, it); const st = o.done?.[key] || {}; const x = { status: st.status || "todo", late: (st.status || "todo") !== "sent" && it.d < t }; const [lab, col] = schStatusLabel(x);
       return `<tr class="click ${x.status === "sent" ? "sch-paid" : x.late ? "sch-late" : ""}" data-occ="${o.id}|${key}" title="${h(it.det || "")}"><td class="num">${k + 1}</td><td>${fdate(it.d)}${it.est && x.status !== "sent" ? ' <span class="sch-est" title="Montant estimé : TMM futur ou chiffre d\'affaires prévisionnel">estimé</span>' : ""}${it.det && !opts.compact ? `<div class="sch-det">${h(it.det)}</div>` : ""}</td>${it.noamt && !schAmt(it) ? `<td class="r muted" colspan="${hasV ? 4 : 3}">montant à saisir</td>` : `<td class="r num">${m0(it.p)}</td><td class="r num">${m0(it.i)}</td>${hasV ? `<td class="r num">${m0(it.v)}</td>` : ""}<td class="r num"><b>${m0(schAmt(it))}</b>${it.manual ? ' <span class="sch-est" style="color:#2F6FB0;background:color-mix(in oklab,#2F6FB0 12%,transparent)" title="Montant modifié à la main : non recalculé">manuel</span>' : ""}</td>`}<td class="r num">${m0(crd)}</td><td>${chip(lab, col)}</td>${opts.compact ? "" : `<td style="font-size:12px">${st.paidDate ? fdate(st.paidDate) : ""}${st.paid && can("view_amounts") ? " · " + fmtN(st.paid) : ""}${x.status !== "sent" && canUpdateOcc(o) ? ` <button class="btn sm" data-dl-sent="${o.id}|${key}">Payé</button>` : ""}</td>`}</tr>`; }).join("")}
     </tbody><tfoot><tr><th colspan="2">Total</th><th class="r num">${m0(items.reduce((s, it) => s + num(it.p), 0))}</th><th class="r num">${m0(items.reduce((s, it) => s + num(it.i), 0))}</th>${hasV ? `<th class="r num">${m0(items.reduce((s, it) => s + num(it.v), 0))}</th>` : ""}<th class="r num">${m0(items.reduce((s, it) => s + schAmt(it), 0))}</th><th colspan="${opts.compact ? 2 : 3}"></th></tr></tfoot></table></div>`;
@@ -3452,13 +3465,13 @@ function schCard(o, open) {
   const s = schSummary(o), cur = S.cfg.general.currency, d = o.dossierId && dossierById(o.dossierId), L = o.rule.loan || {}, pct = s.n ? Math.round(s.paid / s.n * 100) : 0;
   const m = v => can("view_amounts") ? `${fmtN(v)} ${h(cur)}` : "Masqué";
   return `<details class="panel sch-card" ${open ? "open" : ""}><summary class="body"><div class="row" style="gap:10px;flex-wrap:nowrap;align-items:flex-start"><div class="grow" style="min-width:0">
-      <div class="row" style="gap:8px"><b style="font-size:15px">${h(schOwnerName(o))}</b>${s.lateN ? `<span class="chip" style="background:var(--bad-bg);color:var(--bad)">${s.lateN} impayé(s)</span>` : ""}${s.est ? '<span class="sch-est">montants estimés</span>' : ""}${o.active === false ? '<span class="tag">Inactif</span>' : ""}</div>
+      <div class="row" style="gap:8px"><b style="font-size:15px">${h(schOwnerName(o))}</b>${s.lateN ? `<span class="chip" style="background:var(--bad-bg);color:var(--bad)">${s.lateN} impayé(s)</span>` : ""}${s.est ? '<span class="sch-est">montants estimés</span>' : ""}${o.active === false ? '<span class="tag">Inactif</span>' : ""}${o.rule.src?.kind === "ifbp" ? '<span class="tag" title="Dates et montants repris du BP Excel d\'INMA Finance">Repris du BP</span>' : ""}</div>
       <div class="muted" style="font-size:12px">${h(o.fund || "")}${d ? ` · ${h(d.code)}` : ""}${L.amount ? " · " + schLoanText(L) : ""} · ${s.n} échéances ${s.first ? `du ${fdate(s.first)} au ${fdate(s.last)}` : ""}</div></div>
       <div class="sch-kpi"><span>Capital restant dû</span><b>${m(s.crd)}</b></div>
       <div class="sch-kpi"><span>Prochaine échéance</span><b>${s.next ? `${fdate(s.next.d)}` : "—"}</b>${s.next ? `<span class="muted">${m(schAmt(s.next))}</span>` : ""}</div>
       <div class="sch-kpi"><span>Remboursé</span><b>${s.paid}/${s.n}</b><span class="msbar" style="min-width:70px"><span style="width:${pct}%"></span></span></div></div></summary>
-    <div class="body" style="border-top:1px solid var(--line)">${s.lateN ? `<div class="banner warn" style="margin-bottom:10px">${s.lateN} échéance(s) impayée(s) pour ${m(s.lateAmt)}.</div>` : ""}${s.est ? `<p class="muted" style="font-size:12px;margin:0 0 8px">« estimé » : montant calculé avec un TMM futur (hypothèse) ou un chiffre d'affaires prévisionnel. Mettez à jour le TMM (Paramètres) ou le CA réel puis cliquez « Recalculer ».</p>` : ""}${schTable(o)}
-      <div class="row" style="margin-top:10px">${d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : ""}${o.posRef ? `<button class="btn sm" data-pos="${h(o.posRef)}">Fiche de la ligne</button>` : ""}${isURL(o.url) ? linkBtn(o.url, "Contrat / dossier OneDrive") : ""}<span class="spacer"></span><button class="btn sm" data-sch-csv="${o.id}">Exporter (Excel)</button>${canManageDl() && L.amount && can("view_amounts") ? `<button class="btn sm" data-sch-recalc="${o.id}" title="Recalcule les échéances non payées avec le TMM et le CA à jour">Recalculer</button>` : ""}${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier l'échéancier</button><button class="btn sm ghost danger" data-sch-del="${o.id}">Supprimer</button>` : ""}</div></div></details>`;
+    <div class="body" style="border-top:1px solid var(--line)">${s.lateN ? `<div class="banner warn" style="margin-bottom:10px">${s.lateN} échéance(s) impayée(s) pour ${m(s.lateAmt)}.</div>` : ""}${s.est ? `<p class="muted" style="font-size:12px;margin:0 0 8px">« estimé » : montant calculé avec un TMM futur (hypothèse) ou un chiffre d'affaires prévisionnel. Mettez à jour le TMM (Paramètres) ou le CA réel puis cliquez « Recalculer ».</p>` : ""}${schDrawsLine(o)}${schTable(o)}
+      <div class="row" style="margin-top:10px">${d ? `<button class="btn sm" data-open="${d.id}">${h(d.code)} · ${h(d.name)}</button>` : ""}${o.posRef ? `<button class="btn sm" data-pos="${h(o.posRef)}">Fiche de la ligne</button>` : ""}${isURL(o.url) ? linkBtn(o.url, "Contrat / dossier OneDrive") : ""}<span class="spacer"></span><button class="btn sm" data-sch-csv="${o.id}">Exporter (Excel)</button>${canManageDl() && L.amount && !L.datesOnly && can("view_amounts") ? `<button class="btn sm" data-sch-recalc="${o.id}" title="Recalcule les échéances non payées avec le TMM et le CA à jour">Recalculer</button>` : ""}${canManageDl() ? `<button class="btn sm" data-dl-edit="${o.id}">Modifier l'échéancier</button><button class="btn sm ghost danger" data-sch-del="${o.id}">Supprimer</button>` : ""}</div></div></details>`;
 }
 function vSchedules(refFilter) {
   const f = S.ui.dl || {};
@@ -3479,7 +3492,7 @@ function schRefs() {
 const schRefMatch = (o, ref) => !ref || (ref.startsWith("d:") ? o.dossierId === ref.slice(2) : ref.startsWith("c:") ? o.company === ref.slice(2) : true);
 const lockedOf = o => new Map(schItems(o).filter(it => it.manual || (o.done?.[schKey(o, it)]?.status || "todo") === "sent").map(it => [schKey(o, it), it]));
 async function schRecalc(o) {
-  const L = o.rule.loan || {}; if (!L.amount || L.datesOnly) { toast("Cet échéancier n'a pas de conditions de calcul : saisissez les montants échéance par échéance."); return; }
+  const L = o.rule.loan || {}; if (L.imported) { toast("Échéancier repris du BP Excel : mettez-le à jour en réimportant le fichier (onglet TRI du fonds)."); return; } if (!L.amount || L.datesOnly) { toast("Cet échéancier n'a pas de conditions de calcul : saisissez les montants échéance par échéance."); return; }
   const before = schItems(o).reduce((s, it) => s + schAmt(it), 0);
   const items = schCompute(L, o.rule.ca || [], { locked: lockedOf(o), manualP: schItems(o).filter(it => !String(it.k || "").endsWith("#pre")).map(it => it.p) });
   o.rule = { ...o.rule, items }; o.rule.computedAt = new Date().toISOString(); await putDoc("deadlines", o);
@@ -3597,7 +3610,7 @@ function schModal(o0, preset = {}) {
       }
       const u = $("#sc-url", Lm).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
       const live = isNew ? o : ((S.deadlines || []).find(y => y.id === o.id) || o);
-      Object.assign(live, { title: $("#sc-title", Lm).value.trim() || `Remboursement · ${company || dossierById(dossierId)?.name || ""}`, company, posRef: $("#sc-pos", Lm).value || "", fund: $("#sc-fund", Lm).value, dossierId, owners: $$("[data-sc-owner]", Lm).filter(x => x.checked).map(x => x.dataset.scOwner), reminder: +$("#sc-reminder", Lm).value || 0, url: u, notes: $("#sc-notes", Lm).value, active: $("#sc-active", Lm).checked, rule: { type: "schedule", items, loan, ca: amtOk ? CA.filter(r => r.total !== "" || Object.values(r.segs || {}).some(v => v !== "")) : (o.rule.ca || []), computedAt: new Date().toISOString() }, done: live.done || {} });
+      Object.assign(live, { title: $("#sc-title", Lm).value.trim() || `Remboursement · ${company || dossierById(dossierId)?.name || ""}`, company, posRef: $("#sc-pos", Lm).value || "", fund: $("#sc-fund", Lm).value, dossierId, owners: $$("[data-sc-owner]", Lm).filter(x => x.checked).map(x => x.dataset.scOwner), reminder: +$("#sc-reminder", Lm).value || 0, url: u, notes: $("#sc-notes", Lm).value, active: $("#sc-active", Lm).checked, rule: { type: "schedule", items, loan, ca: amtOk ? CA.filter(r => r.total !== "" || Object.values(r.segs || {}).some(v => v !== "")) : (o.rule.ca || []), computedAt: new Date().toISOString(), ...(o.rule.src ? { src: o.rule.src } : {}), ...(o.rule.draws && !computed ? { draws: o.rule.draws } : {}) }, done: live.done || {} });
       if (isNew && $("#sc-pastpaid", Lm)?.checked) for (const it of items) if (it.d < todayISO()) live.done[schKey(live, it)] = { status: "sent", at: new Date().toISOString(), by: me()?.id || null, note: "Antérieure à la création de l'échéancier" };
       await putDoc("deadlines", live); await log(`${isNew ? "Échéancier créé" : "Échéancier modifié"} : ${schOwnerName(live)} (${items.length} échéances)`, { dossierId: live.dossierId || null });
       Lm.remove(); toast(isNew ? "Échéancier créé" : "Échéancier enregistré"); S.ui.dl = { ...(S.ui.dl || {}), view: "schedules" }; saveUI(); if (S.view !== "deadlines") S.view = "deadlines"; render();
@@ -5031,11 +5044,13 @@ function ficheHTML(fid, pid, ed) {
   const pct = ficheCompletion(f, p);
   const groups = []; for (const s of [{ id: "suivi", title: "Suivi INMA" }, ...t.sections]) { const g = s.group || s.title; const last = groups[groups.length - 1]; if (last && last.g === g) last.items.push(s); else groups.push({ g, items: [s] }); }
   if (ficheTplId(f) !== "finance" && p.kind !== "debt" && !ed) groups.push({ g: "Valorisation", items: [{ id: "valo", title: "Valorisation" }] });
+  if (ficheTplId(f) === "finance" && !ed) groups.push({ g: "TRI et synthèse", items: [{ id: "tri", title: "TRI et synthèse" }] });
   const toc = groups.map(g => g.items.length === 1 && g.items[0].title === g.g ? `<a href="#fc-${g.items[0].id}" data-fiche="go">${h(g.g)}</a>` : `<div class="fc-tg">${h(g.g)}</div>${g.items.map(s => `<a href="#fc-${s.id}" data-fiche="go" class="sub">${h(s.title)}</a>`).join("")}`).join("");
   let body = (ed ? "" : posLinkBanner(f, p)) + ficheSuivi(f, p, ed), lastG = null;
   for (const s of t.sections) { if (s.group && s.group !== lastG && s.group !== s.title) body += `<div class="fc-group">${h(s.group)}</div>`; lastG = s.group; body += ficheSection(s, f, p, fc, ed); }
   const withValo = ficheTplId(f) !== "finance" && p.kind !== "debt";
   if (withValo && !ed) body += ficheValoSection(f, p);
+  if (ficheTplId(f) === "finance" && !ed) body += ficheTriSection(f, p);
   return `<div class="scrim fc-scrim" id="fiche" data-fid="${fid}" data-pid="${pid}" data-ed="${ed ? 1 : 0}"><div class="drawer fc-drawer" role="dialog" aria-modal="true" aria-label="${h(t.label)} ${h(p.name)}">
     <header class="fc-head"><div class="row" style="gap:10px;align-items:flex-start">
       <div style="flex:1;min-width:0"><div class="eyebrow">${h(t.label)} · ${h(f.name)}</div><h1 class="fc-title">${hdot(p.health)} ${h(p.name)}</h1></div>
@@ -5377,7 +5392,7 @@ function valoModal(fid, pid, vid) {
 /* onglet « Valorisation » du fonds : valeur liquidative du portefeuille */
 function fhValo(f) {
   if (!can("view_amounts")) return `<div class="empty"><b>Valorisation réservée</b><span>Le droit « Voir les montants » est nécessaire.</span></div>`;
-  if (ficheTplId(f) === "finance") return `<div class="empty"><b>Pas de valorisation pour ${h(f.name)}</b><span>Les financements sont suivis par leur capital restant dû, dans les échéanciers.</span></div>`;
+  if (ficheTplId(f) === "finance") return `<div class="empty"><b>Pas de valorisation pour ${h(f.name)}</b><span>Les financements sont suivis par leur capital restant dû et leur TRI : voir l'onglet TRI.</span></div>`;
   const ps = livePositions(f).filter(p => p.kind !== "debt");
   if (!ps.length) return `<div class="empty"><b>Aucune participation</b><span>Ajoutez les participations dans l'onglet Portefeuille.</span></div>`;
   const qs = []; let q = quarterEnd(todayISO()); for (let i = 0; i < 8; i++) { qs.unshift(q); const d = new Date(q + "T12:00:00"); d.setDate(1); d.setMonth(d.getMonth() - 2); q = quarterEnd(new Date(d.getTime() - 864e5 * 2).toISOString().slice(0, 10)); }
@@ -5579,6 +5594,442 @@ document.addEventListener("click", e => {
   if (b.dataset.valo === "xl-read") return vxImport(fid, pid);
   if (b.dataset.valo === "xl-local") return vxPickLocal(fid, pid);
 }, true);
+
+/* ---------- INMA Finance : import du BP Excel (dossiers, fiches, échéanciers) et calculateur de TRI ---------- */
+const IF_FREQ = { 1: "monthly", 3: "quarterly", 6: "semiannual", 12: "annual" };
+const IF_FREQ_LBL = { 1: "Mensuelle", 3: "Trimestrielle", 6: "Semestrielle", 12: "Annuelle" };
+const IF_AMORT = { 1: ["bullet", "In fine"], 2: ["linear", "Amortissement constant du capital"], 3: ["annuity", "Annuités constantes"], 4: ["manual", "Amortissement libre"] };
+const IF_SECT = { microfinance: "Finance", immobilier: "Immobilier", automobile: "Automobile", agroalimentaire: "Agroalimentaire", "materiel et produits medicaux": "Santé" };
+const ifNorm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’']/g, "'").replace(/\s+/g, " ").trim().toLowerCase();
+const ifISO = v => { if (v == null || v === "") return ""; if (typeof v === "number" && v > 20000 && v < 80000) return new Date(Math.round((v - 25569) * 864e5)).toISOString().slice(0, 10); if (v instanceof Date) return new Date(v.getTime() + 12 * 36e5).toISOString().slice(0, 10); const s = String(v).trim(); let m; if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return m[0]; if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/))) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`; return ""; };
+const ifN = v => typeof v === "number" && isFinite(v) ? v : (v == null || v === "" || isNaN(+v) ? 0 : +v);
+const ifPct = (x, dec = 2) => x == null || !isFinite(x) ? "—" : (x * 100).toLocaleString("fr-FR", { minimumFractionDigits: dec, maximumFractionDigits: dec }) + " %";
+const ifDefaultComment = s => !s || /^(\d+ = |\d+-\d+|Mode 2 :|Types? \d|Vide = |Encaissés au|Échéances au même|Alimente les|Calculé à partir|Utilisé uniquement|0 = exclu|1 = |Versée en|6 = juin|Seuils croissants)/i.test(String(s).trim());
+
+/* --- lecture du classeur --- */
+function ifParse(XL, buf) {
+  const wb = XL.read(buf, { type: "array" });
+  const out = { ok: false, params: {}, synth: {}, dossiers: [], warnings: [] };
+  const cell = (ws, r, c) => { const x = ws[XL.utils.encode_cell({ r: r - 1, c: c - 1 })]; return x ? x.v : null; };
+  const lastRow = ws => ws?.["!ref"] ? XL.utils.decode_range(ws["!ref"]).e.r + 1 : 0;
+  const lastCol = ws => ws?.["!ref"] ? XL.utils.decode_range(ws["!ref"]).e.c + 1 : 0;
+  const find = (ws, label, opts = {}) => { const L = ifNorm(label), col = opts.col || 3; for (let r = opts.from || 1; r <= Math.min(lastRow(ws), opts.to || 1e5); r++) { const v = ifNorm(cell(ws, r, col)); if (opts.starts ? v.startsWith(L) : v === L) return r; } return 0; };
+  const val = (ws, label, opts = {}) => { const r = find(ws, label, opts); return r ? cell(ws, r, opts.vcol || 5) : null; };
+  const com = (ws, label, opts = {}) => { const r = find(ws, label, opts); const s = r ? cell(ws, r, 6) : null; return ifDefaultComment(s) ? "" : String(s).trim(); };
+  // paramètres du TRI
+  const P = wb.Sheets["Paramètres"] || wb.Sheets["Parametres"];
+  if (P) {
+    const g = (l, s) => val(P, l, { starts: s });
+    const st = ifISO(g("Date de début de l'horizon TRI")), en = ifISO(g("Date de fin de l'horizon TRI"));
+    out.params = { start: st || "2020-01-01", end: en || "2032-12-31", method: ifN(g("Méthode de valeur résiduelle")) || 1, disc: ifN(g("Taux d'actualisation", true)) * 100, perim: ifN(g("Périmètre du portefeuille")) || 2,
+      ras: ifN(g("Retenue à la source sur intérêts", true)) * 100, fee: ifN(g("Honoraires INMA Conseil alloués", true)) * 100, ff: ifN(g("Frais fixes annuels", true)), carry: ifN(g("Commission de performance", true)) * 100, hurdle: ifN(g("Seuil de performance", true)) * 100, base: ifN(g("Base de calcul des intérêts")) || 360 };
+    for (const k of ["disc", "ras", "fee", "carry", "hurdle"]) out.params[k] = Math.round(out.params[k] * 1e6) / 1e6;
+  } else out.warnings.push("Feuille « Paramètres » introuvable : paramètres du TRI par défaut.");
+  const Sy = wb.Sheets["Synthèse"] || wb.Sheets["Synthese"];
+  if (Sy) out.synth = { triBrut: ifN(val(Sy, "TRI brut portefeuille", { vcol: 4 })), triNet: ifN(val(Sy, "TRI net investisseurs", { vcol: 4 })), decaisse: ifN(val(Sy, "Montant total décaissé", { vcol: 4, starts: true })), n: ifN(val(Sy, "Nombre de dossiers inclus", { vcol: 4 })) };
+  const T = wb.Sheets["TRI"]; if (T) { const m = val(T, "Multiple brut", { starts: true }); if (m != null) out.synth.moic = ifN(m); }
+  const Cv = wb.Sheets["Couverture"]; if (Cv) { for (let r = 1; r <= 20; r++) { const v = cell(Cv, r, 5); if (typeof v === "string" && /^version/i.test(v)) out.synth.version = v; } }
+  // dossiers
+  for (const name of wb.SheetNames.filter(n => /^Dossier_\d+$/i.test(n))) {
+    const ws = wb.Sheets[name]; const g = (l, s) => val(ws, l, { starts: s });
+    const soc = String(g("Société financée") || "").trim(); if (!soc) continue;
+    const mode = ifN(g("Mode de saisie")) || 1, nominal = ifN(g("Montant nominal décaissé"));
+    const x = { sheet: name, num: +name.replace(/\D/g, ""), name: soc, sector: String(g("Secteur") || "").trim(), statut: ifN(g("Statut")) === 2 ? "eventuel" : "cours", inclus: ifN(g("Inclure dans le portefeuille")) !== 0, mode, nominal, date: ifISO(g("Date de décaissement")),
+      duree: ifN(g("Durée totale")), differe: ifN(g("Différé de remboursement du principal")), period: ifN(g("Périodicité des échéances")) || 12, amort: ifN(g("Mode d'amortissement")) || 2, defInt: ifN(g("Intérêts pendant le différé")) || 1, maturity: ifISO(g("Date de maturité")),
+      rateType: ifN(g("Type de taux")) || 1, rate: Math.round(ifN(g("Taux fixe annuel")) * 1e8) / 1e6, margin: Math.round(ifN(g("Marge sur TMM")) * 1e8) / 1e6, floor: g("Floor sur taux annuel") == null || g("Floor sur taux annuel") === "" ? "" : ifN(g("Floor sur taux annuel")) * 100, cap: g("Cap sur taux annuel") == null || g("Cap sur taux annuel") === "" ? "" : ifN(g("Cap sur taux annuel")) * 100,
+      upfront: Math.round(ifN(g("Frais de dossier / arrangement", true)) * 1e8) / 1e6, varPct: Math.round(ifN(g("Rémunération variable : % de l'agrégat", true)) * 1e8) / 1e6, provision: Math.round(ifN(g("Taux de provision", true)) * 1e8) / 1e6,
+      xl: { tri: typeof g("TRI brut du dossier", true) === "number" ? g("TRI brut du dossier", true) : null, moic: typeof g("Multiple (MOIC)") === "number" ? g("Multiple (MOIC)") : null, avgRate: typeof g("Taux d'intérêt moyen pondéré", true) === "number" ? g("Taux d'intérêt moyen pondéré", true) : null },
+      notes: [com(ws, "Statut"), com(ws, "Date de décaissement"), com(ws, "Mode d'amortissement"), com(ws, "Taux fixe annuel"), com(ws, "Marge sur TMM")].filter(Boolean), rows: [] };
+    if (/\(libre\)/i.test(soc) && !nominal) continue;
+    if (mode === 2) {
+      const hr = find(ws, "Billet / référence"); if (!hr) { out.warnings.push(`${soc} : tableau de l'échéancier contractuel introuvable.`); continue; }
+      for (let r = hr + 1; r <= lastRow(ws); r++) { const lbl = cell(ws, r, 3); if (ifNorm(lbl) === "total") break; const d = ifISO(cell(ws, r, 4)); if (!d) continue;
+        x.rows.push({ lbl: String(lbl || "").trim(), d, dc: ifN(cell(ws, r, 5)), i: ifN(cell(ws, r, 6)), pf: ifISO(cell(ws, r, 7)), pt: ifISO(cell(ws, r, 8)), p: ifN(cell(ws, r, 9)), c: ifN(cell(ws, r, 10)), v: ifN(cell(ws, r, 11)), lo: ifN(cell(ws, r, 12)) }); }
+    } else {
+      const s5 = find(ws, "Echéancier mensuel"), dr = find(ws, "Date d'échéance théorique (date du flux)", { from: s5 });
+      const rr = l => find(ws, l, { from: s5 }); const R = { dc: rr("Décaissement"), i: rr("Intérêts payés"), p: rr("Amortissement contractuel"), ra: rr("Remboursement anticipé"), pen: rr("Pénalité de RA"), c: rr("Frais upfront / commissions"), v: rr("Rémunération variable") };
+      if (!dr) { out.warnings.push(`${soc} : échéancier mensuel introuvable.`); continue; }
+      let prev = x.date;
+      for (let c = 8; c <= lastCol(ws); c++) { const d = ifISO(cell(ws, dr, c)); if (!d) continue; const q = k => R[k] ? ifN(cell(ws, R[k], c)) : 0;
+        const row = { lbl: "", d, dc: q("dc"), i: q("i") + q("pen"), p: q("p") + q("ra"), c: q("c"), v: q("v"), lo: 0, pf: "", pt: "" };
+        if (row.dc || row.i || row.p || row.c || row.v) { if (row.i) { row.pf = prev; row.pt = d; } if (row.i || row.p) prev = d; row.lbl = row.dc ? "Décaissement" : row.p ? "Échéance" : row.c ? "Commissions" : "Intérêts"; x.rows.push(row); } }
+    }
+    if (!x.rows.length) { out.warnings.push(`${soc} : aucun flux lu.`); continue; }
+    const dr0 = x.rows.filter(r => r.dc).map(r => r.d).sort()[0]; if (dr0 && !x.date) x.date = dr0;
+    if (!x.nominal) x.nominal = x.rows.reduce((s, r) => s + r.dc, 0);
+    out.dossiers.push(x);
+  }
+  out.ok = out.dossiers.length > 0;
+  return out;
+}
+// conversion des flux du classeur en échéancier de l'outil (une échéance par date)
+function ifToSchedule(x) {
+  const draws = [], byD = new Map();
+  for (const r of x.rows) {
+    if (r.dc) { const e = draws.find(w => w.d === r.d); if (e) e.a = r3(e.a + r.dc); else draws.push({ d: r.d, a: r3(r.dc), n: r.lbl || "Décaissement" }); }
+    if (!(r.i || r.p || r.c || r.v || r.lo)) continue;
+    const it = byD.get(r.d) || { d: r.d, p: 0, i: 0, v: 0, lbls: [] };
+    it.p = r3(it.p + r.p); it.i = r3(it.i + r.i); it.v = r3(it.v + r.c + r.v); if (r.lo) it.lo = r3((it.lo || 0) + r.lo);
+    if (r.i && r.pf && (!it.pf || r.pf < it.pf)) it.pf = r.pf;
+    const l = (r.lbl || "").replace(/\s*\((précompté|11 % précompté)\)/i, "").trim(); if (l && !it.lbls.includes(l)) it.lbls.push(l);
+    byD.set(r.d, it);
+  }
+  const items = [...byD.values()].sort((a, b) => a.d.localeCompare(b.d)).map(({ lbls, ...it }) => ({ ...it, det: lbls.join(" · ").slice(0, 300) }));
+  const gap = r3(draws.reduce((s, w) => s + w.a, 0) - items.reduce((s, it) => s + it.p + (it.lo || 0), 0)); const lastP = [...items].reverse().find(it => it.p);
+  if (lastP && gap && Math.abs(gap) < 0.05) lastP.p = r3(lastP.p + gap);
+  return { draws: draws.sort((a, b) => a.d.localeCompare(b.d)), items };
+}
+function ifFicheVals(x) {
+  const cur = S.cfg.general.currency || "TND"; const nPrinc = x.rows.filter(r => r.p).length;
+  const rate = x.rateType === 1 ? `${fmtN(x.rate)} % fixe` : `TMM + ${fmtN(x.margin)} %${x.rateType === 3 ? " + composante indexée" : ""}`;
+  const pre = x.rows.some(r => /précompt/i.test(r.lbl)) ? " · intérêts précomptés" : "";
+  const tri = x.xl.avgRate != null ? ` · taux moyen pondéré ${ifPct(x.xl.avgRate)}` : "";
+  const t = todayISO(); const crdNow = x.rows.reduce((s, r) => s + (r.d <= t ? r.dc - r.p - (r.lo || 0) : 0), 0); const last = x.rows.map(r => r.d).sort().pop();
+  const firstP = x.rows.filter(r => r.p).map(r => r.d).sort()[0];
+  const statut = x.statut === "eventuel" && (!x.date || x.date > t) ? "" : x.provision > 0 ? "En défaut" : crdNow < 1 && last <= t ? "Remboursé" : firstP && firstP > t ? "En période de différé" : "En amortissement";
+  const instr = x.rows.some(r => /\bBT\d?\b|billet/i.test(r.lbl)) ? "Billets de trésorerie" : "Prêt";
+  return { id_raison: x.name, id_secteur: x.sector, id_date: x.date, id_instr: instr, id_montant: x.nominal,
+    fi_emprunteur: x.name, fi_type: instr, fi_montant: x.nominal, fi_date: x.date,
+    fi_duree: `${x.duree ? x.duree + " mois" : ""}${x.maturity ? `${x.duree ? " · " : ""}échéance finale le ${fdate(x.maturity)}` : ""}`,
+    fi_taux: `${rate}${x.floor !== "" ? ` · plancher ${fmtN(x.floor)} %` : ""}${x.cap !== "" ? ` · plafond ${fmtN(x.cap)} %` : ""}${pre}${x.upfront ? ` · frais upfront ${fmtN(x.upfront)} %` : ""}${x.varPct ? ` · rémunération variable ${fmtN(x.varPct)} % de l'agrégat` : ""}${tri}`,
+    fi_profil: `${(IF_AMORT[x.amort] || IF_AMORT[2])[1]}${nPrinc ? ` · ${nPrinc} remboursement(s) de capital` : ""}${x.defInt === 2 ? " · intérêts capitalisés pendant le différé" : ""}`,
+    fi_period: x.amort === 1 ? "In fine" : IF_FREQ_LBL[x.period] || "", fi_differe: x.differe ? `${x.differe} mois de différé de capital` : "Aucun différé", ...(statut ? { fi_statut: statut } : {}),
+    ...(x.provision ? { df_incidents: `Provision de ${fmtN(x.provision)} % du capital restant dû dans le BP.` } : {}) };
+}
+
+/* --- fenêtre d'import --- */
+const ifFund = () => (S.cfg.funds || []).find(f => ficheTplId(f) === "finance") || null;
+function ifMatch(f, x, used) {
+  const n = ifNorm(x.name); const ps = (f.positions || []).filter(p => !used.has(p.id));
+  return ps.find(p => p.ifbp?.sheet === x.sheet && ifNorm(p.ifbp?.name) === n) || ps.find(p => ifNorm(p.name) === n) || ps.find(p => { const a = ifNorm(p.name).replace(/\s*\d+$/, ""), b = n.replace(/\s*\d+$/, ""); return a.length > 2 && (b.startsWith(a) || a.startsWith(b) || b.split(" ").includes(a) || a.split(" ").includes(b)); }) || null;
+}
+async function ifRead(f, file) {
+  const XL = await vxLib(); let meta;
+  if (file) meta = { buf: await file.arrayBuffer(), name: file.name, webUrl: f.bpFile?.url || "", modified: file.lastModified ? new Date(file.lastModified).toISOString() : "" };
+  else meta = await window.INMA.graph.readFile(f.bpFile.url);
+  const x = ifParse(XL, new Uint8Array(meta.buf)); x.file = { name: meta.name, url: meta.webUrl || f.bpFile?.url || "", modified: meta.modified || "" }; return x;
+}
+function ifImportStart(fid) {
+  const f = fundById(fid) || ifFund(); if (!f) { toast("Aucun fonds de dette (INMA Finance) trouvé."); return; }
+  if (!(can("funds") || can("portfolio")) || !can("view_amounts") || !can("deadlines")) { toast("L'import demande les droits Fonds ou Portefeuille, Échéances et Voir les montants."); return; }
+  modal(`Importer le BP · ${f.name}`, `<p class="muted" style="margin:0;font-size:12.5px">Choisissez le classeur du business plan et du TRI (onglets « Paramètres », « Synthèse » et « Dossier_01 » à « Dossier_10 »). L'outil vous montre ce qu'il va créer ou mettre à jour avant d'enregistrer quoi que ce soit.</p>
+    <label class="f"><span>Lien OneDrive / SharePoint du classeur (facultatif)</span><input type="url" id="if-url" value="${h(f.bpFile?.url || "")}" placeholder="https://…sharepoint.com/…/IF - Business Plan & TRI.xlsx"></label>
+    <div class="row">${vxGraph() ? `<button class="btn pri" id="if-od">Lire depuis OneDrive</button>` : ""}<label class="btn ${vxGraph() ? "" : "pri"}" style="cursor:pointer">Choisir le fichier sur l'ordinateur<input type="file" id="if-file" accept=".xlsx,.xlsm" hidden></label></div>
+    ${vxGraph() ? "" : '<p class="muted" style="margin:0;font-size:12px">Dans cette version, l\'outil ne peut pas ouvrir OneDrive : choisissez le fichier sur votre ordinateur. La version déployée le lit directement dans OneDrive.</p>'}`,
+    `<button class="btn" data-mclose="1">Annuler</button>`, L => {
+      const go = async file => { const u = $("#if-url", L).value.trim(); if (u && !isURL(u)) { toast("Collez un lien https:// valide."); return; }
+        if (u) { f.bpFile = { ...(f.bpFile || {}), url: u }; } if (!file && !u) { toast("Collez le lien du fichier."); return; }
+        toast("Lecture du classeur…"); try { const x = await ifRead(f, file); if (!x.ok) { toast("Aucun dossier reconnu : le classeur doit contenir les onglets « Dossier_01 »…"); return; } L.remove(); ifPreview(f.id, x); } catch (er) { toast("Lecture impossible : " + (er.message || "erreur")); } };
+      $("#if-file", L).onchange = e => { const fl = e.target.files?.[0]; if (fl) go(fl); };
+      const od = $("#if-od", L); od && (od.onclick = () => go(null));
+    });
+}
+function ifStageFor(w, x) {
+  const st = w.stages; const t = todayISO();
+  if (x.statut === "eventuel" && (!x.date || x.date > t)) return (st.find(s => /d[ée]caiss/i.test(s.name)) || st[Math.max(0, st.length - 2)]).id;
+  return ([...st].reverse().find(s => /suivi/i.test(s.name)) || st[st.length - 1]).id;
+}
+function ifPreview(fid, X) {
+  const f = fundById(fid); const used = new Set(); const w = posFollowWf(f); const t = todayISO();
+  const pid = new Map(); const ps = f.positions || [];
+  for (const x of X.dossiers) { const p = ps.find(q => !used.has(q.id) && ((q.ifbp?.sheet === x.sheet && ifNorm(q.ifbp?.name) === ifNorm(x.name)) || ifNorm(q.name) === ifNorm(x.name))); if (p) { used.add(p.id); pid.set(x, p.id); } }
+  const live = x => { const e = x.rows.reduce((s, r) => s + r.dc - r.p - (r.lo || 0), 0); return Math.abs(e) > 1 || x.rows.some(r => r.d > t) ? 0 : 1; };
+  for (const x of [...X.dossiers].sort((a, b) => live(a) - live(b))) { if (pid.has(x)) continue; const p = ifMatch(f, x, used); if (p) { used.add(p.id); pid.set(x, p.id); } }
+  const plan = X.dossiers.map(x => ({ x, pid: pid.get(x) || "__new", stage: ifStageFor(w, x) }));
+  const cur = S.cfg.general.currency;
+  const row = (pl, k) => { const x = pl.x, sc = ifToSchedule(x); const tot = sc.items.reduce((s, it) => s + it.i + it.v, 0);
+    return `<tr data-ifk="${k}"><td class="num">${x.num}</td><td><b>${h(x.name)}</b><div class="muted" style="font-size:11.5px">${fmtN(Math.round(x.nominal))} ${h(cur)} · ${fdate(x.date)}<br>${h(x.sector)} · ${x.statut === "eventuel" ? "Éventuel" : "En cours"}${x.inclus ? "" : " · exclu du TRI"}</div></td>
+      <td class="r num">${fmtN(Math.round(tot))}<div class="muted" style="font-size:11px">${sc.items.length} échéance(s)</div></td><td class="num">${ifPct(x.xl.tri)}</td>
+      <td><select data-if-pos="${k}" style="max-width:220px;font-size:12.5px"><option value="__new" ${pl.pid === "__new" ? "selected" : ""}>Créer une nouvelle ligne</option><option value="__skip">Ne pas importer</option>${(f.positions || []).map(p => `<option value="${p.id}" ${pl.pid === p.id ? "selected" : ""}>Mettre à jour « ${h(p.name)} »</option>`).join("")}</select></td>
+      <td><select data-if-stage="${k}" ${pl.pid !== "__new" ? "hidden" : ""} style="max-width:190px;font-size:12.5px">${w.stages.map(s => `<option value="${s.id}" ${pl.stage === s.id ? "selected" : ""}>${h(s.name)}</option>`).join("")}</select><span class="muted" data-if-keep="${k}" ${pl.pid === "__new" ? "hidden" : ""} style="font-size:12px">dossier existant conservé</span></td></tr>`; };
+  const inner = `<div class="banner info" style="display:block;line-height:1.5"><b>${h(X.file?.name || "Classeur")}</b>${X.synth.version ? ` · ${h(X.synth.version)}` : ""} — ${X.dossiers.length} dossier(s) de financement lus. Dans le fichier : TRI brut ${ifPct(X.synth.triBrut)}, TRI net investisseurs ${ifPct(X.synth.triNet)}.</div>
+    ${X.warnings.length ? `<div class="banner warn" style="display:block">${X.warnings.map(h).join("<br>")}</div>` : ""}
+    <div class="tablewrap"><table class="t"><thead><tr><th>N°</th><th>Dossier</th><th class="r">Intérêts et commissions</th><th>TRI</th><th>Dans l'outil</th><th>Étape si nouveau dossier</th></tr></thead><tbody>${plan.map(row).join("")}</tbody></table></div>
+    <div class="panel"><header><h2>Pour chaque dossier, l'outil va</h2></header><div class="body" style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+      <span>• créer ou mettre à jour la ligne du portefeuille (montant, date, secteur, instrument) et la rattacher à un dossier de travail « ${h(w.name)} » (créé s'il manque) ;</span>
+      <span>• remplir la fiche financement (identité, montant, durée, taux, profil, périodicité, différé, statut). Les garanties, covenants, contacts et l'objet du financement restent à compléter ;</span>
+      <span>• créer ou remplacer l'échéancier de remboursement avec les dates et montants du fichier (décaissements, intérêts, commissions, rémunération variable, capital).</span>
+      <label class="chk"><input type="checkbox" id="if-tasks">Créer les tâches automatiques de l'étape pour les nouveaux dossiers en cours (jamais pour les dossiers remboursés)</label>
+      <label class="chk"><input type="checkbox" id="if-past" checked>Marquer comme payées les échéances déjà passées (${fdate(t)}) qui n'ont pas encore de statut</label>
+      <label class="chk"><input type="checkbox" id="if-params" checked>Reprendre les paramètres du TRI du fichier (horizon ${fdate(X.params.start)} → ${fdate(X.params.end)}, honoraires ${fmtN(X.params.fee)} %, carried ${fmtN(X.params.carry)} % au-delà de ${fmtN(X.params.hurdle)} %)</label>
+      <label class="chk"><input type="checkbox" id="if-link" ${X.file?.url ? "checked" : "disabled"}>Garder le lien du fichier pour les prochaines mises à jour</label></div></div>`;
+  modal(`Import du BP · ${f.name}`, inner, `<button class="btn" data-mclose="1">Annuler</button><button class="btn pri" id="if-go">Importer ${X.dossiers.length} dossier(s)</button>`, L => {
+    L.addEventListener("change", e => { const s = e.target.closest("[data-if-pos]"); if (!s) return; const k = s.dataset.ifPos; $(`[data-if-stage="${k}"]`, L).hidden = s.value !== "__new"; $(`[data-if-keep="${k}"]`, L).hidden = s.value === "__new" || s.value === "__skip"; });
+    $("#if-go", L).onclick = async () => {
+      const picks = plan.map((pl, k) => ({ ...pl, pid: $(`[data-if-pos="${k}"]`, L).value, stage: $(`[data-if-stage="${k}"]`, L).value }));
+      const dup = picks.filter(p => !p.pid.startsWith("__")).map(p => p.pid); if (new Set(dup).size !== dup.length) { toast("Une même ligne du portefeuille est choisie pour deux dossiers."); return; }
+      const opts = { tasks: $("#if-tasks", L).checked, past: $("#if-past", L).checked, params: $("#if-params", L).checked, link: $("#if-link", L).checked };
+      $("#if-go", L).disabled = true; $("#if-go", L).textContent = "Import en cours…";
+      try { const r = await ifApply(fid, X, picks, opts); L.remove(); S.ui.ftab = "tri"; S.ui.fund = fid; S.view = "funds"; saveUI(); render(); ifReport(fid, r); }
+      catch (er) { $("#if-go", L).disabled = false; $("#if-go", L).textContent = "Réessayer"; toast("Import interrompu : " + (er.message || "erreur")); }
+    };
+  }, true);
+}
+async function ifApply(fid, X, picks, opts) {
+  const f = fundById(fid); const w = posFollowWf(f); const owner = me()?.id || internals()[0]?.id; const t = todayISO(); const res = { created: [], updated: [], dossiers: 0, scheds: 0 };
+  for (const pk of picks) {
+    if (pk.pid === "__skip") continue;
+    const x = pk.x, live = fundById(fid); const isNew = pk.pid === "__new";
+    let p = isNew ? { id: uid("pos"), name: x.name, kind: "debt", stake: "", status: "active", health: "green", boardSeat: false, lastReport: "", url: "", note: "", dossierId: "" } : clone(live.positions.find(y => y.id === pk.pid));
+    let sect = IF_SECT[ifNorm(x.sector)] || x.sector; if (sect && !(S.cfg.sectors || []).includes(sect)) { if (can("settings")) S.cfg.sectors = [...(S.cfg.sectors || []), sect]; else sect = (S.cfg.sectors || []).includes("Autre") ? "Autre" : ""; }
+    const crdEnd = x.rows.reduce((s, r) => s + r.dc - r.p - (r.lo || 0), 0); const last = x.rows.map(r => r.d).sort().pop();
+    const fv = ifFicheVals(x);
+    Object.assign(p, { kind: "debt", sector: sect || p.sector || "", instrument: fv.fi_type, amount: String(Math.round(x.nominal * 1000) / 1000), date: x.date || p.date || "",
+      outstanding: String(Math.max(0, Math.round(x.rows.reduce((s, r) => s + (r.d <= t ? r.dc - r.p - (r.lo || 0) : 0), 0)))),
+      status: Math.abs(crdEnd) < 1 && last <= t ? "repaid" : (p.status === "repaid" || p.status === "exited" ? "active" : p.status || "active"), health: x.provision >= 50 ? "red" : p.health || "green",
+      tri: { ...(p.tri || {}), statut: x.statut, inclus: x.inclus },
+      ifbp: { sheet: x.sheet, num: x.num, name: x.name, file: X.file?.name || "", at: new Date().toISOString(), xl: x.xl, provision: x.provision, mode: x.mode } });
+    if (x.notes.length && !String(p.note || "").includes(x.notes[0].slice(0, 30))) p.note = [p.note, ...x.notes].filter(Boolean).join("\n");
+    const fc = p.fiche || { v: {}, t: {} }; p.fiche = { ...fc, v: { ...(fc.v || {}), ...fv }, updatedAt: new Date().toISOString(), updatedBy: me()?.id || null };
+    // dossier de travail
+    let d = p.dossierId && dossierById(p.dossierId);
+    if (!d) { d = { id: uid("d"), code: nextCode(w), name: p.name || x.name, workflowId: w.id, stageId: pk.stage || ifStageFor(w, x), vehicle: f.name, ownerId: owner, coOwners: [], members: [owner].filter(Boolean), sector: sect || "", priority: (S.cfg.priorities || []).find(y => y.id === "normal")?.id || (S.cfg.priorities || [])[0]?.id || "", amount: p.amount, startDate: x.date || t, dueDate: x.maturity || "", oneDriveUrl: "", description: `Dossier de financement « ${x.name} » (${f.name}), repris du BP (${X.file?.name || "classeur"}, onglet ${x.sheet}).`, createdAt: t, history: [] };
+      await putDoc("dossiers", d); await log(`Dossier créé depuis le BP INMA Finance : ${d.code} · ${d.name}`, { dossierId: d.id });
+      const repaid = Math.abs(crdEnd) < 1 && last <= t;
+      if (opts.tasks && !repaid) await enterStage(d, d.stageId, false);
+      else { const s0 = w.stages.find(y => y.id === d.stageId); d.history = [{ at: new Date().toISOString(), by: me()?.id || null, from: null, fromId: null, to: s0?.name || "", toId: d.stageId, approved: false, note: "Import du BP" }]; d.stageSince = repaid ? (last || t) : t; await putDoc("dossiers", d); }
+      res.dossiers++; }
+    else if (!d.amount || !d.dueDate) { await putDoc("dossiers", { ...d, amount: d.amount || p.amount, dueDate: d.dueDate || x.maturity || "" }); }
+    p.dossierId = d.id;
+    const lf = fundById(fid); lf.positions = (lf.positions || []).some(y => y.id === p.id) ? lf.positions.map(y => y.id === p.id ? p : y) : [...(lf.positions || []), p];
+    // échéancier
+    const sc = ifToSchedule(x); const ref = `${fid}|${p.id}`;
+    let o = (S.deadlines || []).find(y => isSched(y) && y.posRef === ref) || (S.deadlines || []).find(y => isSched(y) && !y.posRef && d && y.dossierId === d.id);
+    const loan = { amount: String(r3(x.nominal)), start: x.date, n: sc.items.filter(it => it.p).length || sc.items.length, freq: IF_FREQ[x.period] || "annual", method: (IF_AMORT[x.amort] || IF_AMORT[2])[0], grace: x.period ? Math.round(x.differe / x.period) : 0, first: "",
+      rateType: x.rateType === 1 ? "fixed" : "tmm", rate: x.rateType === 1 ? String(r3(x.rate)) : "", margin: x.rateType === 1 ? "" : String(r3(x.margin)), floor: x.floor === "" ? "" : String(x.floor), cap: x.cap === "" ? "" : String(x.cap), dayCount: "prop", prepaid: x.rows.some(r => /précompt/i.test(r.lbl)) ? "period" : "none", caRules: [], datesOnly: true, imported: true };
+    const isNewS = !o;
+    if (!o) o = { id: uid("dl"), title: `Remboursement · ${x.name}`, type: (S.cfg.deadlineTypes || []).find(y => /rembours/i.test(y.label))?.id || (S.cfg.deadlineTypes || [])[0]?.id || "", fund: f.name, company: x.name, posRef: ref, dossierId: d.id, recipient: "", owners: owner ? [owner] : [], reminder: S.cfg.notify?.dueSoonDays ?? 3, amount: "", url: X.file?.url || "", notes: "", active: true, done: {}, createdAt: t };
+    else o = clone(o);
+    const done = { ...(o.done || {}) }; const keys = new Set(sc.items.map(it => it.d));
+    for (const k of Object.keys(done)) if (!keys.has(k)) delete done[k];
+    if (opts.past) for (const it of sc.items) if (it.d < t && !done[it.d]) done[it.d] = { status: "sent", paidDate: it.d, at: new Date().toISOString(), by: me()?.id || null, note: "Import du BP : échéance antérieure considérée comme payée" };
+    Object.assign(o, { company: o.company || x.name, fund: f.name, posRef: ref, dossierId: d.id, active: true, done, rule: { type: "schedule", items: sc.items, draws: sc.draws, loan, ca: o.rule?.ca || [], computedAt: new Date().toISOString(), src: { kind: "ifbp", file: X.file?.name || "", sheet: x.sheet, at: new Date().toISOString() } } });
+    await putDoc("deadlines", o); res.scheds++;
+    (isNew ? res.created : res.updated).push(x.name);
+  }
+  const lf = fundById(fid);
+  if (opts.params) lf.tri = { ...(lf.tri || {}), params: { ...X.params } };
+  lf.tri = { ...(lf.tri || {}), xl: { triBrut: X.synth.triBrut, triNet: X.synth.triNet, moic: X.synth.moic ?? null, version: X.synth.version || "", file: X.file?.name || "", at: new Date().toISOString() } };
+  if (opts.link && X.file?.url) lf.bpFile = { url: X.file.url, name: X.file.name || "" }; else if (X.file?.name) lf.bpFile = { ...(lf.bpFile || {}), name: X.file.name };
+  saveCfg(`BP importé : ${res.created.length} ligne(s) créée(s), ${res.updated.length} mise(s) à jour`);
+  await log(`BP ${f.name} importé depuis ${X.file?.name || "le classeur"} : ${res.created.length + res.updated.length} dossier(s) de financement, ${res.scheds} échéancier(s)`, {});
+  return res;
+}
+function ifReport(fid, r) {
+  const f = fundById(fid); const miss = ["fi_objet", "ga_garanties", "ga_suretes", "ga_rang", "df_prevus"];
+  modal("Import terminé", `<p style="margin:0">${r.created.length} ligne(s) créée(s)${r.created.length ? ` (${r.created.map(h).join(", ")})` : ""}, ${r.updated.length} mise(s) à jour${r.updated.length ? ` (${r.updated.map(h).join(", ")})` : ""} · ${r.dossiers} dossier(s) de travail créé(s) · ${r.scheds} échéancier(s).</p>
+    <p class="muted" style="margin:0;font-size:12.5px">Le TRI du fonds se recalcule maintenant tout seul à chaque ajout, modification ou suppression d'un échéancier ou d'une ligne. Informations absentes du classeur, à compléter dans chaque fiche :</p>
+    <div class="list">${(f.positions || []).filter(p => p.ifbp).map(p => { const n = miss.filter(k => !String(p.fiche?.v?.[k] ?? "").trim()).length; return `<div class="li"><div class="grow"><div class="t1">${h(p.name)}</div><div class="t2">${n ? `${n} rubrique(s) à compléter : objet, garanties, sûretés, rang, événements de défaut, contacts, covenants` : "Fiche complète"}</div></div><button class="btn sm" data-pos="${f.id}|${p.id}">Ouvrir la fiche</button></div>`; }).join("")}</div>`,
+    `<button class="btn pri" data-mclose="1">Fermer</button>`);
+}
+
+/* --- moteur du TRI (logique du classeur : flux datés, XIRR sur dates réelles) --- */
+const TRI_DEF = { start: "2020-01-01", end: "2032-12-31", method: 1, disc: 10, perim: 2, ras: 0, fee: 2.38, ff: 0, carry: 20, hurdle: 10.5, base: 360 };
+const triParams = f => ({ ...TRI_DEF, ...(f?.tri?.params || {}) });
+const triDays = (a, b) => (Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 864e5;
+function xirr(cf) {
+  const fl = cf.filter(c => Math.abs(c.a) > 1e-9).sort((a, b) => a.d.localeCompare(b.d)); if (fl.length < 2 || !fl.some(c => c.a > 0) || !fl.some(c => c.a < 0)) return null;
+  const d0 = fl[0].d, ts = fl.map(c => triDays(d0, c.d) / 365);
+  const npv = r => fl.reduce((s, c, k) => s + c.a / Math.pow(1 + r, ts[k]), 0);
+  const dnpv = r => fl.reduce((s, c, k) => s - ts[k] * c.a / Math.pow(1 + r, ts[k] + 1), 0);
+  let r = 0.1; for (let k = 0; k < 60; k++) { const v = npv(r), dv = dnpv(r); if (!isFinite(v) || !dv) break; const n = r - v / dv; if (!isFinite(n) || n <= -0.9999) break; if (Math.abs(n - r) < 1e-12) return n; r = n; }
+  let lo = -0.9999, hi = 10; if (npv(lo) * npv(hi) > 0) return null; for (let k = 0; k < 300; k++) { const m = (lo + hi) / 2; if (npv(lo) * npv(m) <= 0) hi = m; else lo = m; } return (lo + hi) / 2;
+}
+const triMonthEnd = (y, m) => new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+function triSched(f, p) { return (S.deadlines || []).find(o => isSched(o) && o.posRef === `${f.id}|${p.id}`) || (p.dossierId ? (S.deadlines || []).find(o => isSched(o) && !o.posRef && o.dossierId === p.dossierId) : null); }
+function triPosFlows(f, p) {
+  const o = triSched(f, p); if (!o) return null; const L = o.rule.loan || {};
+  const items = schItems(o);
+  let draws = (o.rule.draws || []).filter(w => /^\d{4}-\d{2}-\d{2}$/.test(w.d) && num(w.a));
+  if (!draws.length) { const a = num(L.amount) || num(p.amount), d = L.start || p.date; if (a && d) draws = [{ d, a, n: "Décaissement" }]; }
+  if (!draws.length) return { o, ev: [], err: "Montant ou date de décaissement manquant" };
+  const ev = [];
+  for (const w of draws) ev.push({ d: w.d, dc: num(w.a), ic: 0, pr: 0, lo: 0, lbl: w.n || "Décaissement" });
+  let prev = draws[0].d;
+  for (const it of items) { const ic = num(it.i) + num(it.v), pr = num(it.p); if (ic || pr || num(it.lo)) ev.push({ d: it.d, dc: 0, ic, pr, lo: num(it.lo), i: num(it.i), vv: num(it.v), pf: it.pf || (num(it.i) ? prev : ""), lbl: it.det || "Échéance" }); if (num(it.i) || pr) prev = it.d; }
+  ev.sort((a, b) => a.d.localeCompare(b.d) || (b.dc - a.dc)); return { o, ev };
+}
+const triCash = e => -e.dc + e.ic + e.pr;
+function triCrdAt(ev, t, strict) { return ev.reduce((s, e) => s + ((strict ? e.d < t : e.d <= t) ? e.dc - e.pr - e.lo : 0), 0); }
+function triAccrued(ev, t) { return ev.reduce((s, e) => { if (!e.i || !e.pf || e.d <= t || e.pf >= t) return s; const n = triDays(e.pf, e.d); return s + (n > 0 ? e.i * triDays(e.pf, t) / n : 0); }, 0); }
+function triCompute(f, over) {
+  const P = { ...triParams(f), ...(over || {}) }; const S0 = P.start, E0 = P.end; const out = { P, pos: [], flows: [], years: {}, warn: [] };
+  for (const p of f.positions || []) {
+    const st = p.tri?.statut === "eventuel" ? "eventuel" : "cours"; const incl = p.tri?.inclus !== false && (num(P.perim) !== 1 || st !== "eventuel") && (over?.excl ? !over.excl.includes(p.id) : true);
+    const r = triPosFlows(f, p); const row = { p, st, incl, flagIncl: p.tri?.inclus !== false, sched: r?.o || null, err: !r ? "Pas d'échéancier" : r.err || "", dc: 0, ic: 0, pr: 0, rv: 0, net: 0, tri: null, moic: null, crdEnd: 0, nominal: 0, cf: [] };
+    out.pos.push(row); if (!r || r.err) continue;
+    const ev = r.ev; row.nominal = ev.reduce((s, e) => s + e.dc, 0);
+    let entry = 0;
+    if (ev.some(e => e.d < S0)) { const crd = triCrdAt(ev, S0, true); if (crd > 0.5) { const m = +P.method; entry = m === 1 ? -(crd + triAccrued(ev, S0)) : m === 2 ? -ev.filter(e => e.d >= S0).reduce((s, e) => s + triCash(e) / Math.pow(1 + num(P.disc) / 100, triDays(S0, e.d) / 365), 0) : 0; } }
+    const inH = ev.filter(e => e.d >= S0 && e.d <= E0);
+    const crdE = triCrdAt(ev, E0); row.crdEnd = crdE; let resid = 0;
+    if (crdE > 0.5) { const m = +P.method; resid = m === 1 ? crdE + triAccrued(ev, E0) : m === 2 ? ev.filter(e => e.d > E0).reduce((s, e) => s + triCash(e) / Math.pow(1 + num(P.disc) / 100, triDays(E0, e.d) / 365), 0) : 0; }
+    const cf = inH.map(e => ({ d: e.d, a: triCash(e), dc: e.dc, ic: e.ic, i: e.i || 0, vv: e.vv || 0, pr: e.pr, rv: 0, who: p.name, lbl: e.lbl }));
+    if (entry) cf.unshift({ d: S0, a: entry, dc: 0, ic: 0, pr: 0, rv: entry, who: p.name, lbl: "Valeur d'entrée (début d'horizon)" });
+    if (resid) cf.push({ d: E0, a: resid, dc: 0, ic: 0, pr: 0, rv: resid, who: p.name, lbl: "Valeur résiduelle (fin d'horizon)" });
+    row.cf = cf; row.dc = cf.reduce((s, c) => s + c.dc, 0); row.ic = cf.reduce((s, c) => s + c.ic, 0); row.pr = cf.reduce((s, c) => s + c.pr, 0); row.rv = entry + resid; row.net = cf.reduce((s, c) => s + c.a, 0);
+    const byD = {}; for (const c of cf) byD[c.d] = (byD[c.d] || 0) + c.a; const pos = Object.values(byD).filter(v => v > 0).reduce((s, v) => s + v, 0), neg = -Object.values(byD).filter(v => v < 0).reduce((s, v) => s + v, 0);
+    row.moic = neg ? pos / neg : null; row.tri = xirr(Object.entries(byD).map(([d, a]) => ({ d, a }))); row.ev = ev;
+    if (incl) out.flows.push(...cf);
+  }
+  const inc = out.pos.filter(r => r.incl && !r.err);
+  // coûts du fonds : honoraires sur l'encours de fin de mois (réglés par trimestre), frais fixes, retenue à la source
+  const fees = {}; const [ys, ms] = S0.split("-").map(Number), [ye, me_] = E0.split("-").map(Number);
+  for (let y = ys, m = ms; y < ye || (y === ye && m <= me_); m === 12 ? (y++, m = 1) : m++) {
+    const e = triMonthEnd(y, m); if (e < S0 || e > E0) continue;
+    for (const r of out.pos) if (!r.err && r.ev) { const c1 = -num(P.fee) / 100 / 12 * Math.max(0, triCrdAt(r.ev, e)); if (c1) { const q1 = triMonthEnd(y, Math.ceil(m / 3) * 3); const d1 = q1 > E0 ? E0 : q1; (r.fees ||= {})[d1] = (r.fees[d1] || 0) + c1; } }
+    const crd = inc.reduce((s, r) => s + Math.max(0, triCrdAt(r.ev, e)), 0); const qe = triMonthEnd(y, Math.ceil(m / 3) * 3); const qd = qe > E0 ? E0 : qe;
+    let c = -num(P.fee) / 100 / 12 * crd; if (num(P.ff) && crd > 0.5) c -= num(P.ff) / 12;
+    if (num(P.ras)) { const ms0 = `${y}-${String(m).padStart(2, "0")}`; c -= num(P.ras) / 100 * inc.reduce((s, r) => s + r.ev.filter(x => x.d.startsWith(ms0) && x.d >= S0 && x.d <= E0).reduce((a, x) => a + x.ic, 0), 0); }
+    if (c) fees[qd] = (fees[qd] || 0) + c;
+  }
+  for (const r of out.pos) if (!r.err && r.cf) { r.fee = Object.values(r.fees || {}).reduce((a, b) => a + b, 0); const byD = {}; for (const c of r.cf) byD[c.d] = (byD[c.d] || 0) + c.a; for (const [d, a] of Object.entries(r.fees || {})) byD[d] = (byD[d] || 0) + a; r.triNet = xirr(Object.entries(byD).map(([d, a]) => ({ d, a }))); }
+  const costs = Object.entries(fees).map(([d, a]) => ({ d, a, cost: a, who: "INMA Conseil – honoraires et frais (trimestre)", lbl: "Honoraires sur l'encours de fin de mois" }));
+  const gross = out.flows.map(c => ({ d: c.d, a: c.a }));
+  const netPre = [...gross, ...costs.map(c => ({ d: c.d, a: c.a }))];
+  const fv = netPre.reduce((s, c) => s + c.a * Math.pow(1 + num(P.hurdle) / 100, triDays(c.d, E0) / 365), 0);
+  const carried = num(P.carry) / 100 * Math.max(0, fv); out.fvHurdle = fv; out.carried = carried;
+  if (carried > 0.5) costs.push({ d: E0, a: -carried, cost: -carried, who: "Commission de performance (carried)", lbl: "Prélevée en fin d'horizon" });
+  out.costs = costs;
+  out.triBrut = xirr(gross); out.triNet = xirr([...gross, ...costs.map(c => ({ d: c.d, a: c.a }))]);
+  out.dc = inc.reduce((s, r) => s + r.dc, 0); out.ic = inc.reduce((s, r) => s + r.ic, 0); out.pr = inc.reduce((s, r) => s + r.pr, 0); out.rv = inc.reduce((s, r) => s + r.rv, 0); out.net = gross.reduce((s, c) => s + c.a, 0); out.cost = costs.reduce((s, c) => s + c.a, 0);
+  const byD = {}; for (const c of gross) byD[c.d] = (byD[c.d] || 0) + c.a; const pos = Object.values(byD).filter(v => v > 0).reduce((s, v) => s + v, 0), neg = -Object.values(byD).filter(v => v < 0).reduce((s, v) => s + v, 0); out.moic = neg ? pos / neg : null;
+  out.nominal = inc.reduce((s, r) => s + r.nominal, 0);
+  out.crdNow = inc.reduce((s, r) => s + Math.max(0, triCrdAt(r.ev, todayISO())), 0);
+  // vue annuelle
+  for (const c of out.flows) { const y = c.d.slice(0, 4); const Y = out.years[y] ||= { dc: 0, ic: 0, pr: 0, rv: 0, cost: 0 }; Y.dc -= c.dc; Y.ic += c.ic; Y.pr += c.pr; Y.rv += c.rv; }
+  for (const c of costs) { const y = c.d.slice(0, 4); (out.years[y] ||= { dc: 0, ic: 0, pr: 0, rv: 0, cost: 0 }).cost += c.a; }
+  for (const [y, Y] of Object.entries(out.years)) { Y.gross = Y.dc + Y.ic + Y.pr + Y.rv; Y.net = Y.gross + Y.cost; Y.crd = inc.reduce((s, r) => s + Math.max(0, triCrdAt(r.ev, `${y}-12-31`)), 0); }
+  return out;
+}
+
+/* --- synthèse d'un dossier (mécanique du BP : section « Synthèse du dossier sur l'horizon TRI ») --- */
+const triM = v => Math.abs(v) < 0.5 ? "0" : Math.round(v).toLocaleString("fr-FR");
+const triX = v => v ? v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "x" : "—";
+function triAvgRate(ev, base) {
+  const ds = [...new Set(ev.map(e => e.d))].sort(); let crd = 0, area = 0, ints = 0;
+  for (let k = 0; k < ds.length; k++) { for (const e of ev) if (e.d === ds[k]) { crd += e.dc - e.pr - e.lo; ints += e.i || 0; } if (k + 1 < ds.length && crd > 0.5) area += crd * triDays(ds[k], ds[k + 1]); }
+  return area ? ints / (area / (num(base) || 360)) : null;
+}
+function triSynth(f, p, R) {
+  R = R || triCompute(f); const r = R.pos.find(x => x.p.id === p.id); if (!r) return null;
+  if (r.err) return { r, R, err: r.err };
+  const sum = k => r.cf.reduce((s, c) => s + (c[k] || 0), 0);
+  const entry = r.cf.filter(c => c.rv < 0).reduce((s, c) => s + c.rv, 0), resid = r.cf.filter(c => c.rv > 0).reduce((s, c) => s + c.rv, 0);
+  const life = { dc: r.ev.reduce((s, e) => s + e.dc, 0), pr: r.ev.reduce((s, e) => s + e.pr, 0), lo: r.ev.reduce((s, e) => s + e.lo, 0) };
+  const years = {}; for (const c of r.cf) { const Y = years[c.d.slice(0, 4)] ||= { dc: 0, i: 0, vv: 0, pr: 0, rv: 0, net: 0 }; Y.dc -= c.dc; Y.i += c.i || 0; Y.vv += c.vv || 0; Y.pr += c.pr; Y.rv += c.rv; Y.net += c.a; }
+  for (const [y, Y] of Object.entries(years)) Y.crd = Math.max(0, triCrdAt(r.ev, `${y}-12-31`));
+  return { r, R, entry, resid, dc: sum("dc"), i: sum("i"), vv: sum("vv"), pr: sum("pr"), net: r.net, fee: r.fee || 0, tri: r.tri, triNet: r.triNet, moic: r.moic, crdEnd: r.crdEnd, crdNow: Math.max(0, triCrdAt(r.ev, todayISO())),
+    avg: triAvgRate(r.ev, R.P.base), check: Math.abs(life.pr + life.lo - life.dc) < 1, gapLife: life.dc - life.pr - life.lo, years, first: r.ev[0]?.d, last: r.ev[r.ev.length - 1]?.d };
+}
+function triSynthHTML(f, p, R) {
+  if (!can("view_amounts")) return '<p class="muted" style="margin:0">Le TRI et la synthèse du financement sont réservés aux rôles qui ont le droit « Voir les montants ».</p>';
+  const x = triSynth(f, p, R); if (!x) return "";
+  if (x.err) return `<p class="muted" style="margin:0">${x.err === "Pas d'échéancier" ? "Pas encore d'échéancier : le TRI se calculera dès que l'échéancier de remboursement sera créé." : h(x.err) + " : complétez l'échéancier."}</p>${x.err === "Pas d'échéancier" && can("deadlines") ? `<div style="margin-top:8px"><button class="btn sm" data-act7="sch-new" data-schpos="${f.id}|${p.id}">${ic("plus")}Créer l'échéancier</button></div>` : ""}`;
+  const P = x.R.P, cur = h(S.cfg.general.currency), r = x.r;
+  const note = !r.incl ? `<div class="banner warn" style="margin-bottom:10px">Ce dossier n'est pas inclus dans le TRI du fonds${r.st === "eventuel" && +P.perim === 1 ? " (dossier éventuel, périmètre « en cours » seulement)" : ""} : son TRI reste calculé ci-dessous.</div>` : "";
+  const kv = (l, v, strong) => `<tr><td>${l}</td><td class="r num">${strong ? `<b>${v}</b>` : v}</td></tr>`;
+  const ys = Object.keys(x.years).sort();
+  return `${note}<div class="kpis tri-mini"><div class="kpi"><span class="l">TRI brut du dossier</span><span class="v">${ifPct(x.tri)}</span></div><div class="kpi"><span class="l">TRI net après honoraires</span><span class="v">${ifPct(x.triNet)}</span></div><div class="kpi"><span class="l">Multiple (MOIC)</span><span class="v">${triX(x.moic)}</span></div><div class="kpi"><span class="l">Taux moyen pondéré</span><span class="v">${ifPct(x.avg)}</span></div><div class="kpi"><span class="l">Encours aujourd'hui</span><span class="v" style="font-size:18px">${triM(x.crdNow)} <small>${cur}</small></span></div></div>
+    <div class="tri-syn"><table class="t"><tbody>
+      ${kv("Horizon du TRI", `${fdate(P.start)} → ${fdate(P.end)}`)}
+      ${kv("Valeur d'entrée au début de l'horizon (payée)", triM(x.entry))}
+      ${kv(`Valeur résiduelle à la fin de l'horizon (encaissée) · ${["", "CRD + intérêts courus", "flux restants actualisés", "aucune"][+P.method] || ""}`, triM(x.resid))}
+      ${kv("Décaissements", triM(x.dc))}
+      ${kv("Intérêts encaissés", triM(x.i))}
+      ${kv("Commissions et rémunération variable", triM(x.vv))}
+      ${kv("Principal remboursé", triM(x.pr))}
+      ${kv("Flux net (y.c. valeurs d'entrée et résiduelle)", triM(x.net), 1)}
+      ${kv(`Honoraires de gestion alloués (${fmtN(P.fee)} % de l'encours)`, triM(x.fee))}
+      ${kv("Capital restant dû à la fin de l'horizon", triM(x.crdEnd))}
+      ${kv("Contrôle : principal remboursé + pertes = décaissé (vie entière)", x.check ? '<span class="tri-ok">OK</span>' : `<span style="color:var(--bad);font-weight:600">écart de ${triM(x.gapLife)} ${cur}</span>`)}
+    </tbody></table></div>
+    ${ys.length ? `<div class="tablewrap" style="margin-top:12px"><table class="t tri-y"><thead><tr><th>${cur}</th>${ys.map(y => `<th class="r">${y}</th>`).join("")}<th class="r">Total</th></tr></thead><tbody>
+      ${[["dc", "Décaissement"], ["i", "Intérêts"], ["vv", "Commissions et variable"], ["pr", "Principal remboursé"], ["rv", "Entrée / résiduelle"], ["net", "Flux net", 1], ["crd", "Capital restant dû fin d'année"]].filter(([k]) => k !== "rv" || ys.some(y => Math.abs(x.years[y].rv) > 0.5)).map(([k, l, b]) => `<tr${b ? ' class="tri-sum"' : ""}><td>${l}</td>${ys.map(y => `<td class="r num">${Math.abs(x.years[y][k]) < 0.5 ? "–" : triM(x.years[y][k])}</td>`).join("")}<td class="r num">${k === "crd" ? "" : triM(ys.reduce((s, y) => s + x.years[y][k], 0))}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    <p class="muted" style="font-size:11.5px;margin:8px 0 0">Calcul automatique à partir des flux de l'échéancier (${fdate(x.first)} → ${fdate(x.last)}) : XIRR sur dates réelles. Le TRI net déduit les honoraires sur l'encours de fin de mois, réglés par trimestre.</p>`;
+}
+function triSynthModal(fid, pid) {
+  const f = fundById(fid), p = f?.positions?.find(x => x.id === pid); if (!p) return;
+  const o = triSched(f, p);
+  modal(`TRI et synthèse · ${p.name}`, triSynthHTML(f, p), `${o ? `<button class="btn" data-act7="sch-show" data-ref="${h(o.dossierId ? "d:" + o.dossierId : "c:" + (o.company || ""))}">Voir l'échéancier</button>` : ""}<button class="btn" data-pos="${f.id}|${p.id}" data-mclose="1">Ouvrir la fiche</button><span class="spacer"></span><button class="btn pri" data-mclose="1">Fermer</button>`, null, true);
+}
+function ficheTriSection(f, p) { return `<section class="panel fc-sec" id="fc-tri"><header><h2>TRI et synthèse du financement</h2></header><div class="body">${triSynthHTML(f, p)}</div></section>`; }
+
+/* --- onglet TRI du fonds --- */
+function fhTri(f) {
+  if (ficheTplId(f) !== "finance") return `<div class="empty"><b>Le calculateur de TRI concerne les fonds de dette</b><span>Il calcule le TRI à partir des échéanciers de remboursement des financements.</span></div>`;
+  if (!can("view_amounts")) return `<div class="empty"><b>TRI réservé</b><span>Le droit « Voir les montants » est nécessaire.</span></div>`;
+  const R = triCompute(f), P = R.P, ed = can("funds"), edP = can("funds") || can("portfolio"), cur = S.cfg.general.currency;
+  const M = triM; const Mm = v => (Math.abs(v) < 5000 ? 0 : v / 1e6).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " M";
+  if (!R.pos.length) return `<div class="empty"><b>Aucun financement dans ${h(f.name)}</b><span>Ajoutez les financements dans l'onglet Portefeuille, avec leur échéancier de remboursement : le TRI de chaque dossier et du fonds se calcule automatiquement à partir de leurs flux.</span><button class="btn pri" data-ftab="portfolio">Aller au portefeuille</button></div>`;
+  const nInc = R.pos.filter(r => r.incl && !r.err).length, nErr = R.pos.filter(r => r.err).length;
+  const head = `<div class="banner info"><span>Calcul automatique à partir des flux des échéanciers de l'outil (décaissements, intérêts, commissions, rémunération variable, capital) et des paramètres ci-dessous. Toute création, modification ou suppression d'un financement ou d'un échéancier met le TRI à jour.</span></div>${nErr ? `<div class="banner warn">${nErr} financement(s) sans échéancier complet : ils ne comptent pas dans le TRI tant que l'échéancier n'est pas créé.</div>` : ""}`;
+  const kp = `<div class="kpis"><div class="kpi"><span class="l">TRI brut du portefeuille</span><span class="v">${ifPct(R.triBrut)}</span><span class="l">${nInc} dossier(s) inclus</span></div>
+    <div class="kpi"><span class="l">TRI net investisseurs</span><span class="v">${ifPct(R.triNet)}</span><span class="l">après honoraires, frais et carried</span></div>
+    <div class="kpi"><span class="l">Multiple brut (MOIC)</span><span class="v">${triX(R.moic)}</span><span class="l">encaissements / décaissements</span></div>
+    <div class="kpi"><span class="l">Total décaissé</span><span class="v" style="font-size:20px">${Mm(R.dc)} <small>${h(cur)}</small></span><span class="l">Intérêts et commissions : ${Mm(R.ic)}</span></div>
+    <div class="kpi"><span class="l">Encours aujourd'hui</span><span class="v" style="font-size:20px">${Mm(R.crdNow)} <small>${h(cur)}</small></span><span class="l">Gain net sur l'horizon : ${Mm(R.net)}</span></div>
+    <div class="kpi"><span class="l">Coûts du fonds</span><span class="v" style="font-size:20px">${Mm(-R.cost)} <small>${h(cur)}</small></span><span class="l">dont carried ${Mm(R.carried)}</span></div></div>`;
+  const dis = ed ? "" : "disabled";
+  const prm = `<details class="panel" ${S.ui.triP ? "open" : ""} data-tri-pdet="1"><summary class="body" style="cursor:pointer"><b>Paramètres du calcul</b> <span class="muted" style="font-size:12.5px">· horizon ${fdate(P.start)} → ${fdate(P.end)} · valeur résiduelle : ${["", "CRD + intérêts courus (pair)", "flux restants actualisés à " + fmtN(P.disc) + " %", "aucune (cash réalisé)"][+P.method] || "—"} · ${+P.perim === 1 ? "dossiers en cours uniquement" : "dossiers en cours + éventuels"} · honoraires ${fmtN(P.fee)} % de l'encours · carried ${fmtN(P.carry)} % au-delà de ${fmtN(P.hurdle)} %</span></summary>
+    <div class="body grid3" style="border-top:1px solid var(--line)">
+      <label class="f"><span>Début de l'horizon TRI</span><input type="date" data-trip="start" value="${h(P.start)}" ${dis}></label>
+      <label class="f"><span>Fin de l'horizon TRI</span><input type="date" data-trip="end" value="${h(P.end)}" ${dis}></label>
+      <label class="f"><span>Valeur d'entrée / résiduelle</span><select data-trip="method" ${dis}>${[[1, "CRD + intérêts courus (au pair)"], [2, "Flux restants actualisés"], [3, "Aucune (cash réalisé)"]].map(([k, l]) => `<option value="${k}" ${+P.method === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="f"><span>Taux d'actualisation (méthode 2, %)</span><input type="number" step="0.01" data-trip="disc" value="${h(P.disc)}" ${dis}></label>
+      <label class="f"><span>Périmètre</span><select data-trip="perim" ${dis}><option value="1" ${+P.perim === 1 ? "selected" : ""}>Dossiers en cours uniquement</option><option value="2" ${+P.perim !== 1 ? "selected" : ""}>Dossiers en cours + éventuels</option></select></label>
+      <label class="f"><span>Base de calcul des intérêts (jours)</span><select data-trip="base" ${dis}><option value="360" ${+P.base !== 365 ? "selected" : ""}>Exact/360</option><option value="365" ${+P.base === 365 ? "selected" : ""}>Exact/365</option></select></label>
+      <label class="f"><span>Honoraires de gestion (% de l'encours, TTC/an)</span><input type="number" step="0.01" data-trip="fee" value="${h(P.fee)}" ${dis}></label>
+      <label class="f"><span>Frais fixes annuels (${h(cur)})</span><input type="number" data-trip="ff" value="${h(P.ff)}" ${dis}></label>
+      <label class="f"><span>Retenue à la source, coût définitif (%)</span><input type="number" step="0.01" data-trip="ras" value="${h(P.ras)}" ${dis}></label>
+      <label class="f"><span>Commission de performance (%)</span><input type="number" step="0.01" data-trip="carry" value="${h(P.carry)}" ${dis}></label>
+      <label class="f"><span>Seuil de performance (hurdle, %)</span><input type="number" step="0.01" data-trip="hurdle" value="${h(P.hurdle)}" ${dis}></label>
+      ${ed ? `<div style="grid-column:1/-1" class="row"><span class="muted" style="font-size:12px">Chaque modification recalcule le TRI immédiatement.</span><span class="spacer"></span><button class="btn sm ghost" data-tri="reset">Valeurs par défaut</button></div>` : ""}</div></details>`;
+  const rows = R.pos.slice().sort((a, b) => (a.p.ifbp?.num || 99) - (b.p.ifbp?.num || 99) || (a.p.date || "").localeCompare(b.p.date || ""));
+  const tab = `<div class="panel"><header><h2>TRI par dossier</h2><span class="spacer"></span><span class="muted" style="font-size:12px">Décochez un dossier pour voir le TRI sans lui · « Synthèse » détaille le calcul</span></header><div class="body tablewrap"><table class="t tri-t"><thead><tr><th>Inclus</th><th>Dossier</th><th>Statut</th><th class="r">Décaissé</th><th class="r" title="Intérêts, commissions et rémunération variable">Intérêts et comm.</th><th class="r">Principal</th><th class="r" title="Valeur d'entrée ou valeur résiduelle sur l'horizon">Entrée / résid.</th><th class="r">Flux net</th><th class="r">TRI brut</th><th class="r">TRI net</th><th class="r">MOIC</th><th class="r">Poids</th><th></th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.incl && !r.err ? "" : "tri-off"}"><td><input type="checkbox" class="cb" data-tri-inc="${r.p.id}" ${r.flagIncl ? "checked" : ""} ${edP && !r.err ? "" : "disabled"} aria-label="Inclure dans le TRI"></td>
+      <td><button class="linkish" data-pos="${f.id}|${r.p.id}"><b>${h(r.p.name)}</b></button>${r.err ? `<div style="font-size:11.5px;color:var(--bad)">${h(r.err)}${r.err === "Pas d'échéancier" && can("deadlines") ? ` · <button class="linkish" data-act7="sch-new" data-schpos="${f.id}|${r.p.id}">créer</button>` : ""}</div>` : r.p.status === "repaid" ? '<div class="muted" style="font-size:11.5px">Remboursé</div>' : ""}</td>
+      <td>${edP ? `<select data-tri-st="${r.p.id}" style="font-size:12px;padding:3px 4px;width:auto;min-width:96px"><option value="cours" ${r.st === "cours" ? "selected" : ""}>En cours</option><option value="eventuel" ${r.st === "eventuel" ? "selected" : ""}>Éventuel</option></select>` : (r.st === "eventuel" ? "Éventuel" : "En cours")}</td>
+      ${r.err ? '<td colspan="10"></td>' : `<td class="r num">${M(r.dc)}</td><td class="r num">${M(r.ic)}</td><td class="r num">${M(r.pr)}</td><td class="r num">${M(r.rv)}</td><td class="r num">${M(r.net)}</td><td class="r num"><b>${ifPct(r.tri)}</b></td><td class="r num">${ifPct(r.triNet)}</td><td class="r num">${triX(r.moic)}</td><td class="r num">${r.incl && R.nominal ? ifPct(r.nominal / R.nominal, 1) : "—"}</td><td><button class="btn sm" data-tri-syn="${r.p.id}">Synthèse</button></td>`}</tr>`).join("")}
+    </tbody><tfoot><tr><th colspan="3">Portefeuille (dossiers inclus)</th><th class="r num">${M(R.dc)}</th><th class="r num">${M(R.ic)}</th><th class="r num">${M(R.pr)}</th><th class="r num">${M(R.rv)}</th><th class="r num">${M(R.net)}</th><th class="r num">${ifPct(R.triBrut)}</th><th class="r num">${ifPct(R.triNet)}</th><th class="r num">${triX(R.moic)}</th><th class="r num">100 %</th><th></th></tr></tfoot></table></div></div>`;
+  const ys = Object.keys(R.years).sort(); const maxC = Math.max(1, ...ys.map(y => R.years[y].crd));
+  const yr = ys.length ? `<div class="panel"><header><h2>Flux par année</h2><span class="muted" style="font-size:12px">${h(cur)} · horizon du TRI</span></header><div class="body tablewrap"><table class="t tri-y"><thead><tr><th></th>${ys.map(y => `<th class="r">${y}</th>`).join("")}<th class="r">Total</th></tr></thead><tbody>
+    ${[["dc", "Décaissements"], ["ic", "Intérêts et commissions"], ["pr", "Principal remboursé"], ["rv", "Valeur d'entrée / résiduelle"], ["gross", "Flux brut", 1], ["cost", "Coûts du fonds"], ["net", "Flux net investisseurs", 1], ["crd", "Encours fin d'année"]].map(([k, l, b]) => `<tr${b ? ' class="tri-sum"' : ""}><td>${l}</td>${ys.map(y => `<td class="r num">${Math.abs(R.years[y][k]) < 0.5 ? "–" : M(R.years[y][k])}</td>`).join("")}<td class="r num">${k === "crd" ? "" : M(ys.reduce((s, y) => s + R.years[y][k], 0))}</td></tr>`).join("")}</tbody></table>
+    <div class="tri-bars" aria-label="Encours de fin d'année">${ys.map(y => `<div class="tri-bar" title="Encours fin ${y} : ${M(R.years[y].crd)} ${h(cur)}"><span style="height:${Math.round(R.years[y].crd / maxC * 100)}%"></span><em>${y.slice(2)}</em></div>`).join("")}</div><p class="muted" style="font-size:11.5px;margin:4px 0 0">Encours (capital restant dû) en fin d'année.</p></div></div>` : "";
+  const all = [...R.flows.map(c => ({ ...c, cost: 0 })), ...R.costs.map(c => ({ d: c.d, a: c.a, dc: 0, ic: 0, pr: 0, rv: 0, cost: c.a, who: c.who, lbl: c.lbl }))].sort((a, b) => a.d.localeCompare(b.d) || a.a - b.a);
+  let cum = 0; const list = `<details class="panel"><summary class="body" style="cursor:pointer"><b>Liste chronologique des flux</b> <span class="muted" style="font-size:12.5px">· ${all.length} flux retenus dans le calcul</span></summary><div class="body tablewrap" style="border-top:1px solid var(--line);max-height:520px;overflow:auto"><table class="t tri-l"><thead><tr><th>Date</th><th>Contrepartie</th><th class="r">Décaissements</th><th class="r">Intérêts et commissions</th><th class="r">Principal</th><th class="r">Entrée / résiduelle</th><th class="r">Coûts du fonds</th><th class="r">Flux net</th><th class="r">Cumul</th></tr></thead><tbody>
+    ${all.map(c => { cum += c.a; const z = v => Math.abs(v) < 0.5 ? "" : M(v); return `<tr><td>${fdate(c.d)}</td><td>${h(c.who)}<div class="muted" style="font-size:11px">${h(c.lbl || "")}</div></td><td class="r num">${z(-c.dc)}</td><td class="r num">${z(c.ic)}</td><td class="r num">${z(c.pr)}</td><td class="r num">${z(c.rv)}</td><td class="r num">${z(c.cost)}</td><td class="r num">${M(c.a)}</td><td class="r num">${M(cum)}</td></tr>`; }).join("")}</tbody></table></div></details>`;
+  const how = `<details class="panel"><summary class="body" style="cursor:pointer"><b>Méthode de calcul</b></summary><div class="body" style="border-top:1px solid var(--line);font-size:13px;line-height:1.55;display:flex;flex-direction:column;gap:6px">
+    <span>• Flux de chaque financement, tirés de son échéancier dans l'outil : décaissements (négatifs), intérêts, commissions et rémunération variable, principal remboursé, à leurs dates réelles. Un échéancier calculé par l'outil (taux fixe ou TMM + marge, différé, précompte, part indexée sur le CA) alimente donc directement le TRI.</span>
+    <span>• Seuls les flux compris dans l'horizon sont retenus. Un financement décaissé avant le début entre pour sa valeur d'entrée ; un financement encore en cours à la fin sort pour sa valeur résiduelle (selon la méthode choisie).</span>
+    <span>• TRI brut = XIRR sur dates réelles (année de 365 jours). MOIC = encaissements / décaissements, flux nets par date. Taux moyen pondéré = intérêts / (capital restant dû × durée, base ${fmtN(P.base)} jours).</span>
+    <span>• TRI net = XIRR après les coûts du fonds : honoraires de gestion sur l'encours de fin de mois (taux/12, réglés par trimestre), frais fixes, retenue à la source éventuelle et commission de performance (taux × valeur future au hurdle des flux nets, si positive, prélevée en fin d'horizon, sans rattrapage). Pour un dossier, le TRI net ne déduit que ses honoraires.</span></div></details>`;
+  return head + kp + prm + tab + yr + list + how;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-tri-syn]"); if (!b) return; e.preventDefault(); const f = triCurFund(); if (f) triSynthModal(f.id, b.dataset.triSyn); });
+
+const triCurFund = () => fundById(S.ui.fund) || (S.ui.fund === "_all" ? null : (S.cfg.funds || [])[0]);
+async function triSaveParam(fid, k, v) {
+  const f = fundById(fid); const P = { ...triParams(f) }; P[k] = ["start", "end"].includes(k) ? v : num(v);
+  if (k === "start" || k === "end") { if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return; if ((k === "start" ? v : P.start) >= (k === "end" ? v : P.end)) { toast("La fin de l'horizon doit suivre son début."); render(); return; } }
+  f.tri = { ...(f.tri || {}), params: P }; saveCfg("Paramètres du TRI enregistrés"); render();
+}
+document.addEventListener("change", e => {
+  const t = e.target; if (!t.dataset || !(t.dataset.trip || t.dataset.triInc || t.dataset.triSt)) return; const f = triCurFund(); if (!f) return;
+  if (t.dataset.trip) { if (!can("funds")) return; triSaveParam(f.id, t.dataset.trip, t.value); return; }
+  if (t.dataset.triInc || t.dataset.triSt) { if (!(can("funds") || can("portfolio"))) return; const pid = t.dataset.triInc || t.dataset.triSt;
+    f.positions = (f.positions || []).map(p => p.id !== pid ? p : { ...p, tri: { ...(p.tri || {}), ...(t.dataset.triInc ? { inclus: t.checked } : { statut: t.value }) } });
+    saveCfg("TRI recalculé"); render(); }
+});
+document.addEventListener("toggle", e => { const d = e.target; if (d?.dataset?.triPdet) { S.ui.triP = d.open; } }, true);
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-tri]"); if (!b) return; e.preventDefault(); const f = triCurFund() || ifFund(); if (!f) return;
+  const a = b.dataset.tri;
+  if (a === "import") return ifImportStart(f.id);
+  if (a === "reimport") { try { toast("Lecture du classeur…"); const x = await ifRead(f, null); if (!x.ok) { toast("Aucun dossier reconnu dans le fichier."); return; } ifPreview(f.id, x); } catch (er) { toast("Lecture impossible : " + (er.message || "erreur")); } return; }
+  if (a === "reset" && can("funds")) { confirmBox("Remettre les paramètres du TRI aux valeurs par défaut (celles du BP INMA Finance de novembre 2026) ?", "Réinitialiser", async () => { f.tri = { ...(f.tri || {}), params: { ...TRI_DEF } }; saveCfg("Paramètres du TRI réinitialisés"); render(); }); }
+});
+function schDrawsLine(o) { const w = o.rule?.draws || []; if (!w.length || !can("view_amounts")) return ""; return `<p class="muted" style="font-size:12px;margin:0 0 8px">Décaissement${w.length > 1 ? "s" : ""} : ${w.map(x => `${fmtN(x.a)} ${h(S.cfg.general.currency)} le ${fdate(x.d)}`).join(" · ")}${o.rule.src?.kind === "ifbp" ? ` · repris du BP (${h(o.rule.src.file || "classeur")}, ${h(o.rule.src.sheet || "")})` : ""}</p>`; }
 
 /* ---------- events ---------- */
 function setPath(obj, path, val) { const k = path.split("."); let o = obj; for (let i = 0; i < k.length - 1; i++) o = o[isNaN(k[i]) ? k[i] : +k[i]]; o[isNaN(k.at(-1)) ? k.at(-1) : +k.at(-1)] = val; }
